@@ -12,7 +12,7 @@ namespace large_fantasy_model
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            builder.Services.AddDbContext<UsersContext>(options =>
+            builder.Services.AddDbContext<LargeFantasyModelContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("LargeFantasyModelDB"))
             );
 

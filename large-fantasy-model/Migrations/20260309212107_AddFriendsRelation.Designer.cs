@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using large_fantasy_model.Data;
 
@@ -11,9 +12,11 @@ using large_fantasy_model.Data;
 namespace large_fantasy_model.Migrations
 {
     [DbContext(typeof(LargeFantasyModelContext))]
-    partial class UsersContextModelSnapshot : ModelSnapshot
+    [Migration("20260309212107_AddFriendsRelation")]
+    partial class AddFriendsRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,36 +24,6 @@ namespace large_fantasy_model.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("ConversationUser", b =>
-                {
-                    b.Property<int>("ConversationsConversationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsersUserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ConversationsConversationId", "UsersUserId");
-
-                    b.HasIndex("UsersUserId");
-
-                    b.ToTable("ConversationUser");
-                });
-
-            modelBuilder.Entity("GameUser", b =>
-                {
-                    b.Property<int>("GamesGameKey")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsersUserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("GamesGameKey", "UsersUserId");
-
-                    b.HasIndex("UsersUserId");
-
-                    b.ToTable("GameUser");
-                });
 
             modelBuilder.Entity("UserUser", b =>
                 {
@@ -81,7 +54,7 @@ namespace large_fantasy_model.Migrations
 
                     b.HasKey("ConversationId");
 
-                    b.ToTable("Conversation");
+                    b.ToTable("Conversations");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.Game", b =>
@@ -91,9 +64,6 @@ namespace large_fantasy_model.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GameKey"));
-
-                    b.Property<int>("ConversationId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
@@ -112,9 +82,6 @@ namespace large_fantasy_model.Migrations
 
                     b.HasKey("GameKey");
 
-                    b.HasIndex("ConversationId")
-                        .IsUnique();
-
                     b.ToTable("Games");
                 });
 
@@ -131,20 +98,10 @@ namespace large_fantasy_model.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<int>("ConversationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SenderUserId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("SendingTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("MessageId");
-
-                    b.HasIndex("ConversationId");
-
-                    b.HasIndex("SenderUserId");
 
                     b.ToTable("Messages");
                 });
@@ -193,37 +150,7 @@ namespace large_fantasy_model.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("User");
-                });
-
-            modelBuilder.Entity("ConversationUser", b =>
-                {
-                    b.HasOne("large_fantasy_model.Models.Conversation", null)
-                        .WithMany()
-                        .HasForeignKey("ConversationsConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("large_fantasy_model.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("GameUser", b =>
-                {
-                    b.HasOne("large_fantasy_model.Models.Game", null)
-                        .WithMany()
-                        .HasForeignKey("GamesGameKey")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("large_fantasy_model.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("UserUser", b =>
@@ -239,48 +166,6 @@ namespace large_fantasy_model.Migrations
                         .HasForeignKey("FriendsUserId")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("large_fantasy_model.Models.Game", b =>
-                {
-                    b.HasOne("large_fantasy_model.Models.Conversation", "Conversation")
-                        .WithOne("Game")
-                        .HasForeignKey("large_fantasy_model.Models.Game", "ConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Conversation");
-                });
-
-            modelBuilder.Entity("large_fantasy_model.Models.Message", b =>
-                {
-                    b.HasOne("large_fantasy_model.Models.Conversation", "Conversation")
-                        .WithMany("Messages")
-                        .HasForeignKey("ConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("large_fantasy_model.Models.User", "Sender")
-                        .WithMany("Messages")
-                        .HasForeignKey("SenderUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Conversation");
-
-                    b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("large_fantasy_model.Models.Conversation", b =>
-                {
-                    b.Navigation("Game");
-
-                    b.Navigation("Messages");
-                });
-
-            modelBuilder.Entity("large_fantasy_model.Models.User", b =>
-                {
-                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

@@ -10,7 +10,7 @@ using large_fantasy_model.Data;
 
 namespace large_fantasy_model.Migrations
 {
-    [DbContext(typeof(UsersContext))]
+    [DbContext(typeof(LargeFantasyModelContext))]
     [Migration("20260309201359_InitSchema")]
     partial class InitSchema
     {

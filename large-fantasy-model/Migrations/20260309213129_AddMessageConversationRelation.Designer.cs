@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using large_fantasy_model.Data;
 
@@ -11,9 +12,11 @@ using large_fantasy_model.Data;
 namespace large_fantasy_model.Migrations
 {
     [DbContext(typeof(LargeFantasyModelContext))]
-    partial class UsersContextModelSnapshot : ModelSnapshot
+    [Migration("20260309213129_AddMessageConversationRelation")]
+    partial class AddMessageConversationRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,9 +95,6 @@ namespace large_fantasy_model.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GameKey"));
 
-                    b.Property<int>("ConversationId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
 
@@ -111,9 +111,6 @@ namespace large_fantasy_model.Migrations
                         .HasColumnType("nvarchar(25)");
 
                     b.HasKey("GameKey");
-
-                    b.HasIndex("ConversationId")
-                        .IsUnique();
 
                     b.ToTable("Games");
                 });
@@ -134,17 +131,12 @@ namespace large_fantasy_model.Migrations
                     b.Property<int>("ConversationId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SenderUserId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("SendingTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("MessageId");
 
                     b.HasIndex("ConversationId");
-
-                    b.HasIndex("SenderUserId");
 
                     b.ToTable("Messages");
                 });
@@ -193,7 +185,7 @@ namespace large_fantasy_model.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("ConversationUser", b =>
@@ -241,17 +233,6 @@ namespace large_fantasy_model.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.Game", b =>
-                {
-                    b.HasOne("large_fantasy_model.Models.Conversation", "Conversation")
-                        .WithOne("Game")
-                        .HasForeignKey("large_fantasy_model.Models.Game", "ConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Conversation");
-                });
-
             modelBuilder.Entity("large_fantasy_model.Models.Message", b =>
                 {
                     b.HasOne("large_fantasy_model.Models.Conversation", "Conversation")
@@ -260,25 +241,10 @@ namespace large_fantasy_model.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("large_fantasy_model.Models.User", "Sender")
-                        .WithMany("Messages")
-                        .HasForeignKey("SenderUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Conversation");
-
-                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.Conversation", b =>
-                {
-                    b.Navigation("Game");
-
-                    b.Navigation("Messages");
-                });
-
-            modelBuilder.Entity("large_fantasy_model.Models.User", b =>
                 {
                     b.Navigation("Messages");
                 });
