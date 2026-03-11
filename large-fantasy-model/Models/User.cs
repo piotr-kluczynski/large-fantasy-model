@@ -1,12 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace large_fantasy_model.Models
 {
     public class User
     {
         [Key]
-        public int UserId { get; set; }
+        public int Id { get; set; }
 
         [Required(ErrorMessage = "Please enter your username.")]
         [StringLength(25, MinimumLength = 3, ErrorMessage = "Username should be between 3 and 25 characters.")]
@@ -36,12 +35,17 @@ namespace large_fantasy_model.Models
         [Required(ErrorMessage = "It has to be stated whether the user has admin permissions.")]
         public int AdminPermissions { get; set; }
 
+
+        // Kolekcja przechowująca gry w których uczestniczy użytkownik - relacja wiele-do-wielu (wielu użytkowników może brać udział w wielu grach)
         public ICollection<Game> Games { get; set; } = new List<Game>();
 
+        // Kolekcja przechowująca wiadomości wysłane przez użytkownika - relacja jeden-do-wielu (jeden użytkownik może wysłać wiele wiadomości)
         public virtual ICollection<Message>? Messages { get; set; }
 
+        // Kolekcja przechowująca konwersacje, w których bierze udział użytkownik - relacja wiele-do-wielu (wielu użytkowników może brać udział w wielu konwersacjach)
         public ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
 
+        // Kolekcje służące do stworzenia relacji wiele-do-wielu dla tabeli User z tabelą User - funkcjonalność znajomych
         public ICollection<User> Friends { get; set; } = new List<User>();
         public ICollection<User> FriendOf { get; set; } = new List<User>();
     }
