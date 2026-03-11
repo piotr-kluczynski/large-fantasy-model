@@ -27,5 +27,9 @@ namespace large_fantasy_model.Models
         // Odwołanie do konwersacji powiązanej z tą grą - relacja jeden-do-jednego, dziecko (jedna gra ma tylko jedną powiązaną konwersację)
         public int ConversationId { get; set; }
         public Conversation Conversation { get; set; } = null!;
+    
+        // Odwołanie do właściciela gry - relacja jeden-do-wielu (jeden użytkownik może być właścicielem wielu gier)
+        public int UserId { get; set; }
+        public virtual User User { get; set; }
     }
 }

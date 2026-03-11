@@ -40,7 +40,7 @@ namespace large_fantasy_model.Models
         public ICollection<Game> Games { get; set; } = new List<Game>();
 
         // Kolekcja przechowująca wiadomości wysłane przez użytkownika - relacja jeden-do-wielu (jeden użytkownik może wysłać wiele wiadomości)
-        public virtual ICollection<Message>? Messages { get; set; }
+        public virtual ICollection<Message>? SentMessages { get; set; }
 
         // Kolekcja przechowująca konwersacje, w których bierze udział użytkownik - relacja wiele-do-wielu (wielu użytkowników może brać udział w wielu konwersacjach)
         public ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
@@ -48,5 +48,12 @@ namespace large_fantasy_model.Models
         // Kolekcje służące do stworzenia relacji wiele-do-wielu dla tabeli User z tabelą User - funkcjonalność znajomych
         public ICollection<User> Friends { get; set; } = new List<User>();
         public ICollection<User> FriendOf { get; set; } = new List<User>();
+    
+        // Kolekcja przechowuiąca zasoby należące do użytkownika - relacja jeden-do-wielu (jeden użytkownik może mieć wiele zasobów)
+        public virtual ICollection<Resources> Resources { get; set; }
+
+        // IN PROGRESS
+        // Odwołanie do gier posiadanych przez użytkownika - relacja jeden-do-wielu (jeden użytkownik może być właścicielem wielu gier)
+         public virtual ICollection<Game> OwnedGames { get; set; }
     }
 }

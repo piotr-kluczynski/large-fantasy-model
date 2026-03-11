@@ -12,16 +12,24 @@ namespace large_fantasy_model.Data
         public DbSet<Conversation> Conversations { get; set; }
         public DbSet<Message> Messages { get; set; }
 
-
-        // Relacja jeden-do-wielu pomiędzy Conversation-User (jedna gra może mieć wielu użytkowników)
-        public DbSet<Conversation> Conversation { get; set; }
-
-        // Relacja jeden-do-wielu pomiędzy User-Message (jeden użytkownik może być autorem wielu wiadomości)
-        public DbSet<User> User { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Relacja jeden-do-wielu pomiędzy User-Message (jeden użytkownik może być autorem wielu wiadomości)
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.User)
+                .WithMany(u => u.SentMessages)
+                .HasForeignKey(m => m.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // Relacja jeden-do-wielu pomiędzy User-Game (jeden użytkownik może być właścicielem wielu gier)
+            modelBuilder.Entity<Game>()
+                .HasOne(g => g.User)
+                .WithMany(u => u.OwnedGames)
+                .HasForeignKey(g => g.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Relacja wiele-do-wielu pomiędzy User-User (wiele użytkowników może być przyjaciółmi wielu użytkowników)
             modelBuilder.Entity<User>()

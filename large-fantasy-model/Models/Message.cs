@@ -19,6 +19,8 @@ namespace large_fantasy_model.Models
         public virtual Conversation Conversation { get; set; }
 
         // Odwołanie do obiektu użytkownika, który wysłał wiadomość - relacja jeden-do-wielu (jeden użytkownik może wysłać wiele wiadomości)
-        public virtual User Sender { get; set; }
+        public int UserId { get; set; }
+        public virtual User User { get; set; }
+        
     }
 }

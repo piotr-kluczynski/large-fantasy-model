@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using large_fantasy_model.Data;
 
@@ -11,9 +12,11 @@ using large_fantasy_model.Data;
 namespace large_fantasy_model.Migrations
 {
     [DbContext(typeof(LargeFantasyModelContext))]
-    partial class UsersContextModelSnapshot : ModelSnapshot
+    [Migration("20260311150730_AddResourcesTable")]
+    partial class AddResourcesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,7 +84,7 @@ namespace large_fantasy_model.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Conversations");
+                    b.ToTable("Conversation");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.Game", b =>
@@ -110,15 +113,10 @@ namespace large_fantasy_model.Migrations
                         .HasMaxLength(25)
                         .HasColumnType("nvarchar(25)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ConversationId")
                         .IsUnique();
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Games");
                 });
@@ -139,17 +137,17 @@ namespace large_fantasy_model.Migrations
                     b.Property<int>("ConversationId")
                         .HasColumnType("int");
 
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("SendingTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ConversationId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("SenderId");
 
                     b.ToTable("Messages");
                 });
@@ -166,10 +164,6 @@ namespace large_fantasy_model.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("IsPublic")
                         .HasColumnType("int");
@@ -237,7 +231,7 @@ namespace large_fantasy_model.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("ConversationUser", b =>
@@ -293,15 +287,7 @@ namespace large_fantasy_model.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("large_fantasy_model.Models.User", "User")
-                        .WithMany("OwnedGames")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Conversation");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.Message", b =>
@@ -312,15 +298,15 @@ namespace large_fantasy_model.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("large_fantasy_model.Models.User", "User")
-                        .WithMany("SentMessages")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("large_fantasy_model.Models.User", "Sender")
+                        .WithMany("Messages")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Conversation");
 
-                    b.Navigation("User");
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.Resources", b =>
@@ -343,11 +329,9 @@ namespace large_fantasy_model.Migrations
 
             modelBuilder.Entity("large_fantasy_model.Models.User", b =>
                 {
-                    b.Navigation("OwnedGames");
+                    b.Navigation("Messages");
 
                     b.Navigation("Resources");
-
-                    b.Navigation("SentMessages");
                 });
 #pragma warning restore 612, 618
         }
