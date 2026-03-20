@@ -22,6 +22,7 @@ namespace large_fantasy_model.Models
         public string Description { get; set; }
 
         [Required]
+        [StringLength(500, MinimumLength = 1)]
         public string FilePath { get; set; }
 
         // Odwołanie do właściciela zasobu - relacja jeden-do-wielu (jeden użytkownik może posiadać wiele zasobów)

@@ -8,7 +8,7 @@ namespace large_fantasy_model.Models
         public int Id { get; set; }
 
         [Required]
-        [StringLength(250, MinimumLength = 1)]
+        [StringLength(4000, MinimumLength = 1, ErrorMessage = "The message cannot be empty.")]
         public string  Content { get; set; }
 
         [Required]

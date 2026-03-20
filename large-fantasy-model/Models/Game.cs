@@ -11,7 +11,8 @@ namespace large_fantasy_model.Models
         [StringLength(25, MinimumLength = 3, ErrorMessage = "Name of the game has to be provided.")]
         public string Name { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Campaign description is required.")]
+        [StringLength(2000, MinimumLength = 5, ErrorMessage = "Description must be between 5 and 2000 characters long.")]
         public string Description { get; set; }
 
         [Required]
