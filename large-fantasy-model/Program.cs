@@ -1,5 +1,6 @@
 using large_fantasy_model.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace large_fantasy_model
 {
@@ -16,6 +17,14 @@ namespace large_fantasy_model
                 options.UseSqlServer(builder.Configuration.GetConnectionString("LargeFantasyModelDB"))
             );
 
+            // Konfiguracja autoryzacji opartej na ciasteczkach
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Auth/Login"; // Tu przekieruje, jak ktoś wejdzie tam, gdzie nie ma dostępu
+                });
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -30,6 +39,9 @@ namespace large_fantasy_model
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseAuthorization();
 
