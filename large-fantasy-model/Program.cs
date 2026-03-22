@@ -1,3 +1,6 @@
+using large_fantasy_model.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace large_fantasy_model
 {
     public class Program
@@ -8,6 +11,10 @@ namespace large_fantasy_model
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddDbContext<LargeFantasyModelContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("LargeFantasyModelDB"))
+            );
 
             var app = builder.Build();
 
