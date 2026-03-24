@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace large_fantasy_model.Models
+namespace large_fantasy_model.Models.Character.Json  
 {
     public class Feature
     {
@@ -10,7 +10,5 @@ namespace large_fantasy_model.Models
         public string Name { get; set; }
 
         public string Description { get; set; }
-
-        // Relacja wiele-do-wielu z Class
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace large_fantasy_model.Models
+﻿namespace large_fantasy_model.Models.Character.Json
 {
     public class SenseValue
     {

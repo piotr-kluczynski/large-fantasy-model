@@ -1,12 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace large_fantasy_model.Models
+namespace large_fantasy_model.Models.Character.Json
 {
     public class Spell
     {
-        [Key]
-        public int Id { get; set; }
-
         public string Name { get; set; }
         public string Description { get; set; }
         public string HigherLevel { get; set; }
@@ -21,7 +18,8 @@ namespace large_fantasy_model.Models
         public string School { get; set; }
         public string AttackSave { get; set; }
         public string DamageEffect { get; set; }
+        public Tag tag { get; set; }
 
-        // Add TAG table?
+        // I'm going to modify the json structure so that it does not use "source"
     }
 }

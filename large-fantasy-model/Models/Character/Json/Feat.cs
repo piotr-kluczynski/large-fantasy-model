@@ -1,6 +1,6 @@
-﻿namespace large_fantasy_model.Models
+﻿namespace large_fantasy_model.Models.Character.Json
 {
-    public class Action
+    public class Feat
     {
         public string Name { get; set; }
         public string Description { get; set; }
