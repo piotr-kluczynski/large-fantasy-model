@@ -1,4 +1,4 @@
-﻿namespace large_fantasy_model.Models.Character.Json
+﻿namespace large_fantasy_model.Models.Character
 {
     // Class representing different character proficiencies (Weapon, Armor, Tool) in the database
     public class CharacterProficiency

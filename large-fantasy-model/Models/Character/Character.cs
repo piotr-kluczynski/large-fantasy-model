@@ -1,5 +1,4 @@
-﻿using large_fantasy_model.Models.Character.Json;
-using large_fantasy_model.Models.Character.References;
+﻿using large_fantasy_model.Models.Character.References;
 using System.ComponentModel.DataAnnotations;
 
 namespace large_fantasy_model.Models.Character
@@ -37,7 +36,7 @@ namespace large_fantasy_model.Models.Character
 
         public List<CharacterSpell> Spells { get; set; }
 
-        // Weapons
+        public List<CharacterWeapon> Weapons { get; set; }
 
         public List<CharacterEquipment> Equipment { get; set; } // Sprawdź czy wszystko działa poprawnie
 

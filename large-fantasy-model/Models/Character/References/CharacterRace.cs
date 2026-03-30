@@ -4,6 +4,6 @@
     public class CharacterRace
     {
         public int CharacterId { get; set; }
-        public int RaceName { get; set; }
+        public int RaceId { get; set; }
     }
 }

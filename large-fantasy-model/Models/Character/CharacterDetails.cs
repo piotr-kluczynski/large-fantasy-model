@@ -5,9 +5,6 @@ namespace large_fantasy_model.Models.Character
     // Class describing the character details in the database
     public class CharacterDetails
     {
-        public int Id { get; set; }
-        public int Character { get; set; }
-
         [Range(0, int.MaxValue)]
         public int Age { get; set; }
         public string Eyes { get; set; }
