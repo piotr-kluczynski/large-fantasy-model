@@ -28,14 +28,20 @@
         position: relative; 
     }
 
-        .nav-link:hover {
-            transform: scale(1.1) translateZ(0) !important;
-            color: #007bff !important;
+        .nav-link:not(.btn):hover {
             text-shadow: 0.3px 0 0 currentColor, -0.3px 0 0 currentColor;
+            transform: scale(1.05) translateZ(0) !important;
+            color: #007bff !important;
+        }
+
+      
+        .nav-link.btn:hover {
+            transform: scale(1.05) translateZ(0) !important;
+            
         }
 
         
-        .nav-link:not(.dropdown-toggle)::after {
+        .nav-link:not(.dropdown-toggle, .btn)::after {
             content: '';
             position: absolute;
             width: 0;
