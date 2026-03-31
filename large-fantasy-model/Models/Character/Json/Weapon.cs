@@ -2,6 +2,7 @@
 {
     public class Weapon : Item
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Category { get; set; } // Change to enum
         
@@ -14,7 +15,5 @@
         public Range ThrowRange { get; set; }
 
         public WeaponProperties Properties { get; set; }
-
-        public bool Equipped { get; set; }
     }
 }

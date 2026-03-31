@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using large_fantasy_model.Models.Character.Additional.Creature;
+using System.ComponentModel.DataAnnotations;
 
 namespace large_fantasy_model.Models.Character.Json
 {

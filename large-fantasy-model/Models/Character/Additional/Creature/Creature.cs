@@ -1,6 +1,8 @@
 ﻿using large_fantasy_model.Models.Character.Json;
+using large_fantasy_model.Models.Character.References;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace large_fantasy_model.Models.Character
+namespace large_fantasy_model.Models.Character.Additional.Creature
 {
     public class Creature
     {
@@ -32,12 +34,19 @@ namespace large_fantasy_model.Models.Character
 
         public List<string> ConditionImmunities { get; set; }
 
-        public List<DamageType> DamageImmunities { get; set; }
+        public List<CharacterDamageType> DamageTypes { get; set; }
 
-        public List<DamageType> DamageResistances { get; set; }
+        [NotMapped]
+        public List<CharacterDamageType> DamageImmunities =>
+           DamageTypes.Where(p => p.Category == DamageCategory.Immunity).ToList();
 
-        public List<DamageType> Vulnerabilities { get; set; }
+        [NotMapped]
+        public List<CharacterDamageType> DamageResistances =>
+           DamageTypes.Where(p => p.Category == DamageCategory.Resistance).ToList();
 
-        // Na razie pomijamy obraz postaci
+        [NotMapped]
+        public List<CharacterDamageType> Vulnerabilities =>
+           DamageTypes.Where(p => p.Category == DamageCategory.Vulnerability).ToList();
+
     }
 }

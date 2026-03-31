@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using large_fantasy_model.Data;
 
@@ -11,9 +12,11 @@ using large_fantasy_model.Data;
 namespace large_fantasy_model.Migrations
 {
     [DbContext(typeof(LargeFantasyModelContext))]
-    partial class UsersContextModelSnapshot : ModelSnapshot
+    [Migration("20260331145804_FixedCharacterRace")]
+    partial class FixedCharacterRace
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,7 +92,7 @@ namespace large_fantasy_model.Migrations
 
                     b.HasIndex("CharacterId");
 
-                    b.ToTable("Proficiencies");
+                    b.ToTable("CharacterProficiency");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.Character.Character", b =>
@@ -212,7 +215,7 @@ namespace large_fantasy_model.Migrations
                     b.HasIndex("CharacterId")
                         .IsUnique();
 
-                    b.ToTable("Races");
+                    b.ToTable("CharacterRace");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterSpell", b =>
@@ -501,17 +504,17 @@ namespace large_fantasy_model.Migrations
                             b1.Property<string>("Description")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Background_Description");
+                                .HasColumnName("BackgroundDescription");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Background_Name");
+                                .HasColumnName("BackgroundName");
 
                             b1.Property<string>("Option")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Background_Option");
+                                .HasColumnName("BackgroundOption");
 
                             b1.HasKey("CharacterId");
 
@@ -521,30 +524,30 @@ namespace large_fantasy_model.Migrations
                                 .HasForeignKey("CharacterId");
                         });
 
-                    b.OwnsOne("large_fantasy_model.Models.Character.Additional.CharacterCurrency", "Currency", b1 =>
+                    b.OwnsOne("large_fantasy_model.Models.Character.Additional.CharacterCurrency", "Treasure", b1 =>
                         {
                             b1.Property<int>("CharacterId")
                                 .HasColumnType("int");
 
                             b1.Property<int>("Copper")
                                 .HasColumnType("int")
-                                .HasColumnName("Currency_Copper");
+                                .HasColumnName("Copper");
 
                             b1.Property<int>("Electrum")
                                 .HasColumnType("int")
-                                .HasColumnName("Currency_Electrum");
+                                .HasColumnName("Electrum");
 
                             b1.Property<int>("Gold")
                                 .HasColumnType("int")
-                                .HasColumnName("Currency_Gold");
+                                .HasColumnName("Gold");
 
                             b1.Property<int>("Platinum")
                                 .HasColumnType("int")
-                                .HasColumnName("Currency_Platinum");
+                                .HasColumnName("Platinum");
 
                             b1.Property<int>("Silver")
                                 .HasColumnType("int")
-                                .HasColumnName("Currency_Silver");
+                                .HasColumnName("Silver");
 
                             b1.HasKey("CharacterId");
 
@@ -628,10 +631,10 @@ namespace large_fantasy_model.Migrations
                     b.Navigation("Background")
                         .IsRequired();
 
-                    b.Navigation("Currency")
+                    b.Navigation("Details")
                         .IsRequired();
 
-                    b.Navigation("Details")
+                    b.Navigation("Treasure")
                         .IsRequired();
                 });
 

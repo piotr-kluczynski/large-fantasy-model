@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace large_fantasy_model.Models.Character
+namespace large_fantasy_model.Models.Character.Additional
 {
     // Class describing the character details in the database
     public class CharacterDetails

@@ -1,5 +1,8 @@
-﻿using large_fantasy_model.Models.Character.References;
+﻿using large_fantasy_model.Models.Character.Additional;
+using large_fantasy_model.Models.Character.Additional.Creature;
+using large_fantasy_model.Models.Character.References;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace large_fantasy_model.Models.Character
 {
@@ -10,6 +13,8 @@ namespace large_fantasy_model.Models.Character
 
         [Required]
         public int Owner { get; set; }
+
+        public Creature Creature { get; set; }
 
         public string Nickname { get; set; }
 
@@ -26,11 +31,19 @@ namespace large_fantasy_model.Models.Character
 
         public CharacterDetails Details { get; set; }
 
-        public List<CharacterProficiency> WeaponProficiencies { get; set; }
+        public List<CharacterProficiency> Proficiencies { get; set; }
 
-        public List<CharacterProficiency> ArmorProficiencies { get; set; }
+        [NotMapped]
+        public List<CharacterProficiency> WeaponProficiencies => 
+            Proficiencies.Where(p => p.Type == ProficiencyType.Weapon).ToList();
 
-        public List<CharacterProficiency> ToolProficiencies { get; set; }
+        [NotMapped]
+        public List<CharacterProficiency> ArmorProficiencies =>
+            Proficiencies.Where(p => p.Type == ProficiencyType.Armor).ToList();
+
+        [NotMapped]
+        public List<CharacterProficiency> ToolProficiencies =>
+            Proficiencies.Where(p => p.Type == ProficiencyType.Tool).ToList();
 
         public List<CharacterFeat> Feats { get; set; }
 
@@ -38,8 +51,8 @@ namespace large_fantasy_model.Models.Character
 
         public List<CharacterWeapon> Weapons { get; set; }
 
-        public List<CharacterEquipment> Equipment { get; set; } // Sprawdź czy wszystko działa poprawnie
+        public List<CharacterEquipment> Equipment { get; set; } 
 
-        public List<CharacterTreasure> Treasure { get; set; }
+        public CharacterCurrency Currency { get; set; }
     }
 }

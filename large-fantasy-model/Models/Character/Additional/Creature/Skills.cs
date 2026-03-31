@@ -1,4 +1,4 @@
-﻿namespace large_fantasy_model.Models.Character.Json
+﻿namespace large_fantasy_model.Models.Character.Additional.Creature
 {
     public class Skills
     {

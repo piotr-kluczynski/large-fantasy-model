@@ -1,5 +1,6 @@
 ﻿using large_fantasy_model.Models;
 using large_fantasy_model.Models.Character;
+using large_fantasy_model.Models.Character.Additional;
 using large_fantasy_model.Models.Character.References;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,8 @@ namespace large_fantasy_model.Data
         // Postacie gracza
         public DbSet<Character> Characters { get; set; }
 
+        public DbSet<CharacterProficiency> Proficiencies { get; set; }
+        public DbSet<CharacterRace> Races { get; set; }
         public DbSet<CharacterClass> Classes { get; set; }
         public DbSet<CharacterEquipment> Equipment { get; set; }
         public DbSet<CharacterWeapon> Weapons { get; set; }
@@ -65,18 +68,54 @@ namespace large_fantasy_model.Data
         {
             var entity = modelBuilder.Entity<Character>();
 
-            // Relacje Jeden-do-Jednego
-            entity.OwnsOne(c => c.Race, race => 
+            // Pomocnicze tabele (istnieją niezależnie od tabeli Character)
+            entity.HasOne(c => c.Race)
+                 .WithOne(cr => cr.Character)
+                 .HasForeignKey<CharacterRace>(cr => cr.CharacterId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(c => c.Classes)
+                .WithOne()
+                .HasForeignKey(cc => cc.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(c => c.Equipment)
+                .WithOne()
+                .HasForeignKey(ce => ce.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(c => c.Weapons)
+                .WithOne()
+                .HasForeignKey(cw => cw.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(c => c.Spells)
+                .WithOne()
+                .HasForeignKey(s => s.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(c => c.Feats)
+                .WithOne()
+                .HasForeignKey(f => f.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(c => c.Proficiencies)
+                .WithOne(p => p.Character)
+                .HasForeignKey(p => p.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(c => c.DamageTypes)
+                .WithOne(d => d.Character)
+                .HasForeignKey(d => d.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Owned Entity - uwzględniane w tabeli Character
+            entity.OwnsOne(c => c.Currency, cc =>
             {
-                race.Property(r => r.RaceId)
-                    .HasColumnName("RaceId")
-                    .IsRequired();
+                cc.Property(c => c.Copper).HasColumnName("Currency_Copper");
+                cc.Property(c => c.Silver).HasColumnName("Currency_Silver");
+                cc.Property(c => c.Electrum).HasColumnName("Currency_Electrum");
+                cc.Property(c => c.Gold).HasColumnName("Currency_Gold");
+                cc.Property(c => c.Platinum).HasColumnName("Currency_Platinum");
             });
             entity.OwnsOne(c => c.Background, bg =>
             {
-                bg.Property(b => b.Name).HasColumnName("BackgroundName");
-                bg.Property(b => b.Option).HasColumnName("BackgroundOption");
-                bg.Property(b => b.Description).HasColumnName("BackgroundDescription");
+                bg.Property(b => b.Name).HasColumnName("Background_Name");
+                bg.Property(b => b.Option).HasColumnName("Background_Option");
+                bg.Property(b => b.Description).HasColumnName("Background_Description");
             });
             entity.OwnsOne(c => c.Details, d =>
             {
@@ -116,47 +155,47 @@ namespace large_fantasy_model.Data
                 d.Property(x => x.Physical)
                     .HasColumnName("Details_Physical");
             });
+            entity.OwnsOne(c => c.Creature, creature =>
+            {
+                creature.Property(x => x.Name);
+                creature.Property(x => x.Alignment);
+                creature.Property(x => x.Inspiration);
+                creature.Property(x => x.Shield);
 
-            // Relacje Jeden-do-Wielu
-            entity.HasMany(c => c.Classes)
-                .WithOne()
-                .HasForeignKey(cc => cc.CharacterId)
-                .OnDelete(DeleteBehavior.Cascade);
+                creature.OwnsOne(x => x.Speed);
+                creature.OwnsOne(x => x.HitPoints);
+                creature.OwnsOne(x => x.Skills);
+                creature.OwnsOne(x => x.AbilityScores);
+                creature.OwnsOne(x => x.SavingThrows);
+                creature.OwnsOne(x => x.Senses);
+                creature.OwnsOne(x => x.ArmorClass);
+                creature.OwnsOne(x => x.Conditions);
 
-            entity.HasMany(c => c.Equipment)
-                .WithOne()
-                .HasForeignKey("CharacterId")
-                .OnDelete(DeleteBehavior.Cascade);
+                creature.OwnsMany(x => x.Languages, b =>
+                {
+                    b.Property(p => p).HasColumnName("Language");
+                });
 
-            entity.HasMany(c => c.Weapons)
-                .WithOne()
-                .HasForeignKey("CharacterId")
-                .OnDelete(DeleteBehavior.Cascade);
+                creature.OwnsMany(x => x.ConditionImmunities, b =>
+                {
+                    b.Property(p => p).HasColumnName("ConditionImmunity");
+                });
 
-            entity.HasMany(c => c.Spells)
-                .WithOne()
-                .HasForeignKey("CharacterId")
-                .OnDelete(DeleteBehavior.Cascade);
+                creature.OwnsMany(x => x.DamageImmunities, b =>
+                {
+                    b.Property(p => p).HasColumnName("DamageImmunity");
+                });
 
-            entity.HasMany(c => c.Feats)
-                .WithOne()
-                .HasForeignKey("CharacterId")
-                .OnDelete(DeleteBehavior.Cascade);
+                creature.OwnsMany(x => x.DamageResistances, b =>
+                {
+                    b.Property(p => p).HasColumnName("DamageResistance");
+                });
 
-            entity.HasMany(c => c.WeaponProficiencies)
-                .WithOne()
-                .HasForeignKey("CharacterId")
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasMany(c => c.ArmorProficiencies)
-                .WithOne()
-                .HasForeignKey("CharacterId")
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasMany(c => c.ToolProficiencies)
-                .WithOne()
-                .HasForeignKey("CharacterId")
-                .OnDelete(DeleteBehavior.Cascade);
+                creature.OwnsMany(x => x.Vulnerabilities, b =>
+                {
+                    b.Property(p => p).HasColumnName("Vulnerability");
+                });
+            });
         }
     }   
 }
