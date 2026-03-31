@@ -1,0 +1,42 @@
+﻿@model IEnumerable<large_fantasy_model.Models.GameModeRulebook>
+@{
+    ViewData["Title"] = "Compendium";
+}
+
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold fantasy-font">The Grand Compendium</h1>
+        <p class="lead text-muted">Study the rules before you step into the arena.</p>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var book in Model)
+        {
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-top border-primary border-4 rounded-4 transition-hover">
+                    <div class="card-body p-4 text-center">
+                        <div class="display-3 mb-3">@book.IconEmoji</div>
+                        <h4 class="card-title fw-bold">@book.Title</h4>
+                        <p class="card-text text-muted">@book.Description</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 p-4 pt-0 text-center">
+                        <a href="~/pdfs/@book.PdfFileName" target="_blank" class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                            Read Rules
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    /* Drobny efekt, żeby kafelki lekko podnosiły się przy najechaniu */
+    .transition-hover {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .transition-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+    }
+</style>
