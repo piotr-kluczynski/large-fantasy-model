@@ -1,7 +1,8 @@
 ﻿using large_fantasy_model.Models;
-using large_fantasy_model.Models.Character;
-using large_fantasy_model.Models.Character.Additional;
-using large_fantasy_model.Models.Character.References;
+using large_fantasy_model.Models.CharacterModels;
+using large_fantasy_model.Models.CharacterModels.Additional;
+using large_fantasy_model.Models.CharacterModels.Additional.Creature;
+using large_fantasy_model.Models.CharacterModels.References;
 using Microsoft.EntityFrameworkCore;
 
 namespace large_fantasy_model.Data
@@ -25,6 +26,7 @@ namespace large_fantasy_model.Data
         public DbSet<CharacterWeapon> Weapons { get; set; }
         public DbSet<CharacterSpell> Spells { get; set; }
         public DbSet<CharacterFeat> Feats { get; set; }
+        //public DbSet<CharacterDamageType> DamageTypes { get; set; } SPRAWDŹ CZY TEGO POTRZEBUJEMY
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -59,6 +61,13 @@ namespace large_fantasy_model.Data
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Conversations)
                 .WithMany(c => c.Users);
+
+            // Relacja jeden-do-wielu pomiędzy User-Character (jeden użytkownik może być właścicielem wielu postaci)
+            modelBuilder.Entity<Character>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Characters)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Konfiguracja modelu Postaci
             ConfigureCharacter(modelBuilder);
@@ -162,38 +171,73 @@ namespace large_fantasy_model.Data
                 creature.Property(x => x.Inspiration);
                 creature.Property(x => x.Shield);
 
-                creature.OwnsOne(x => x.Speed);
+                creature.OwnsOne(x => x.Speed, s =>
+                {
+                    s.OwnsOne(x => x.Burrow);
+                    s.OwnsOne(x => x.Climb);
+                    s.OwnsOne(x => x.Fly);
+                    s.OwnsOne(x => x.Hover);
+                    s.OwnsOne(x => x.Swim);
+                });
                 creature.OwnsOne(x => x.HitPoints);
-                creature.OwnsOne(x => x.Skills);
+                creature.OwnsOne(x => x.Skills, s =>
+                {
+                    s.OwnsOne(x => x.Athletics);
+                    s.OwnsOne(x => x.Acrobatics);
+                    s.OwnsOne(x => x.SleightOfHand);
+                    s.OwnsOne(x => x.Stealth);
+                    s.OwnsOne(x => x.Arcana);
+                    s.OwnsOne(x => x.History);
+                    s.OwnsOne(x => x.Investigation);
+                    s.OwnsOne(x => x.Nature);
+                    s.OwnsOne(x => x.Religion);
+                    s.OwnsOne(x => x.AnimalHandling);
+                    s.OwnsOne(x => x.Insight);
+                    s.OwnsOne(x => x.Medicine);
+                    s.OwnsOne(x => x.Perception);
+                    s.OwnsOne(x => x.Survival);
+                    s.OwnsOne(x => x.Deception);
+                    s.OwnsOne(x => x.Intimidation);
+                    s.OwnsOne(x => x.Performance);
+                    s.OwnsOne(x => x.Persuasion);
+                });
                 creature.OwnsOne(x => x.AbilityScores);
-                creature.OwnsOne(x => x.SavingThrows);
-                creature.OwnsOne(x => x.Senses);
+                creature.OwnsOne(x => x.SavingThrows, st =>
+                {
+                    st.OwnsOne(x => x.Str);
+                    st.OwnsOne(x => x.Dex);
+                    st.OwnsOne(x => x.Con);
+                    st.OwnsOne(x => x.Int);
+                    st.OwnsOne(x => x.Wis);
+                    st.OwnsOne(x => x.Cha);
+                });
+                creature.OwnsOne(x => x.Senses, s =>
+                {
+                    s.OwnsOne(x => x.Blindsight);
+                    s.OwnsOne(x => x.Darkvision);
+                    s.OwnsOne(x => x.Tremorsense);
+                    s.OwnsOne(x => x.Truesight);
+                });
                 creature.OwnsOne(x => x.ArmorClass);
                 creature.OwnsOne(x => x.Conditions);
+                creature.OwnsOne(x => x.ConditionImmunities);
 
                 creature.OwnsMany(x => x.Languages, b =>
                 {
-                    b.Property(p => p).HasColumnName("Language");
+                    b.Property(p => p.Name).HasColumnName("Language");
                 });
-
-                creature.OwnsMany(x => x.ConditionImmunities, b =>
+                creature.OwnsOne(x => x.HitPoints, hp =>
                 {
-                    b.Property(p => p).HasColumnName("ConditionImmunity");
-                });
+                    hp.Property(x => x.Max);
+                    hp.Property(x => x.Current);
+                    hp.Property(x => x.Temporary);
 
-                creature.OwnsMany(x => x.DamageImmunities, b =>
-                {
-                    b.Property(p => p).HasColumnName("DamageImmunity");
-                });
-
-                creature.OwnsMany(x => x.DamageResistances, b =>
-                {
-                    b.Property(p => p).HasColumnName("DamageResistance");
-                });
-
-                creature.OwnsMany(x => x.Vulnerabilities, b =>
-                {
-                    b.Property(p => p).HasColumnName("Vulnerability");
+                    hp.OwnsMany(x => x.Dice, dice =>
+                    {
+                        dice.Property(d => d.Sides);
+                        dice.Property(d => d.Count);
+                        dice.Property(d => d.Mod);
+                    });
                 });
             });
         }

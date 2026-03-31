@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using large_fantasy_model.Models.CharacterModels;
+using System.ComponentModel.DataAnnotations;
 
 namespace large_fantasy_model.Models
 {
@@ -57,5 +58,8 @@ namespace large_fantasy_model.Models
         // IN PROGRESS
         // Odwołanie do gier posiadanych przez użytkownika - relacja jeden-do-wielu (jeden użytkownik może być właścicielem wielu gier)
          public virtual ICollection<Game>? OwnedGames { get; set; }
+
+        // Kolekcja przechowująca listę postaci należących do gracza - relacja wiele-do-wielu (wielu użytkowników może posiadać wiele postaci)
+        public ICollection<Character> Characters { get; set; } = new List<Character>();
     }
 }

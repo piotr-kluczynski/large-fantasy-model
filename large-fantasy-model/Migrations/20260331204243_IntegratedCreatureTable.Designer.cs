@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using large_fantasy_model.Data;
 
@@ -11,9 +12,11 @@ using large_fantasy_model.Data;
 namespace large_fantasy_model.Migrations
 {
     [DbContext(typeof(LargeFantasyModelContext))]
-    partial class UsersContextModelSnapshot : ModelSnapshot
+    [Migration("20260331204243_IntegratedCreatureTable")]
+    partial class IntegratedCreatureTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,7 +70,7 @@ namespace large_fantasy_model.Migrations
                     b.ToTable("UserUser");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Additional.CharacterProficiency", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.Additional.CharacterProficiency", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -92,7 +95,7 @@ namespace large_fantasy_model.Migrations
                     b.ToTable("Proficiencies");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Character", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.Character", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -104,24 +107,22 @@ namespace large_fantasy_model.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Owner")
+                        .HasColumnType("int");
+
                     b.Property<string>("Player")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
 
                     b.Property<int>("Xp")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Characters");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterClass", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterClass", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -150,7 +151,7 @@ namespace large_fantasy_model.Migrations
                     b.ToTable("Classes");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterDamageType", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterDamageType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -174,7 +175,7 @@ namespace large_fantasy_model.Migrations
                     b.ToTable("CharacterDamageType");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterEquipment", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterEquipment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -198,7 +199,7 @@ namespace large_fantasy_model.Migrations
                     b.ToTable("Equipment");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterFeat", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterFeat", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -219,7 +220,7 @@ namespace large_fantasy_model.Migrations
                     b.ToTable("Feats");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterRace", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterRace", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -241,7 +242,7 @@ namespace large_fantasy_model.Migrations
                     b.ToTable("Races");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterSpell", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterSpell", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -263,7 +264,7 @@ namespace large_fantasy_model.Migrations
                     b.ToTable("Spells");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterWeapon", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterWeapon", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -506,9 +507,9 @@ namespace large_fantasy_model.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Additional.CharacterProficiency", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.Additional.CharacterProficiency", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", "Character")
+                    b.HasOne("large_fantasy_model.Models.Character.Character", "Character")
                         .WithMany("Proficiencies")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -517,15 +518,9 @@ namespace large_fantasy_model.Migrations
                     b.Navigation("Character");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Character", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.Character", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.User", "User")
-                        .WithMany("Characters")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.CharacterBackground", "Background", b1 =>
+                    b.OwnsOne("large_fantasy_model.Models.Character.Additional.CharacterBackground", "Background", b1 =>
                         {
                             b1.Property<int>("CharacterId")
                                 .HasColumnType("int");
@@ -553,7 +548,7 @@ namespace large_fantasy_model.Migrations
                                 .HasForeignKey("CharacterId");
                         });
 
-                    b.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.CharacterCurrency", "Currency", b1 =>
+                    b.OwnsOne("large_fantasy_model.Models.Character.Additional.CharacterCurrency", "Currency", b1 =>
                         {
                             b1.Property<int>("CharacterId")
                                 .HasColumnType("int");
@@ -586,7 +581,7 @@ namespace large_fantasy_model.Migrations
                                 .HasForeignKey("CharacterId");
                         });
 
-                    b.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.CharacterDetails", "Details", b1 =>
+                    b.OwnsOne("large_fantasy_model.Models.Character.Additional.CharacterDetails", "Details", b1 =>
                         {
                             b1.Property<int>("CharacterId")
                                 .HasColumnType("int");
@@ -657,7 +652,7 @@ namespace large_fantasy_model.Migrations
                                 .HasForeignKey("CharacterId");
                         });
 
-                    b.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.Creature", "Creature", b1 =>
+                    b.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.Creature", "Creature", b1 =>
                         {
                             b1.Property<int>("CharacterId")
                                 .HasColumnType("int");
@@ -684,7 +679,7 @@ namespace large_fantasy_model.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("CharacterId");
 
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.AbilityScores", "AbilityScores", b2 =>
+                            b1.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.AbilityScores", "AbilityScores", b2 =>
                                 {
                                     b2.Property<int>("CreatureCharacterId")
                                         .HasColumnType("int");
@@ -715,7 +710,7 @@ namespace large_fantasy_model.Migrations
                                         .HasForeignKey("CreatureCharacterId");
                                 });
 
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.ArmorClass", "ArmorClass", b2 =>
+                            b1.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.ArmorClass", "ArmorClass", b2 =>
                                 {
                                     b2.Property<int>("CreatureCharacterId")
                                         .HasColumnType("int");
@@ -735,7 +730,7 @@ namespace large_fantasy_model.Migrations
                                         .HasForeignKey("CreatureCharacterId");
                                 });
 
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.Conditions", "ConditionImmunities", b2 =>
+                            b1.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.Conditions", "ConditionImmunities", b2 =>
                                 {
                                     b2.Property<int>("CreatureCharacterId")
                                         .HasColumnType("int");
@@ -796,7 +791,7 @@ namespace large_fantasy_model.Migrations
                                         .HasForeignKey("CreatureCharacterId");
                                 });
 
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.Conditions", "Conditions", b2 =>
+                            b1.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.Conditions", "Conditions", b2 =>
                                 {
                                     b2.Property<int>("CreatureCharacterId")
                                         .HasColumnType("int");
@@ -857,7 +852,7 @@ namespace large_fantasy_model.Migrations
                                         .HasForeignKey("CreatureCharacterId");
                                 });
 
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.HitPoints", "HitPoints", b2 =>
+                            b1.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.HitPoints", "HitPoints", b2 =>
                                 {
                                     b2.Property<int>("CreatureCharacterId")
                                         .HasColumnType("int");
@@ -878,7 +873,7 @@ namespace large_fantasy_model.Migrations
                                     b2.WithOwner()
                                         .HasForeignKey("CreatureCharacterId");
 
-                                    b2.OwnsMany("large_fantasy_model.Models.CharacterModels.Additional.Creature.Dice", "Dice", b3 =>
+                                    b2.OwnsMany("large_fantasy_model.Models.Character.Additional.Creature.Dice", "Dice", b3 =>
                                         {
                                             b3.Property<int>("HitPointsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -909,7 +904,7 @@ namespace large_fantasy_model.Migrations
                                     b2.Navigation("Dice");
                                 });
 
-                            b1.OwnsMany("large_fantasy_model.Models.CharacterModels.Additional.Creature.Language", "Languages", b2 =>
+                            b1.OwnsMany("large_fantasy_model.Models.Character.Additional.Creature.Language", "Languages", b2 =>
                                 {
                                     b2.Property<int>("CreatureCharacterId")
                                         .HasColumnType("int");
@@ -933,7 +928,7 @@ namespace large_fantasy_model.Migrations
                                         .HasForeignKey("CreatureCharacterId");
                                 });
 
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrows", "SavingThrows", b2 =>
+                            b1.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SavingThrows", "SavingThrows", b2 =>
                                 {
                                     b2.Property<int>("CreatureCharacterId")
                                         .HasColumnType("int");
@@ -945,7 +940,7 @@ namespace large_fantasy_model.Migrations
                                     b2.WithOwner()
                                         .HasForeignKey("CreatureCharacterId");
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrowValue", "Cha", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SavingThrowValue", "Cha", b3 =>
                                         {
                                             b3.Property<int>("SavingThrowsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -964,7 +959,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SavingThrowsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrowValue", "Con", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SavingThrowValue", "Con", b3 =>
                                         {
                                             b3.Property<int>("SavingThrowsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -983,7 +978,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SavingThrowsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrowValue", "Dex", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SavingThrowValue", "Dex", b3 =>
                                         {
                                             b3.Property<int>("SavingThrowsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1002,7 +997,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SavingThrowsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrowValue", "Int", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SavingThrowValue", "Int", b3 =>
                                         {
                                             b3.Property<int>("SavingThrowsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1021,7 +1016,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SavingThrowsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrowValue", "Str", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SavingThrowValue", "Str", b3 =>
                                         {
                                             b3.Property<int>("SavingThrowsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1040,7 +1035,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SavingThrowsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrowValue", "Wis", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SavingThrowValue", "Wis", b3 =>
                                         {
                                             b3.Property<int>("SavingThrowsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1078,7 +1073,7 @@ namespace large_fantasy_model.Migrations
                                         .IsRequired();
                                 });
 
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.Senses", "Senses", b2 =>
+                            b1.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.Senses", "Senses", b2 =>
                                 {
                                     b2.Property<int>("CreatureCharacterId")
                                         .HasColumnType("int");
@@ -1090,7 +1085,7 @@ namespace large_fantasy_model.Migrations
                                     b2.WithOwner()
                                         .HasForeignKey("CreatureCharacterId");
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SenseValue", "Blindsight", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SenseValue", "Blindsight", b3 =>
                                         {
                                             b3.Property<int>("SensesCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1110,7 +1105,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SensesCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SenseValue", "Darkvision", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SenseValue", "Darkvision", b3 =>
                                         {
                                             b3.Property<int>("SensesCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1130,7 +1125,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SensesCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SenseValue", "Tremorsense", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SenseValue", "Tremorsense", b3 =>
                                         {
                                             b3.Property<int>("SensesCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1150,7 +1145,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SensesCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SenseValue", "Truesight", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SenseValue", "Truesight", b3 =>
                                         {
                                             b3.Property<int>("SensesCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1183,7 +1178,7 @@ namespace large_fantasy_model.Migrations
                                         .IsRequired();
                                 });
 
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.Skills", "Skills", b2 =>
+                            b1.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.Skills", "Skills", b2 =>
                                 {
                                     b2.Property<int>("CreatureCharacterId")
                                         .HasColumnType("int");
@@ -1195,7 +1190,7 @@ namespace large_fantasy_model.Migrations
                                     b2.WithOwner()
                                         .HasForeignKey("CreatureCharacterId");
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Acrobatics", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Acrobatics", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1214,7 +1209,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "AnimalHandling", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "AnimalHandling", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1233,7 +1228,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Arcana", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Arcana", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1252,7 +1247,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Athletics", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Athletics", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1271,7 +1266,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Deception", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Deception", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1290,7 +1285,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "History", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "History", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1309,7 +1304,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Insight", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Insight", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1328,7 +1323,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Intimidation", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Intimidation", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1347,7 +1342,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Investigation", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Investigation", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1366,7 +1361,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Medicine", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Medicine", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1385,7 +1380,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Nature", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Nature", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1404,7 +1399,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Perception", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Perception", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1423,7 +1418,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Performance", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Performance", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1442,7 +1437,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Persuasion", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Persuasion", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1461,7 +1456,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Religion", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Religion", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1480,7 +1475,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "SleightOfHand", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "SleightOfHand", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1499,7 +1494,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Stealth", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Stealth", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1518,7 +1513,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SkillsCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Survival", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SkillValue", "Survival", b3 =>
                                         {
                                             b3.Property<int>("SkillsCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1592,7 +1587,7 @@ namespace large_fantasy_model.Migrations
                                         .IsRequired();
                                 });
 
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.Speed", "Speed", b2 =>
+                            b1.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.Speed", "Speed", b2 =>
                                 {
                                     b2.Property<int>("CreatureCharacterId")
                                         .HasColumnType("int");
@@ -1607,7 +1602,7 @@ namespace large_fantasy_model.Migrations
                                     b2.WithOwner()
                                         .HasForeignKey("CreatureCharacterId");
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SpeedValue", "Burrow", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SpeedValue", "Burrow", b3 =>
                                         {
                                             b3.Property<int>("SpeedCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1626,7 +1621,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SpeedCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SpeedValue", "Climb", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SpeedValue", "Climb", b3 =>
                                         {
                                             b3.Property<int>("SpeedCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1645,7 +1640,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SpeedCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SpeedValue", "Fly", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SpeedValue", "Fly", b3 =>
                                         {
                                             b3.Property<int>("SpeedCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1664,7 +1659,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SpeedCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SpeedValue", "Hover", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SpeedValue", "Hover", b3 =>
                                         {
                                             b3.Property<int>("SpeedCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1683,7 +1678,7 @@ namespace large_fantasy_model.Migrations
                                                 .HasForeignKey("SpeedCreatureCharacterId");
                                         });
 
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SpeedValue", "Swim", b3 =>
+                                    b2.OwnsOne("large_fantasy_model.Models.Character.Additional.Creature.SpeedValue", "Swim", b3 =>
                                         {
                                             b3.Property<int>("SpeedCreatureCharacterId")
                                                 .HasColumnType("int");
@@ -1759,22 +1754,20 @@ namespace large_fantasy_model.Migrations
 
                     b.Navigation("Details")
                         .IsRequired();
-
-                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterClass", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterClass", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", null)
+                    b.HasOne("large_fantasy_model.Models.Character.Character", null)
                         .WithMany("Classes")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterDamageType", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterDamageType", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", "Character")
+                    b.HasOne("large_fantasy_model.Models.Character.Character", "Character")
                         .WithMany("DamageTypes")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1783,47 +1776,47 @@ namespace large_fantasy_model.Migrations
                     b.Navigation("Character");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterEquipment", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterEquipment", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", null)
+                    b.HasOne("large_fantasy_model.Models.Character.Character", null)
                         .WithMany("Equipment")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterFeat", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterFeat", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", null)
+                    b.HasOne("large_fantasy_model.Models.Character.Character", null)
                         .WithMany("Feats")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterRace", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterRace", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", "Character")
+                    b.HasOne("large_fantasy_model.Models.Character.Character", "Character")
                         .WithOne("Race")
-                        .HasForeignKey("large_fantasy_model.Models.CharacterModels.References.CharacterRace", "CharacterId")
+                        .HasForeignKey("large_fantasy_model.Models.Character.References.CharacterRace", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Character");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterSpell", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterSpell", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", null)
+                    b.HasOne("large_fantasy_model.Models.Character.Character", null)
                         .WithMany("Spells")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterWeapon", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.References.CharacterWeapon", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", null)
+                    b.HasOne("large_fantasy_model.Models.Character.Character", null)
                         .WithMany("Weapons")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1879,7 +1872,7 @@ namespace large_fantasy_model.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Character", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.Character.Character", b =>
                 {
                     b.Navigation("Classes");
 
@@ -1908,8 +1901,6 @@ namespace large_fantasy_model.Migrations
 
             modelBuilder.Entity("large_fantasy_model.Models.User", b =>
                 {
-                    b.Navigation("Characters");
-
                     b.Navigation("OwnedGames");
 
                     b.Navigation("Resources");
