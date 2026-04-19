@@ -1,4 +1,116 @@
-﻿<!DOCTYPE html>
+﻿@{
+    
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+  
+    string GetActiveMenuClass(string controller, string action)
+    {
+        return (currentController == controller && currentAction == action)
+            ? "text-primary fw-bold active-link"
+            : "text-dark";
+    }
+}
+
+<style>
+    .nav-item {
+        margin: 0 5px;
+    }
+
+    
+    .nav-link {
+        display: inline-block !important;
+        transition: transform 0.25s ease-in-out, color 0.25s ease-in-out, text-shadow 0.25s ease-in-out !important;
+        transform-origin: center center;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+        -webkit-font-smoothing: antialiased;
+        position: relative; 
+    }
+
+        .nav-link:not(.btn):hover {
+            text-shadow: 0.3px 0 0 currentColor, -0.3px 0 0 currentColor;
+            transform: scale(1.05) translateZ(0) !important;
+            color: #007bff !important;
+        }
+
+      
+        .nav-link.btn:hover {
+            transform: scale(1.05) translateZ(0) !important;
+            
+        }
+
+        
+        .nav-link:not(.dropdown-toggle, .btn)::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px; 
+            bottom: 4px; 
+            left: 50%;
+            background-color: #007bff;
+            transition: all 0.3s ease-in-out;
+            transform: translateX(-50%);
+            border-radius: 2px; 
+        }
+
+        
+        .nav-link:not(.dropdown-toggle):hover::after {
+            width: 80%; 
+        }
+        
+        .nav-link.active-link::after {
+            width: 80% !important;
+            background-color: #007bff;
+        }
+
+    
+    .dropdown-menu {
+        display: block !important;
+        visibility: hidden;
+        opacity: 0;
+        right: 0;
+        left: auto;
+        margin-top: 10px; 
+        transform: translateY(15px);
+        transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+        min-width: 240px;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08) !important;
+        border-radius: 16px;
+        padding: 10px;
+    }
+
+        .dropdown-menu.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0s linear 0s;
+        }
+
+    
+    .dropdown-item {
+        color: #495057;
+        transition: all 0.2s ease-in-out;
+    }
+
+        
+        .dropdown-item:hover {
+            background-color: #f0f7ff; 
+            color: #007bff; 
+            transform: scale(1.1) translateX(4px); 
+        }
+
+        
+        .dropdown-item.logout-item:hover {
+            background-color: #fff0f0; 
+            color: #dc3545 !important; 
+            transform: translateX(4px);
+        }
+</style>
+
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -10,39 +122,80 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">large_fantasy_model</a>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom shadow-sm py-3 mb-3">
+            <div class="container-fluid px-md-5">
+                <a class="navbar-brand fw-bold fs-3 text-primary fantasy-font" asp-area="" asp-controller="Home" asp-action="Index">
+                    LFM <span class="text-dark">Online</span>
+                </a>
+        
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between ms-4">
+                    <ul class="navbar-nav flex-grow-1 fs-5">
+                        <li class="nav-item me-3">
+                            <a class="nav-link @GetActiveMenuClass("Home", "Index") px-2" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
+    
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
-                                <span class="nav-link text-dark fw-bold">Welcome, @User.Identity.Name!</span>
+                            <li class="nav-item me-3">
+                                <a class="nav-link @GetActiveMenuClass("Game", "Find") px-2" href="#"><i class="bi bi-play-circle"></i> Find Game</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-danger" asp-area="" asp-controller="Auth" asp-action="Logout">Logout</a>
+                            <li class="nav-item me-3">
+                                <a class="nav-link @GetActiveMenuClass("Ranking", "Index") px-2" href="#">Ranking</a>
+                            </li>
+                        }
+
+                        <li class="nav-item me-3">
+                            <a class="nav-link @GetActiveMenuClass("Compendium", "Index") px-2"
+                               asp-controller="Compendium"
+                               asp-action="Index">Compendium</a>
+                        </li>
+                    </ul>
+
+                    <ul class="navbar-nav align-items-center">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark fw-bold border rounded-pill px-4 py-2 bg-light shadow-sm"
+                                       href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                       data-bs-display="static">
+        
+                                    <img src="https://ui-avatars.com/api/?name=@User.Identity.Name&size=32&background=random"
+                                         class="rounded-circle me-2" alt="Avatar" />
+                                    @User.Identity.Name
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 rounded-4 p-2" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item rounded-3 py-2 mb-1 fw-semibold d-flex align-items-center" asp-controller="Profile" asp-action="ProfilePage">
+                                            <span class="me-3 fs-5"></span> My Profile
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item rounded-3 py-2 mb-1 fw-semibold d-flex align-items-center" asp-controller="Profile" asp-action="Edit">
+                                            <span class="me-3 fs-5"></span> Edit Details
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-2 opacity-25"></li>
+                                    <li>
+                                        <a class="dropdown-item rounded-3 py-2 fw-bold text-danger d-flex align-items-center logout-item" asp-controller="Auth" asp-action="Logout">
+                                            <span class="me-3 fs-5"></span> Logout
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Login">Sign in</a>
+                                <a class="nav-link text-dark fw-bold me-3" asp-controller="Auth" asp-action="Login">Login</a>
                             </li>
                             <li class="nav-item">
-                                <a class="btn btn-primary text-white ms-2" asp-area="" asp-controller="Auth" asp-action="Register">Register</a>
+                                <a class="nav-link btn btn-primary text-white px-4 py-2 rounded-pill shadow-sm fw-bold"
+                                   asp-controller="Auth" asp-action="Register">Join Adventure</a>
                             </li>
                         }
                     </ul>
