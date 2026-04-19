@@ -1,8 +1,66 @@
-﻿@{
+﻿@using System.Security.Claims
+@{
     ViewData["Title"] = "Home Page";
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var username = User.Identity?.Name ?? "Traveler";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5">
+    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm border text-center">
+        <div class="container-fluid py-5">
+            @if (isAuthenticated)
+            {
+                <h1 class="display-5 fw-bold text-dark">Welcome back, @username!</h1>
+                <p class="fs-4 text-muted">Your adventure continues. Where shall we go today?</p>
+            }
+            else
+            {
+                <h1 class="display-5 fw-bold">Welcome to the Large Fantasy Model</h1>
+                <p class="fs-4">Step into the tavern, traveler. Your journey starts here.</p>
+                <a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-lg px-4 me-md-2">Login</a>
+                <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-secondary btn-lg px-4">Register</a>
+            }
+        </div>
+    </div>
+
+    @if (isAuthenticated)
+    {
+        <div class="row g-4 mt-2">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="display-4 mb-3"></div>
+                        <h4 class="card-title fw-bold">My Profile</h4>
+                        <p class="card-text text-muted">Manage your identity, change your tale, or update your security.</p>
+                        <a asp-controller="Profile" asp-action="ProfilePage" class="btn btn-outline-primary stretched-link">Open Profile</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-primary border-top border-4">
+                    <div class="card-body text-center p-4">
+                        <div class="display-4 mb-3"></div>
+                        <h4 class="card-title fw-bold text-primary">My Characters</h4>
+                        <p class="card-text text-muted">Your heroes awaiting orders. View stats or create a new legend.</p>
+                        <a href="#" class="btn btn-primary stretched-link disabled">Coming Soon</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body text-center p-4">
+                        <div class="display-4 mb-3"></div>
+                        <h4 class="card-title fw-bold">Settings</h4>
+                        <p class="card-text text-muted">Quick access to password and email changes.</p>
+                        <div class="d-grid gap-2">
+                            <a asp-controller="Profile" asp-action="ChangePassword" class="btn btn-sm btn-light border text-danger">Change Password</a>
+                            <a asp-controller="Profile" asp-action="ChangeEmail" class="btn btn-sm btn-light border">Change Email</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>

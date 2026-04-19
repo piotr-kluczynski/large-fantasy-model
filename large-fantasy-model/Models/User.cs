@@ -11,11 +11,12 @@ namespace large_fantasy_model.Models
         [StringLength(25, MinimumLength = 3, ErrorMessage = "Username should be between 3 and 25 characters.")]
         public string Username { get; set; }
 
+        [Required(ErrorMessage = "First Name is required.")]
         [StringLength(50, MinimumLength = 2, ErrorMessage = "First name should be between 2 and 50 characters.")]
         public string FirstName { get; set; }
 
         [StringLength(50, MinimumLength = 2, ErrorMessage = "Last name should be between 2 and 50 characters.")]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy}")]
@@ -26,11 +27,12 @@ namespace large_fantasy_model.Models
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Please enter your password.")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$", ErrorMessage = "Password must meet all complexity requirements listed below the field.")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
         [MaxLength(250, ErrorMessage = "Description should not exceed 250 characters.")]
-        public string Bio { get; set; }
+        public string? Bio { get; set; }
 
         [Required(ErrorMessage = "It has to be stated whether the user has admin permissions.")]
         public int AdminPermissions { get; set; }
@@ -50,10 +52,10 @@ namespace large_fantasy_model.Models
         public ICollection<User> FriendOf { get; set; } = new List<User>();
     
         // Kolekcja przechowuiąca zasoby należące do użytkownika - relacja jeden-do-wielu (jeden użytkownik może mieć wiele zasobów)
-        public virtual ICollection<Resources> Resources { get; set; }
+        public virtual ICollection<Resources>? Resources { get; set; }
 
         // IN PROGRESS
         // Odwołanie do gier posiadanych przez użytkownika - relacja jeden-do-wielu (jeden użytkownik może być właścicielem wielu gier)
-         public virtual ICollection<Game> OwnedGames { get; set; }
+         public virtual ICollection<Game>? OwnedGames { get; set; }
     }
 }
