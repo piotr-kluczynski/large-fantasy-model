@@ -18,8 +18,5 @@ namespace large_fantasy_model.Models.CharacterModels.Json
         public string School { get; set; }
         public string AttackSave { get; set; }
         public string DamageEffect { get; set; }
-        public Tag tag { get; set; }
-
-        // I'm going to modify the json structure so that it does not use "source"
     }
 }

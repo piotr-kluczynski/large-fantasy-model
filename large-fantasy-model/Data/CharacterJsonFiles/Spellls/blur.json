@@ -1,0 +1,16 @@
+{
+  "name": "Blur",
+  "description": "Your body becomes blurred, shifting and wavering to all who can see you. For the duration, any creature has disadvantage on attack rolls against you. An attacker is immune to this effect if it doesn’t rely on sight, as with blindsight, or can see through illusions, as with truesight.",
+  "higher_level": "",
+  "level": "2",
+  "casting_time": "1 Action",
+  "range_area": "Self",
+  "components": ["V"],
+  "material": "",
+  "ritual": false,
+  "concentration": true,
+  "duration": "Up to 1 minute",
+  "school": "Illusion",
+  "attack_save": "",
+  "damage_effect": ""
+}

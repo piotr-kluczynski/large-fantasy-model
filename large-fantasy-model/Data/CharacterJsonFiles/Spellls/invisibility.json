@@ -1,0 +1,16 @@
+{
+  "name": "Invisibility",
+  "description": "A creature you touch becomes invisible until the spell ends. Anything the target is wearing or carrying is invisible as long as it is on the target’s person. The spell ends for a target that attacks or casts a spell.",
+  "higher_level": "When you cast this spell using a spell slot of 3rd level or higher, you can target one additional creature for each slot level above 2nd.",
+  "level": "2",
+  "casting_time": "1 Action",
+  "range_area": "Touch",
+  "components": ["V", "S", "M"],
+  "material": "an eyelash encased in gum arabic",
+  "ritual": false,
+  "concentration": true,
+  "duration": "Up to 1 hour",
+  "school": "Illusion",
+  "attack_save": "",
+  "damage_effect": ""
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Wizard",
+  "hit_die": 6,
+  "spellcasting": "int",
+  "features": [
+    { "id": "common.spellcasting" },
+    { "id": "wizard.arcane_recovery" },
+    { "id": "wizard.arcane_tradition" },
+    { "id": "common.ability_score_improvement" },
+    { "id": "wizard.spell_mastery" },
+    { "id": "wizard.signature_spells" }
+  ]
+}

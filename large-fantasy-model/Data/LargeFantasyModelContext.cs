@@ -26,7 +26,6 @@ namespace large_fantasy_model.Data
         public DbSet<CharacterWeapon> Weapons { get; set; }
         public DbSet<CharacterSpell> Spells { get; set; }
         public DbSet<CharacterFeat> Feats { get; set; }
-        //public DbSet<CharacterDamageType> DamageTypes { get; set; } SPRAWDŹ CZY TEGO POTRZEBUJEMY
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

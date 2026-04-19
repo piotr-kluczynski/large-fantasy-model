@@ -1,0 +1,13 @@
+{
+  "name": "Cleric",
+  "hit_die": 8,
+  "spellcasting": "wis",
+  "features": [
+    { "id": "common.spellcasting" },
+    { "id": "common.ability_score_improvement" },
+    { "id": "cleric.divine_domain" },
+    { "id": "cleric.channel_divinity" },
+    { "id": "cleric.destroy_undead" },
+    { "id": "cleric.divine_intervention" }
+  ]
+}
