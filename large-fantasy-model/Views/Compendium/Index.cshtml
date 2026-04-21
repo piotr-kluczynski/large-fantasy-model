@@ -15,13 +15,16 @@
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm border-0 border-top border-primary border-4 rounded-4 transition-hover">
                     <div class="card-body p-4 text-center">
-                        <div class="display-3 mb-3">@book.IconEmoji</div>
+                        <div class="display-3 mb-3">
+                            <img src="imgs/@book.IconEmoji" />
+                        </div>
                         <h4 class="card-title fw-bold">@book.Title</h4>
                         <p class="card-text text-muted">@book.Description</p>
                     </div>
                     <div class="card-footer bg-transparent border-0 p-4 pt-0 text-center">
-                        <a href="~/pdfs/@book.PdfFileName" target="_blank" class="btn btn-outline-primary w-100 rounded-pill fw-bold">
-                            Read Rules
+                        <a href="@Url.Action("Details", "Compendium", new { id = book.Id })"
+                           class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                            Explore System
                         </a>
                     </div>
                 </div>

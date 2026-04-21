@@ -10,6 +10,10 @@ namespace large_fantasy_model
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Add Json reading/writing services
+            builder.Services.AddSingleton<SpellService>();
+            builder.Services.AddScoped<SpellWriter>();
+
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 

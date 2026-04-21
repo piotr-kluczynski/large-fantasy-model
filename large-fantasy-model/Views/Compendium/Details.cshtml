@@ -1,0 +1,123 @@
+﻿@model GameModeRulebook
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm sticky-top" style="top: 20px;">
+                <img src="~/imgs/@Model.IconEmoji" />
+                <h3>@Model.Title</h3>
+                <p class="text-muted">@Model.Description</p>
+
+                <a href="~/pdfs/@Model.PdfFileName"
+                   target="_blank"
+                   class="btn btn-outline-primary w-100 mt-3">
+                    Open Rulebook PDF
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <ul class="nav nav-tabs" id="rulebookTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active"
+                            data-bs-toggle="tab"
+                            data-bs-target="#overview"
+                            type="button">
+                        Overview
+                    </button>
+                </li>
+
+                @for (int i = 0; i < Model.Categories.Count; i++)
+                {
+                    var category = Model.Categories[i];
+
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link"
+                                data-bs-toggle="tab"
+                                data-bs-target="#@category.Key"
+                                type="button">
+                            @category.Title
+                        </button>
+                    </li>
+                }
+            </ul>
+
+            <div class="tab-content border border-top-0 p-4">
+                <div class="tab-pane fade show active" id="overview">
+                    @foreach (var paragraph in Model.Overview)
+                    {
+                        <p>@Html.Raw(paragraph)</p>
+                    }
+                </div>
+
+                @foreach (var category in Model.Categories)
+                {
+                    <div class="tab-pane fade show" id="@category.Key">
+                        @if (category.Key == "spells")
+                        {
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <a asp-controller="Compendium"
+                                       asp-action="CreateSpell"
+                                       class="text-decoration-none">
+
+                                        <div class="card p-3 shadow-sm d-flex align-items-center justify-content-center h-100 border-dashed">
+
+                                            <div class="text-center">
+                                                <h5 class="mb-0">+ Add spell</h5>
+                                            </div>
+
+                                        </div>
+                                    </a>
+                                </div>
+
+                                @foreach (var spell in Model.Spells)
+                                {
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card p-3 shadow-sm">
+                                            <a asp-controller="Compendium"
+                                               asp-action="Spell"
+                                               asp-route-name="@spell.Name.Replace(" ", "-").ToLower()"
+                                               class="text-decoration-none">
+
+                                                <h5>@spell.Name</h5>
+                                            </a>
+                                            <small>@spell.Name • Level @spell.Level</small>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+
+            const savedTab = localStorage.getItem("activeTab");
+
+            if (savedTab) {
+                const triggerEl = document.querySelector(`[data-bs-target="${savedTab}"]`);
+
+                if (triggerEl) {
+                    const tab = new bootstrap.Tab(triggerEl);
+                    tab.show();
+                }
+            }
+
+            tabButtons.forEach(btn => {
+                btn.addEventListener("shown.bs.tab", function (e) {
+                    localStorage.setItem("activeTab", e.target.getAttribute("data-bs-target"));
+                });
+            });
+
+        });
+    </script>
+}
