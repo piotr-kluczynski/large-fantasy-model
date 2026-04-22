@@ -1,6 +1,7 @@
 using large_fantasy_model.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using large_fantasy_model.Models.CharacterModels.Json;
 
 namespace large_fantasy_model
 {
@@ -10,9 +11,9 @@ namespace large_fantasy_model
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add Json reading/writing services
-            builder.Services.AddSingleton<SpellService>();
-            builder.Services.AddScoped<SpellWriter>();
+            // Rejestrowanie repozytoriów dla plików JSON
+            builder.Services.AddScoped<JsonRepository<Spell>>(sp =>
+                new JsonRepository<Spell>("Data/JsonFiles"));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();

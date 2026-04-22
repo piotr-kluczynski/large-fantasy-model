@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace large_fantasy_model.Models.CharacterModels.Json
 {
-    public class Spell
+    public class Spell : IRulebookEntity
     {
         [JsonPropertyName("name")]
         public string Name { get; set; }

@@ -7,19 +7,23 @@ namespace large_fantasy_model.Controllers
 {
     public class CompendiumController : Controller
     {
-        private readonly SpellService _spellService;
-        private readonly SpellWriter _spellWriter;
+        private readonly JsonRepository<Spell> _spellRepository;
 
-        public CompendiumController(SpellService spellService, SpellWriter spellWriter)
+        public CompendiumController(JsonRepository<Spell> spellRepository)
         {
-            _spellService = spellService;
-            _spellWriter = spellWriter;
+            _spellRepository = spellRepository;
         }
 
         [HttpGet]
-        public IActionResult CreateSpell()
+        public IActionResult CreateSpell(string rulebook, string category)
         {
-            return View(new CreateSpellViewModel());
+            var model = new CreateSpellViewModel
+            {
+                Rulebook = rulebook,
+                Category = category
+            };
+
+            return View(model);
         }
 
         [HttpPost]
@@ -43,7 +47,7 @@ namespace large_fantasy_model.Controllers
                 DamageEffect = model.DamageEffect
             };
 
-            _spellWriter.Save(spell);
+            _spellRepository.Save(spell, model.Rulebook, model.Category);
 
             return RedirectToAction("Details", new { id = 1 });
         }
@@ -61,14 +65,24 @@ namespace large_fantasy_model.Controllers
             if (rulebook == null)
                 return NotFound();
 
-            rulebook.Spells = _spellService.GetAllSpells();
+            foreach (var category in rulebook.Categories)
+            {
+                if (category.Key == "spells")
+                {
+                    var items = _spellRepository.GetAll(
+                        rulebook.FilesPathName,
+                        category.FilesPathName);
+
+                    category.Items = items.Cast<IRulebookEntity>().ToList();
+                }
+            }
 
             return View(rulebook);
         }
 
-        public IActionResult Spell(string name)
+        public IActionResult Spell(string rulebook, string category, string name)
         {
-            var spells = _spellService.GetAllSpells();
+            var spells = _spellRepository.GetAll(rulebook, category);
             var normalized = name.Replace("-", " ");
 
             var spell = spells.FirstOrDefault(s =>
@@ -93,6 +107,7 @@ namespace large_fantasy_model.Controllers
                     Description = "D&D Basic Rules, Version 1.0, Released November 2018",
                     IconEmoji = "DnD_BasicRules_2018.png",
                     PdfFileName = "DnD_BasicRules_2018.pdf",
+                    FilesPathName = "DnD_BasicRules_2018",
                     Overview = [
                         "<h3>Introduction</h3>",
                         "The Dungeons & Dragons roleplaying game is about\r\nstorytelling in worlds of swords and sorcery. It shares elements with childhood games of make-believe. Like those\r\ngames, D&D is driven by imagination. It’s about picturing\r\nthe towering castle beneath the stormy night sky and\r\nimagining how a fantasy adventurer might react to the\r\nchallenges that scene presents.Unlike a game of make-believe, D&D gives structure to\r\nthe stories, a way of determining the consequences of the\r\nadventurers’ action. Players roll dice to resolve whether\r\ntheir attacks hit or miss or whether their adventurers\r\ncan scale a cliff, roll away from the strike of a magical\r\nlightning bolt, or pull off some other dangerous task. Anything is possible, but the dice make some outcomes more\r\nprobable than others. In the Dungeons & Dragons game, each player creates an adventurer (also called a character) and teams\r\nup with other adventurers (played by friends). Working together, the group might explore a dark dungeon, a ruined city, a haunted castle, a lost temple deep in a jungle,\r\nor a lava-filled cavern beneath a mysterious mountain.\r\nThe adventurers can solve puzzles, talk with other characters, battle fantastic monsters, and discover fabulous\r\nmagic items and other treasure. One player, however, takes on the role of the Dungeon\r\nMaster (DM), the game’s lead storyteller and referee. The\r\nDM creates adventures for the characters, who navigate\r\nits hazards and decide which paths to explore. The DM\r\nmight describe the entrance to Castle Ravenloft, and the\r\nplayers decide what they want their adventurers to do.\r\nWill they walk across the dangerously weathered drawbridge? Tie themselves together with rope to minimize\r\nthe chance that someone will fall if the drawbridge gives\r\nway? Or cast a spell to carry them over the chasm?\r\nThen the DM determines the results of the adventurers’\r\nactions and narrates what they experience. Because the\r\nDM can improvise to react to anything the players attempt, D&D is infinitely flexible, and each adventure can\r\nbe exciting and unexpected.\r\nThe game has no real end; when one story or quest\r\nwraps up, another one can begin, creating an ongoing\r\nstory called a campaign. Many people who play the\r\ngame keep their campaigns going for months or years,\r\nmeeting with their friends every week or so to pick up\r\nthe story where they left off. The adventurers grow in\r\nmight as the campaign continues. Each monster defeated, each adventure completed, and each treasure\r\nrecovered not only adds to the continuing story, but also\r\nearns the adventurers new capabilities. This increase\r\nin power is reflected by an adventurer’s level.\r\nThere’s no winning and losing in the Dungeons &\r\nDragons game—at least, not the way those terms are\r\nusually understood. Together, the DM and the players\r\ncreate an exciting story of bold adventurers who confront\r\ndeadly perils. Sometimes an adventurer might come to\r\na grisly end, torn apart by ferocious monsters or done in\r\nby a nefarious villain. Even so, the other adventurers can\r\nsearch for powerful magic to revive their fallen comrade,\r\nor the player might choose to create a new character to\r\ncarry on. The group might fail to complete an adventure\r\nsuccessfully, but if everyone had a good time and created a\r\nmemorable story, they all win.",
@@ -124,7 +139,7 @@ namespace large_fantasy_model.Controllers
                             Id = 1,
                             Key = "spells",
                             Title = "Spells",
-                            Type = CategoryType.Spells
+                            FilesPathName = "Spells"
                         }
                     }
                 }

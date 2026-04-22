@@ -5,11 +5,7 @@
         public int Id { get; set; }
         public string Key { get; set; }
         public string Title { get; set; }
-        public CategoryType Type { get; set; }
-    }
-
-    public enum CategoryType
-    {
-        Spells
+        public string FilesPathName { get; set; }
+        public List<IRulebookEntity> Items { get; set; } = new();
     }
 }

@@ -20,8 +20,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Data\CharacterJsonFiles\Features\" />
-  </ItemGroup>
-
 </Project>
