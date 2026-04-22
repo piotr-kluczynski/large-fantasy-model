@@ -1,4 +1,4 @@
-﻿namespace large_fantasy_model.ViewModels
+﻿namespace large_fantasy_model.ViewModels.Compendium
 {
     public class CreateSpellViewModel
     {

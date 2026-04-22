@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using large_fantasy_model.Models;
 using large_fantasy_model.Models.CharacterModels.Json;
-using large_fantasy_model.ViewModels;
+using large_fantasy_model.ViewModels.Compendium;
 
 namespace large_fantasy_model.Controllers
 {
@@ -73,7 +73,14 @@ namespace large_fantasy_model.Controllers
                         rulebook.FilesPathName,
                         category.FilesPathName);
 
-                    category.Items = items.Cast<IRulebookEntity>().ToList();
+                    category.Items = items.Select(s => new RulebookItemViewModel
+                    {
+                        Name = s.Name,
+                        Subtitle = $"Level {s.Level}",
+                        Rulebook = rulebook.FilesPathName,
+                        Category = category.FilesPathName,
+                        Slug = s.Name.ToLower().Replace(" ", "-")
+                    }).ToList();
                 }
             }
 

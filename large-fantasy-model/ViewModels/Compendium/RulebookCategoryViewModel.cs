@@ -1,13 +1,11 @@
-﻿using large_fantasy_model.ViewModels.Compendium;
-
-namespace large_fantasy_model.Models
+﻿namespace large_fantasy_model.ViewModels.Compendium
 {
-    public class RulebookCategory
+    public class RulebookCategoryViewModel
     {
-        public int Id { get; set; }
         public string Key { get; set; }
         public string Title { get; set; }
         public string FilesPathName { get; set; }
+
         public List<RulebookItemViewModel> Items { get; set; } = new();
     }
 }
