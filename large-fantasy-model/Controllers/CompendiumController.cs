@@ -14,6 +14,54 @@ namespace large_fantasy_model.Controllers
             _spellRepository = spellRepository;
         }
 
+        private T MapToEntity<T>(Dictionary<string, string> values)
+            where T : new()
+        {
+            var entity = new T();
+            var type = typeof(T);
+
+            foreach (var kv in values)
+            {
+                var prop = type.GetProperty(kv.Key);
+                if (prop == null || !prop.CanWrite)
+                    continue;
+
+                object convertedValue = null;
+
+                if (prop.PropertyType == typeof(string))
+                {
+                    convertedValue = kv.Value;
+                }
+                else if (prop.PropertyType == typeof(int))
+                {
+                    if (int.TryParse(kv.Value, out var intVal))
+                        convertedValue = intVal;
+                }
+                else if (prop.PropertyType == typeof(bool))
+                {
+                    convertedValue = true;
+                }
+
+                if (convertedValue != null)
+                {
+                    prop.SetValue(entity, convertedValue);
+                }
+            }
+
+            var boolProps = type.GetProperties()
+                .Where(p => p.PropertyType == typeof(bool));
+
+            foreach (var prop in boolProps)
+            {
+                if (!values.ContainsKey(prop.Name))
+                {
+                    prop.SetValue(entity, false);
+                }
+            }
+
+            return entity;
+        }
+
         [HttpGet]
         public IActionResult Create(string rulebook, string category)
         {
@@ -39,19 +87,8 @@ namespace large_fantasy_model.Controllers
         {
             if (model.Category == "Spells")
             {
-                var spell = new Spell
-                {
-                    Name = model.Values["Name"],
-                    Description = model.Values["Description"],
-                    Level = model.Values["Level"],
-                    School = model.Values["School"],
-                    CastingTime = model.Values["CastingTime"],
-                    RangeArea = model.Values["RangeArea"],
-                    Duration = model.Values["Duration"],
-                    Ritual = model.Values.ContainsKey("Ritual"),
-                    Concentration = model.Values.ContainsKey("Concentration")
-                };
-
+                var spell = MapToEntity<Spell>(model.Values);
+                
                 _spellRepository.Save(spell, model.Rulebook, model.Category);
             }
 
