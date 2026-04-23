@@ -15,6 +15,51 @@ namespace large_fantasy_model.Controllers
         }
 
         [HttpGet]
+        public IActionResult Create(string rulebook, string category)
+        {
+            var fields = category switch
+            {
+                "Spells" => SpellSchema.Fields,
+                _ => new List<EntityFieldDefinition>()
+            };
+
+            var model = new EntityEditorViewModel
+            {
+                Rulebook = rulebook,
+                Category = category,
+                Fields = fields,
+                Title = $"Create {category}"
+            };
+
+            return View("EntityEditor", model);
+        }
+
+        [HttpPost]
+        public IActionResult Create(EntityEditorViewModel model)
+        {
+            if (model.Category == "Spells")
+            {
+                var spell = new Spell
+                {
+                    Name = model.Values["Name"],
+                    Description = model.Values["Description"],
+                    Level = model.Values["Level"],
+                    School = model.Values["School"],
+                    CastingTime = model.Values["CastingTime"],
+                    RangeArea = model.Values["RangeArea"],
+                    Duration = model.Values["Duration"],
+                    Ritual = model.Values.ContainsKey("Ritual"),
+                    Concetration = model.Values.ContainsKey("Concentration")
+                };
+
+                _spellRepository.Save(spell, model.Rulebook, model.Category);
+            }
+
+            return RedirectToAction("Details", new { id = 1 });
+        }
+        
+        /*
+        [HttpGet]
         public IActionResult CreateSpell(string rulebook, string category)
         {
             var model = new CreateSpellViewModel
@@ -51,6 +96,7 @@ namespace large_fantasy_model.Controllers
 
             return RedirectToAction("Details", new { id = 1 });
         }
+        */
 
         public IActionResult Index()
         {
@@ -85,6 +131,25 @@ namespace large_fantasy_model.Controllers
             }
 
             return View(rulebook);
+        }
+
+        public IActionResult Entity(string rulebook, string category, string name)
+        {
+            if (category == "Spells")
+            {
+                var items = _spellRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var item = items.FirstOrDefault(x =>
+                    x.Name.ToLower() == normalized.ToLower());
+
+                if (item == null)
+                    return NotFound();
+
+                return View("Spell", item); // na razie używasz starego widoku
+            }
+
+            return NotFound();
         }
 
         public IActionResult Spell(string rulebook, string category, string name)

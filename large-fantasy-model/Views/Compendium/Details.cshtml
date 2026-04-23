@@ -59,7 +59,7 @@
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <a asp-controller="Compendium"
-                                       asp-action="CreateSpell"
+                                       asp-action="Create"
                                        asp-route-rulebook="@Model.FilesPathName"
                                        asp-route-category="@category.FilesPathName"
                                        class="text-decoration-none">
@@ -67,7 +67,7 @@
                                         <div class="card p-3 shadow-sm d-flex align-items-center justify-content-center h-100 border-dashed">
 
                                             <div class="text-center">
-                                                <h5 class="mb-0">+ Add spell</h5>
+                                                <h5 class="mb-0">+ Add @category.Title</h5>
                                             </div>
 
                                         </div>
@@ -80,7 +80,7 @@
                                         <div class="card p-3 shadow-sm">
 
                                             <a asp-controller="Compendium"
-                                               asp-action="Spell"
+                                               asp-action="Entity"
                                                asp-route-rulebook="@item.Rulebook"
                                                asp-route-category="@item.Category"
                                                asp-route-name="@item.Slug"
