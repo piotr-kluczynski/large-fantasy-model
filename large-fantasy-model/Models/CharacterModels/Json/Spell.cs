@@ -33,7 +33,7 @@ namespace large_fantasy_model.Models.CharacterModels.Json
         public bool Ritual { get; set; }
 
         [JsonPropertyName("concentration")]
-        public bool Concetration { get; set; }
+        public bool Concentration { get; set; }
 
         [JsonPropertyName("duration")]
         public string Duration { get; set; }

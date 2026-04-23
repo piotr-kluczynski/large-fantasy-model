@@ -101,30 +101,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-
-            const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
-
-            const savedTab = localStorage.getItem("activeTab");
-
-            if (savedTab) {
-                const triggerEl = document.querySelector(`[data-bs-target="${savedTab}"]`);
-
-                if (triggerEl) {
-                    const tab = new bootstrap.Tab(triggerEl);
-                    tab.show();
-                }
-            }
-
-            tabButtons.forEach(btn => {
-                btn.addEventListener("shown.bs.tab", function (e) {
-                    localStorage.setItem("activeTab", e.target.getAttribute("data-bs-target"));
-                });
-            });
-
-        });
-    </script>
-}

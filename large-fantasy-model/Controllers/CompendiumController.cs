@@ -49,7 +49,7 @@ namespace large_fantasy_model.Controllers
                     RangeArea = model.Values["RangeArea"],
                     Duration = model.Values["Duration"],
                     Ritual = model.Values.ContainsKey("Ritual"),
-                    Concetration = model.Values.ContainsKey("Concentration")
+                    Concentration = model.Values.ContainsKey("Concentration")
                 };
 
                 _spellRepository.Save(spell, model.Rulebook, model.Category);
@@ -58,45 +58,6 @@ namespace large_fantasy_model.Controllers
             return RedirectToAction("Details", new { id = 1 });
         }
         
-        /*
-        [HttpGet]
-        public IActionResult CreateSpell(string rulebook, string category)
-        {
-            var model = new CreateSpellViewModel
-            {
-                Rulebook = rulebook,
-                Category = category
-            };
-
-            return View(model);
-        }
-
-        [HttpPost]
-        public IActionResult CreateSpell(CreateSpellViewModel model)
-        {
-            var spell = new Spell
-            {
-                Name = model.Name,
-                Description = model.Description,
-                HigherLevel = model.HigherLevel,
-                Level = model.Level,
-                CastingTime = model.CastingTime,
-                RangeArea = model.RangeArea,
-                Components = model.Components,
-                Material = model.Material,
-                Ritual = model.Ritual,
-                Concetration = model.Concentration,
-                Duration = model.Duration,
-                School = model.School,
-                AttackSave = model.AttackSave,
-                DamageEffect = model.DamageEffect
-            };
-
-            _spellRepository.Save(spell, model.Rulebook, model.Category);
-
-            return RedirectToAction("Details", new { id = 1 });
-        }
-        */
 
         public IActionResult Index()
         {
@@ -140,32 +101,33 @@ namespace large_fantasy_model.Controllers
                 var items = _spellRepository.GetAll(rulebook, category);
                 var normalized = name.Replace("-", " ");
 
-                var item = items.FirstOrDefault(x =>
+                var spell = items.FirstOrDefault(x =>
                     x.Name.ToLower() == normalized.ToLower());
 
-                if (item == null)
+                if (spell == null)
                     return NotFound();
 
-                return View("Spell", item); // na razie używasz starego widoku
+                var fields = SpellSchema.Fields;
+
+                var model = new EntityDetailsViewModel
+                {
+                    Title = spell.Name,
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields
+                        .Where(f => f.ShowInDetails)
+                        .Select(f => new EntityFieldValue
+                        {
+                            Label = f.Label,
+                            Value = GetValue(spell, f.Key)
+                        })
+                        .ToList()
+                };
+
+                return View("EntityDetails", model);
             }
 
             return NotFound();
-        }
-
-        public IActionResult Spell(string rulebook, string category, string name)
-        {
-            var spells = _spellRepository.GetAll(rulebook, category);
-            var normalized = name.Replace("-", " ");
-
-            var spell = spells.FirstOrDefault(s =>
-                s.Name.ToLower() == normalized.ToLower());
-
-            if (spell == null)
-            {
-                return NotFound();
-            }
-
-            return View(spell);
         }
 
         private List<GameModeRulebook> GetRulebooks()
@@ -216,6 +178,20 @@ namespace large_fantasy_model.Controllers
                     }
                 }
             };
+        }
+
+        private string GetValue(object obj, string propertyName)
+        {
+            var prop = obj.GetType().GetProperty(propertyName);
+            var value = prop?.GetValue(obj);
+
+            if (value == null)
+                return "";
+
+            if (value is bool b)
+                return b ? "Yes" : "No";
+
+            return value.ToString();
         }
     }
 }

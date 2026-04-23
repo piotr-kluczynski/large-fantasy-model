@@ -1,0 +1,26 @@
+﻿@using large_fantasy_model.ViewModels.Compendium
+@model EntityDetailsViewModel
+
+<div class="container mt-4">
+
+    <h2>@Model.Title</h2>
+
+    <hr />
+
+    @foreach (var field in Model.Fields)
+    {
+        @if (!string.IsNullOrWhiteSpace(field.Value))
+        {
+            <p>
+                <strong>@field.Label:</strong> @field.Value
+            </p>
+        }
+    }
+
+    <a asp-action="Details"
+       asp-route-id="1"
+       class="btn btn-secondary mt-3">
+        Back
+    </a>
+
+</div>
