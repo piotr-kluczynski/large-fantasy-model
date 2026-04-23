@@ -17,10 +17,20 @@
         }
     }
 
-    <a asp-action="Details"
-       asp-route-id="1"
-       class="btn btn-secondary mt-3">
-        Back
-    </a>
+    <div class="d-flex justify-content-between mt-4">
+        <a asp-action="Details"
+           asp-route-id="1"
+           class="btn btn-secondary mt-3">
+            Back
+        </a>
+
+        <a asp-action="Edit"
+           asp-route-rulebook="@Model.Rulebook"
+           asp-route-category="@Model.Category"
+           asp-route-name="@Model.Title.ToLower().Replace(" ", "-")"
+           class="btn btn-primary mt-3">
+           Edit
+        </a>
+    </div>
 
 </div>

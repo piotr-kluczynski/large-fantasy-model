@@ -76,6 +76,7 @@ namespace large_fantasy_model.Controllers
                 Rulebook = rulebook,
                 Category = category,
                 Fields = fields,
+                IsEdit = false,
                 Title = $"Create {category}"
             };
 
@@ -89,6 +90,58 @@ namespace large_fantasy_model.Controllers
             {
                 var spell = MapToEntity<Spell>(model.Values);
                 
+                _spellRepository.Save(spell, model.Rulebook, model.Category);
+            }
+
+            return RedirectToAction("Details", new { id = 1 });
+        }
+
+        [HttpGet]
+        public IActionResult Edit(string rulebook, string category, string name)
+        {
+            if (category == "Spells")
+            {
+                var items = _spellRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var spell = items.FirstOrDefault(x =>
+                x.Name.ToLower() == normalized.ToLower());
+
+                if (spell == null)
+                {
+                    return NotFound();
+                }
+
+                var fields = SpellSchema.Fields;
+
+                var values = fields.ToDictionary(
+                    f => f.Key,
+                    f => GetValue(spell, f.Key)
+                );
+
+                var model = new EntityEditorViewModel
+                {
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields,
+                    Values = values,
+                    IsEdit = true,
+                    Title = $"Edit {spell.Name}"
+                };
+
+                return View("EntityEditor", model);
+            }
+
+            return NotFound();
+        }
+
+        [HttpPost]
+        public IActionResult Edit(EntityEditorViewModel model)
+        {
+            if (model.Category == "Spells")
+            {
+                var spell = MapToEntity<Spell>(model.Values);
+
                 _spellRepository.Save(spell, model.Rulebook, model.Category);
             }
 

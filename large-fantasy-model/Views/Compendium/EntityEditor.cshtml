@@ -4,7 +4,7 @@
 <div class="container mt-4">
     <h2>@Model.Title</h2>
 
-    <form asp-controller="Compendium" asp-action="Create" method="post">
+    <form asp-controller="Compendium" asp-action="@(Model.IsEdit ? "Edit" : "Create")" method="post">
         <input type="hidden" asp-for="Rulebook" />
         <input type="hidden" asp-for="Category" />
 
@@ -16,24 +16,48 @@
                 @switch (field.Type)
                 {
                     case "text":
-                        <input class="form-control" name="Values[@field.Key]" />
+                        <input class="form-control" 
+                               name="Values[@field.Key]"
+                               value="@(Model.Values.ContainsKey(field.Key) ? Model.Values[field.Key] : "")" />
                         break;
                     
                     case "number":
-                        <input type="number" class="form-control" name="Values[@field.Key]" />
+                        <input type="number" 
+                               class="form-control"
+                               name="Values[@field.Key]"
+                               value="@(Model.Values.ContainsKey(field.Key) ? Model.Values[field.Key] : "")" />
                         break;
                 
                     case "textarea":
-                        <textarea class="form-control" name="Values[@field.Key]"></textarea>
+                        <textarea class="form-control" 
+                                  name="Values[@field.Key]">
+                            @(Model.Values.ContainsKey(field.Key) ? Model.Values[field.Key] : "")    
+                        </textarea>
                         break;
 
                     case "checkbox":
-                        <input type="checkbox" name="Values[@field.Key]" value="true" />
+                        <input type="checkbox" 
+                               name="Values[@field.Key]" 
+                               value="true"
+                               @(Model.Values.ContainsKey(field.Key) && Model.Values[field.Key] == "Yes" ? "checked" : "") />
                         break;
                 }
             </div>
         }
 
-        <button class="btn btn-primary">Save</button>
+        <div class="d-flex justify-content-between mt-4">
+            <a asp-action="Entity"
+               asp-route-rulebook="@Model.Rulebook"
+               asp-route-category="@Model.Category"
+               asp-route-name="@Model.Values["Name"].ToLower().Replace(" ", "-")"
+               class="btn btn-secondary">
+                Cancel
+            </a>
+
+            <button type="submit" class="btn btn-primary">
+                Save
+            </button>
+
+        </div>
     </form>
 </div>
