@@ -1,7 +1,30 @@
 ﻿@model IEnumerable<large_fantasy_model.ViewModels.AdminUserViewModel>
 
 <div class="container mt-4">
-    <h2 class="mb-4"><i class="bi bi-shield-lock"></i> User Management</h2>
+    @* --- SEKCJA KOMUNIKATÓW TEMP DATA --- *@
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @* ZMIANA: Nagłówek i przycisk w jednym rzędzie *@
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"><i class="bi bi-shield-lock"></i> User Management</h2>
+        <a asp-action="CreateUser" class="btn btn-success">
+            <i class="bi bi-person-plus-fill me-1"></i> Add New User
+        </a>
+    </div>
 
     <div class="card shadow-sm">
         <div class="table-responsive">
@@ -13,7 +36,7 @@
                         <th>Email</th>
                         <th>Role</th>
                         <th>Joined</th>
-                        <th class="text-end">Actions</th>
+                        <th style="width: 180px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -34,10 +57,23 @@
                                 }
                             </td>
                             <td>@user.CreatedDate.ToShortDateString()</td>
-                            <td class="text-end">
-                                <a asp-action="EditUser" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary">
-                                    Edit
-                                </a>
+
+                            <td style="width: 180px;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a asp-action="EditUser" asp-route-id="@user.Id"
+                                           class="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
+                                        Edit
+                                    </a>
+
+                                    <form asp-action="DeleteUser" asp-route-id="@user.Id" method="post"
+                                          class="m-0 p-0"
+                                          onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     }

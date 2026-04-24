@@ -65,5 +65,63 @@ namespace large_fantasy_model.Controllers
 
             return RedirectToAction(nameof(Users));
         }
+        // USUWANIE UŻYTKOWNIKA
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            // Opcjonalnie: Zabezpieczenie, żeby admin nie mógł usunąć samego siebie
+            var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+            if (id == currentUserId)
+            {
+                TempData["Error"] = "You cannot delete your own admin account!";
+                return RedirectToAction(nameof(Users));
+            }
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "User has been deleted successfully.";
+            return RedirectToAction(nameof(Users));
+        }
+        // DODAWANIE UŻYTKOWNIKA (GET)
+        [HttpGet]
+        public IActionResult CreateUser()
+        {
+            return View(new User()); // Przesyłamy pusty model
+        }
+
+        // DODAWANIE UŻYTKOWNIKA (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateUser(User user)
+        {
+            // Usuwamy walidację Id, bo baza sama je wygeneruje
+            ModelState.Remove("Id");
+
+            if (ModelState.IsValid)
+            {
+                // Sprawdzenie czy mail/login zajęty
+                if (_context.Users.Any(u => u.Email == user.Email || u.Username == user.Username))
+                {
+                    ModelState.AddModelError("", "Użytkownik z tym mailem lub loginem już istnieje.");
+                    return View(user);
+                }
+
+                user.CreatedDate = DateTime.Now;
+                user.LastName = user.LastName ?? ""; // Zabezpieczenie przed nullem
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = $"User {user.Username} created successfully!";
+                return RedirectToAction(nameof(Users));
+            }
+
+            return View(user);
+        }
     }
 }
