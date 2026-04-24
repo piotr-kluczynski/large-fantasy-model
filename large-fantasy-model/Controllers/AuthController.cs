@@ -91,6 +91,11 @@ namespace large_fantasy_model.Controllers
 
             if (user != null)
             {
+                if (user.IsLockedOut)
+                {
+                    ViewBag.ErrorMessage = $"Twój dostęp został zablokowany do {user.LockoutEnd:dd.MM.yyyy}. Powód: {user.LockoutReason}";
+                    return View();
+                }
                 // Tworzymy listę "Dowodów tożsamości" (Claims)
                 var claims = new List<Claim>
                 {

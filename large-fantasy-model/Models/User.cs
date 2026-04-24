@@ -37,7 +37,9 @@ namespace large_fantasy_model.Models
 
         [Required(ErrorMessage = "It has to be stated whether the user has admin permissions.")]
         public int AdminPermissions { get; set; }
-
+        public DateTime? LockoutEnd { get; set; } // Do kiedy blokada (null = brak blokady)
+        public string? LockoutReason { get; set; } // Powód wyświetlany użytkownikowi
+        public bool IsLockedOut => LockoutEnd.HasValue && LockoutEnd > DateTime.Now; // Pomocnicza właściwość
 
         // Kolekcja przechowująca gry w których uczestniczy użytkownik - relacja wiele-do-wielu (wielu użytkowników może brać udział w wielu grach)
         public ICollection<Game> Games { get; set; } = new List<Game>();

@@ -29,7 +29,8 @@ namespace large_fantasy_model.Controllers
                     FirstName = u.FirstName,
                     LastName = u.LastName,
                     AdminPermissions = u.AdminPermissions,
-                    CreatedDate = u.CreatedDate
+                    CreatedDate = u.CreatedDate,
+                    LockoutEnd = u.LockoutEnd
                 })
                 .ToListAsync();
 
@@ -122,6 +123,47 @@ namespace large_fantasy_model.Controllers
             }
 
             return View(user);
+        }
+        [HttpGet]
+        public async Task<IActionResult> LockUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LockUser(int id, int days, string reason)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            user.LockoutEnd = DateTime.Now.AddDays(days);
+            user.LockoutReason = reason;
+
+            _context.Update(user);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"User {user.Username} has been locked for {days} days.";
+            return RedirectToAction(nameof(Users));
+        }
+
+        // Dodatkowo: Odblokowywanie
+        [HttpPost]
+        public async Task<IActionResult> UnlockUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            user.LockoutEnd = null;
+            user.LockoutReason = null;
+
+            _context.Update(user);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Account unlocked.";
+            return RedirectToAction(nameof(Users));
         }
     }
 }

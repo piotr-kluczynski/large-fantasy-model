@@ -1,0 +1,30 @@
+﻿@model large_fantasy_model.Models.User
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-warning">
+            <h4 class="mb-0 text-dark"><i class="bi bi-lock-fill"></i> Lock Account: @Model.Username</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="LockUser" method="post">
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="mb-3">
+                    <label class="form-label">Lock duration (days)</label>
+                    <input type="number" name="days" class="form-control" value="7" min="1" />
+                    <div class="form-text">After this time, the account will unlock automatically.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Reason for lockout</label>
+                    <textarea name="reason" class="form-control" rows="3" required placeholder="e.g. Breaking community rules..."></textarea>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Users" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-warning">Apply Lockout</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

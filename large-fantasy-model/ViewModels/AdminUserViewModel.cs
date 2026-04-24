@@ -9,5 +9,6 @@
         public string LastName { get; set; }
         public int AdminPermissions { get; set; }
         public DateTime CreatedDate { get; set; }
+        public DateTime? LockoutEnd { get; set; }
     }
 }
