@@ -1,4 +1,4 @@
-﻿@model large_fantasy_model.Models.User
+﻿@model large_fantasy_model.ViewModels.RegisterViewModel
 
 @{
     ViewData["Title"] = "Register";
@@ -57,6 +57,12 @@
                     </div>
                 </div>
 
+                <div class="mb-3">
+                    <label asp-for="ConfirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirm your strong password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+
                 <button type="submit" class="btn btn-primary w-100">Register now</button>
             </form>
 
@@ -74,7 +80,6 @@
                                         number: document.getElementById('check-number')
                                     };
 
-                                    
                                     function updateRequirement(element, isValid) {
                                         if (isValid) {
                                             // Usuwamy czerwony, dodajemy zielony (text-success z Bootstrapa)
@@ -86,11 +91,9 @@
                                             element.classList.add('text-danger');
                                         }
                                     }
-                                   
 
                                     function checkPasswordStrength() {
                                         const val = passwordInput.value;
-
                                         if (val.length > 0) {
                                             checklistContainer.classList.remove('d-none');
                                         } else {
@@ -115,8 +118,7 @@
             }
             <div class="text-center mt-3">
                 <p>
-                    Already have an account?
-                    <a asp-controller="Auth" asp-action="Login">Sing in</a>
+                    Already have an account? <a asp-controller="Auth" asp-action="Login">Sign in</a>
                 </p>
             </div>
         </div>

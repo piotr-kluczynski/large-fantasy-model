@@ -23,35 +23,38 @@ namespace large_fantasy_model.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            return View();
+            // Przekazujemy pusty ViewModel do widoku
+            return View(new ViewModels.RegisterViewModel());
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(User user)
+        [ValidateAntiForgeryToken] 
+        public async Task<IActionResult> Register(ViewModels.RegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
                 // Sprawdzenie, czy email lub nazwa użytkownika są już zajęte
                 var existingUser = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Email == user.Email || u.Username == user.Username);
+                    .FirstOrDefaultAsync(u => u.Email == model.Email || u.Username == model.Username);
 
                 if (existingUser != null)
                 {
                     ViewBag.ErrorMessage = "Użytkownik z takim adresem e-mail lub nazwą już istnieje.";
-                    return View(user);
+                    return View(model);
                 }
 
-                // Ustawienie domyślnych wartości wymaganych przez model User
-                user.LastName = user.LastName ?? "";
-
-                // Bio domyślnie zostawiamy puste, do edycji później w Profilu
-                user.Bio = "";
-
-                user.CreatedDate = DateTime.Now; 
-                user.AdminPermissions = 0;       
-
-                
-                // Na ten moment zapisujemy tak, jak pozwala na to model.
+                // Przepisujemy dane z ViewModelu do obiektu bazy danych (User)
+                var user = new User
+                {
+                    Username = model.Username,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName ?? "",
+                    Email = model.Email,
+                    Password = model.Password, 
+                    Bio = "",
+                    CreatedDate = DateTime.Now,
+                    AdminPermissions = 0
+                };
 
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
@@ -59,13 +62,13 @@ namespace large_fantasy_model.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            // Jeśli dane z formularza były błędne, wracamy do widoku z błędami
-            return View(user);
+           
+            return View(model);
         }
 
-        
+
         // LOGOWANIE
-        
+
 
         [HttpGet]
         public IActionResult Login()
