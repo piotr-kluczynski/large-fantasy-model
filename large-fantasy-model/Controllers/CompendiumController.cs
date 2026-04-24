@@ -2,6 +2,7 @@
 using large_fantasy_model.Models;
 using large_fantasy_model.Models.CharacterModels.Json;
 using large_fantasy_model.ViewModels.Compendium;
+using Microsoft.AspNetCore.Authorization;
 
 namespace large_fantasy_model.Controllers
 {
@@ -62,6 +63,7 @@ namespace large_fantasy_model.Controllers
             return entity;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Create(string rulebook, string category)
         {
@@ -83,6 +85,7 @@ namespace large_fantasy_model.Controllers
             return View("EntityEditor", model);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult Create(EntityEditorViewModel model)
         {
@@ -96,6 +99,7 @@ namespace large_fantasy_model.Controllers
             return RedirectToAction("Details", new { id = 1 });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Edit(string rulebook, string category, string name)
         {
@@ -135,6 +139,7 @@ namespace large_fantasy_model.Controllers
             return NotFound();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult Edit(EntityEditorViewModel model)
         {

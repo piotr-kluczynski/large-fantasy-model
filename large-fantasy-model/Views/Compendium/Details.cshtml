@@ -57,22 +57,23 @@
                         @if (category.Items.Any())
                         {
                             <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <a asp-controller="Compendium"
-                                       asp-action="Create"
-                                       asp-route-rulebook="@Model.FilesPathName"
-                                       asp-route-category="@category.FilesPathName"
-                                       class="text-decoration-none">
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <div class="col-md-4 mb-3">
+                                        <a asp-controller="Compendium"
+                                               asp-action="Create"
+                                               asp-route-rulebook="@Model.FilesPathName"
+                                               asp-route-category="@category.FilesPathName"
+                                               class="text-decoration-none">
 
-                                        <div class="card p-3 shadow-sm d-flex align-items-center justify-content-center h-100 border-dashed">
-
-                                            <div class="text-center">
-                                                <h5 class="mb-0">+ Add @category.Title</h5>
+                                            <div class="card p-3 shadow-sm d-flex align-items-center justify-content-center h-100 border-dashed">
+                                                <div class="text-center">
+                                                    <h5 class="mb-0">+ Add @category.Title</h5>
+                                                </div>
                                             </div>
-
-                                        </div>
-                                    </a>
-                                </div>
+                                        </a>
+                                    </div>
+                                }
 
                                 @foreach (var item in category.Items)
                                 {

@@ -97,7 +97,8 @@ namespace large_fantasy_model.Controllers
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), 
                     new Claim(ClaimTypes.Name, user.Username),               
                     new Claim(ClaimTypes.Email, user.Email),                
-                    new Claim("AdminPermissions", user.AdminPermissions.ToString()) 
+                    new Claim("AdminPermissions", user.AdminPermissions.ToString()),
+                    new Claim(ClaimTypes.Role, user.AdminPermissions == 1 ? "Admin" : "User")
                 };
 
                 // Pakujemy to w "tożsamość" opartą na ciasteczkach

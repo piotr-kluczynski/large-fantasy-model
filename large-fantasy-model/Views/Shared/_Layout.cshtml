@@ -154,6 +154,12 @@
                                asp-controller="Compendium"
                                asp-action="Index">Compendium</a>
                         </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Users">Admin Panel</a>
+                            </li>
+                        }
                     </ul>
 
                     <ul class="navbar-nav align-items-center">
