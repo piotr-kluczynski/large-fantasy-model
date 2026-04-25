@@ -46,13 +46,24 @@
         }
 
         <div class="d-flex justify-content-between mt-4">
-            <a asp-action="Entity"
-               asp-route-rulebook="@Model.Rulebook"
-               asp-route-category="@Model.Category"
-               asp-route-name="@Model.Values["Name"].ToLower().Replace(" ", "-")"
-               class="btn btn-secondary">
-                Cancel
-            </a>
+            @if (Model.IsEdit && Model.Values.ContainsKey("Name"))
+            {
+                <a asp-action="Entity"
+                   asp-route-rulebook="@Model.Rulebook"
+                   asp-route-category="@Model.Category"
+                   asp-route-name="@Model.Values["Name"].ToLower().Replace(" ", "-")"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+            }
+            else
+            {
+                <a asp-action="Details"
+                   asp-route-id="1"
+                   class="btn btn-secondary">
+                   Cancel
+               </a>
+            }
 
             <button type="submit" class="btn btn-primary">
                 Save
