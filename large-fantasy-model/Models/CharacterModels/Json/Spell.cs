@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using large_fantasy_model.Models.Compendium;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace large_fantasy_model.Models.CharacterModels.Json

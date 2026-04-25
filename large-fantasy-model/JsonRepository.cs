@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Models;
+﻿using large_fantasy_model.Models.Compendium;
 using System.Text.Json;
 
 namespace large_fantasy_model

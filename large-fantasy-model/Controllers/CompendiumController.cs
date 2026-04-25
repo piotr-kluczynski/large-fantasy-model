@@ -1,12 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using large_fantasy_model.Models;
 using large_fantasy_model.Models.CharacterModels.Json;
 using large_fantasy_model.ViewModels.Compendium;
+using large_fantasy_model.Models.Compendium;
 
 namespace large_fantasy_model.Controllers
 {
+    /// <summary>
+    /// Kontroler zarządzający podstronami dotyczącymi różnych systemów RPG oraz powiązanymi z nimi podmiotami.
+    /// </summary>
     public class CompendiumController : Controller
     {
+        /// <summary>
+        /// Repozytorium przechowujące listę zaklęć załadowaną z plików JSON.
+        /// </summary>
         private readonly JsonRepository<Spell> _spellRepository;
 
         public CompendiumController(JsonRepository<Spell> spellRepository)
@@ -14,6 +20,12 @@ namespace large_fantasy_model.Controllers
             _spellRepository = spellRepository;
         }
 
+        /// <summary>
+        /// Funkcja pomocnicza mapująca zawartość słownika na odpowiednie typy danych.
+        /// Służy do zapisywania informacji otrzymanych z formularza (np. parametrów nowego zaklęcia dodanego przez admina) do plików aplikacji.
+        /// </summary>
+        /// <param name="values">Słownik przechowujący informacje na temat elementu, który chcemy zmapować</param>
+        /// <returns>Element systemu RPG o wartościach przekazanych przez słownik.</returns>
         private T MapToEntity<T>(Dictionary<string, string> values)
             where T : new()
         {
@@ -22,12 +34,14 @@ namespace large_fantasy_model.Controllers
 
             foreach (var kv in values)
             {
+                // Znajdujemy odpowiednie pole elementu, przy pomocy klucza ze słownika
                 var prop = type.GetProperty(kv.Key);
                 if (prop == null || !prop.CanWrite)
                     continue;
 
                 object convertedValue = null;
 
+                // Zależnie od rodzaju pola elementu, konwertujemy wartość na odpowiedni typ.
                 if (prop.PropertyType == typeof(string))
                 {
                     convertedValue = kv.Value;
@@ -51,6 +65,7 @@ namespace large_fantasy_model.Controllers
             var boolProps = type.GetProperties()
                 .Where(p => p.PropertyType == typeof(bool));
 
+            // W przypadku pól elementu, dla których nie znaleźliśmy pasującego klucza ustawiamy negatywną wartość.
             foreach (var prop in boolProps)
             {
                 if (!values.ContainsKey(prop.Name))
@@ -62,6 +77,7 @@ namespace large_fantasy_model.Controllers
             return entity;
         }
 
+        // TWORZENIE NOWYCH ELEMENTÓW
         [HttpGet]
         public IActionResult Create(string rulebook, string category)
         {
@@ -82,7 +98,6 @@ namespace large_fantasy_model.Controllers
 
             return View("EntityEditor", model);
         }
-
         [HttpPost]
         public IActionResult Create(EntityEditorViewModel model)
         {
@@ -96,6 +111,7 @@ namespace large_fantasy_model.Controllers
             return RedirectToAction("Details", new { id = 1 });
         }
 
+        // EDYTOWANIE ISTNIEJĄCYCH ELEMENTÓW
         [HttpGet]
         public IActionResult Edit(string rulebook, string category, string name)
         {
@@ -134,7 +150,6 @@ namespace large_fantasy_model.Controllers
 
             return NotFound();
         }
-
         [HttpPost]
         public IActionResult Edit(EntityEditorViewModel model)
         {

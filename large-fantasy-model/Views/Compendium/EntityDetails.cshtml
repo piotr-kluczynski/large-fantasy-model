@@ -1,4 +1,20 @@
-﻿@using large_fantasy_model.ViewModels.Compendium
+﻿@*
+    Widok: EntityDetails
+
+    Przeznaczenie:
+    - Uniwersalny widok, pozwalający na inspekcję wartości wszystkich pól elementu istniejącego systemu RPG
+
+    Model:
+    - EntityDetailsViewModel
+
+    Zachowanie:
+    - Pozwala na zmianę wyświetlenie wszystkich pól wybranego elementu
+    - Przycisk "Back" cofa użytkownika do widoku Details danego systemu RPG
+    - Przycisk "Edit" przenosi użytkownika do widoku EntityEditor, który pozwala na zmianę wartości pól otwartego elementu
+
+*@
+
+@using large_fantasy_model.ViewModels.Compendium
 @model EntityDetailsViewModel
 
 <div class="container mt-4">

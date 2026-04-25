@@ -1,4 +1,22 @@
-﻿@using large_fantasy_model.Models.CharacterModels.Json
+﻿@*
+    Widok: Details
+
+    Przeznaczenie:
+    - Uniwersalny widok, pozwalający na wyświetlenie szczegółowych informacji na temat dowolnego systemu RPG zawartego w aplikacji
+
+    Model:
+    - GameModeRuleBook
+
+    Zachowanie:
+    - Wyświetla szczegółowy opis systemu RPG (zawartość listy Overview modelu GameModeRulebook)
+    - Daje dostęp do pliku pdf (podręcznika) na którym został oparty ten system
+    - Wyświetla każdą "kategorię" danego systemu oraz jej elementy
+    - Pozwala adminowi na tworzenie nowych elementów oraz edytowanie istniejących elementów
+
+*@
+
+@using large_fantasy_model.Models.CharacterModels.Json
+@using large_fantasy_model.Models.Compendium
 @model GameModeRulebook
 
 <div class="container mt-4">
