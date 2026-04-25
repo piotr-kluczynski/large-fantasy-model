@@ -15,28 +15,33 @@ namespace large_fantasy_model
             builder.Services.AddScoped<JsonRepository<Spell>>(sp =>
                 new JsonRepository<Spell>("Data/JsonFiles"));
 
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // --- DODAJ TO: Rejestracja obsługi Sesji ---
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Sesja wygaśnie po 30 min bezczynności
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+            // ------------------------------------------
 
             builder.Services.AddDbContext<LargeFantasyModelContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("LargeFantasyModelDB"))
             );
 
-            // Konfiguracja autoryzacji opartej na ciasteczkach
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = "/Auth/Login"; // Tu przekieruje, jak ktoś wejdzie tam, gdzie nie ma dostępu
+                    options.LoginPath = "/Auth/Login";
                 });
-
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -45,10 +50,12 @@ namespace large_fantasy_model
 
             app.UseRouting();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            // --- DODAJ TO: Włączenie Sesji w potoku (MUSI BYĆ PRZED Authentication) ---
+            app.UseSession();
+            // -------------------------------------------------------------------------
 
-            app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseAuthorization(); // Zostawiamy tylko jedno
 
             app.MapControllerRoute(
                 name: "default",

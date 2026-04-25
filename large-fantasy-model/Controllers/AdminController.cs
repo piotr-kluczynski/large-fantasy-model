@@ -1,9 +1,12 @@
 ﻿using large_fantasy_model.Data;
 using large_fantasy_model.Models;
 using large_fantasy_model.ViewModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace large_fantasy_model.Controllers
 {
@@ -164,6 +167,68 @@ namespace large_fantasy_model.Controllers
 
             TempData["Success"] = "Account unlocked.";
             return RedirectToAction(nameof(Users));
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Impersonate(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            // Zapisujemy ID Admina w sesji, zanim się "przełączymy"
+            var adminId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            HttpContext.Session.SetString("OriginalAdminId", adminId);
+
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Name, user.Username),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, user.AdminPermissions == 1 ? "Admin" : "User"),
+        new Claim("IsImpersonating", "true")
+    };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
+        public async Task<IActionResult> RevertImpersonation()
+        {
+            // Pobieramy Twoje oryginalne ID z sesji
+            var originalAdminId = HttpContext.Session.GetString("OriginalAdminId");
+
+            if (string.IsNullOrEmpty(originalAdminId))
+            {
+                return RedirectToAction("Logout", "Auth");
+            }
+
+            var adminUser = await _context.Users.FindAsync(int.Parse(originalAdminId));
+            if (adminUser == null) return RedirectToAction("Logout", "Auth");
+
+            // Czyścimy sesję podszywania
+            HttpContext.Session.Remove("OriginalAdminId");
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Logujemy Cię z powrotem jako Admina
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, adminUser.Id.ToString()),
+        new Claim(ClaimTypes.Name, adminUser.Username),
+        new Claim(ClaimTypes.Email, adminUser.Email),
+        new Claim(ClaimTypes.Role, "Admin")
+    };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+            return RedirectToAction("Users", "Admin");
         }
     }
 }
