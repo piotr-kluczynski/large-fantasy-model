@@ -96,6 +96,7 @@ namespace large_fantasy_model.Controllers
                 model.AdminPermissions = userInDb.AdminPermissions; // Cofnij zmianę jeśli nie jesteś HeadAdminem
             }
 
+            userInDb.Username = model.Username;
             userInDb.FirstName = model.FirstName;
             userInDb.LastName = model.LastName ?? "";
             userInDb.Email = model.Email;
@@ -259,21 +260,38 @@ namespace large_fantasy_model.Controllers
             var adminUser = await _context.Users.FindAsync(int.Parse(originalAdminId));
             if (adminUser == null) return RedirectToAction("Logout", "Auth");
 
+            // Czyścimy sesję podszywania
             HttpContext.Session.Remove("OriginalAdminId");
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, adminUser.Id.ToString()),
+        new Claim(ClaimTypes.Name, adminUser.Username),
+        new Claim(ClaimTypes.Email, adminUser.Email),
+        new Claim("AdminPermissions", adminUser.AdminPermissions.ToString())
+    };
+
+            // KLUCZOWE: Musimy dodać OBIE role, jeśli to HeadAdmin
+            if (adminUser.AdminPermissions == 2)
             {
-                new Claim(ClaimTypes.NameIdentifier, adminUser.Id.ToString()),
-                new Claim(ClaimTypes.Name, adminUser.Username),
-                new Claim(ClaimTypes.Email, adminUser.Email),
-                new Claim("AdminPermissions", adminUser.AdminPermissions.ToString()),
-                new Claim(ClaimTypes.Role, adminUser.AdminPermissions == 2 ? "HeadAdmin" : "Admin")
-            };
+                claims.Add(new Claim(ClaimTypes.Role, "HeadAdmin"));
+                claims.Add(new Claim(ClaimTypes.Role, "Admin")); // HeadAdmin MUSI mieć też rolę Admin
+            }
+            else if (adminUser.AdminPermissions == 1)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            }
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
 
+            // Ważne: SignInAsync musi być wywołane z nową tożsamością
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identity),
+                new AuthenticationProperties { IsPersistent = true }); // IsPersistent pomaga utrzymać sesję
+
+            // Przekierowanie do panelu użytkowników, co wymusi przeładowanie uprawnień
             return RedirectToAction("Users", "Admin");
         }
     }

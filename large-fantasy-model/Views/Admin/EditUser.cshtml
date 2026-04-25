@@ -10,7 +10,12 @@
                 <div class="card-body">
                     <form asp-action="EditUser" method="post">
                         <input type="hidden" asp-for="Id" />
-                        
+
+                        <div class="mb-3">
+                            <label asp-for="Username" class="form-label">Username</label>
+                            <input asp-for="Username" class="form-control" />
+                        </div>
+
                         <div class="mb-3">
                             <label asp-for="FirstName" class="form-label">First Name</label>
                             <input asp-for="FirstName" class="form-control" />
