@@ -10,7 +10,7 @@ using System.Security.Claims;
 
 namespace large_fantasy_model.Controllers
 {
-    [Authorize(Roles = "Admin")] // Tylko osoby z rolą Admin mają tu wstęp
+    [Authorize(Roles = "Admin,HeadAdmin")] // Dostęp dla obu rang
     public class AdminController : Controller
     {
         private readonly LargeFantasyModelContext _context;
@@ -18,6 +18,23 @@ namespace large_fantasy_model.Controllers
         public AdminController(LargeFantasyModelContext context)
         {
             _context = context;
+        }
+
+        // Pomocnicza metoda sprawdzająca hierarchię
+        private bool CanManage(int myPermissions, int targetPermissions)
+        {
+            // HeadAdmin (2) zarządza wszystkimi prócz siebie
+            if (myPermissions == 2) return true;
+            // Admin (1) zarządza tylko zwykłymi Userami (0)
+            if (myPermissions == 1 && targetPermissions == 0) return true;
+
+            return false;
+        }
+
+        private int GetMyPermissions()
+        {
+            var claim = User.FindFirst("AdminPermissions")?.Value;
+            return int.TryParse(claim, out int res) ? res : 0;
         }
 
         // LISTA UŻYTKOWNIKÓW
@@ -47,7 +64,13 @@ namespace large_fantasy_model.Controllers
             var user = await _context.Users.FindAsync(id);
             if (user == null) return NotFound();
 
-            return View(user); // Przekazujemy model User do formularza edycji 
+            if (!CanManage(GetMyPermissions(), user.AdminPermissions))
+            {
+                TempData["Error"] = "You do not have permission to edit this user.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            return View(user);
         }
 
         // EDYCJA UŻYTKOWNIKA (POST)
@@ -58,17 +81,33 @@ namespace large_fantasy_model.Controllers
             var userInDb = await _context.Users.FindAsync(model.Id);
             if (userInDb == null) return NotFound();
 
-            // Aktualizujemy dane
+            var myPerms = GetMyPermissions();
+
+            // Walidacja hierarchii
+            if (!CanManage(myPerms, userInDb.AdminPermissions))
+            {
+                TempData["Error"] = "You do not have permission to modify this account.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            // Blokada nadawania rangi HeadAdmin (2)
+            if (model.AdminPermissions == 2 && myPerms < 2)
+            {
+                model.AdminPermissions = userInDb.AdminPermissions; // Cofnij zmianę jeśli nie jesteś HeadAdminem
+            }
+
             userInDb.FirstName = model.FirstName;
             userInDb.LastName = model.LastName ?? "";
             userInDb.Email = model.Email;
-            userInDb.AdminPermissions = model.AdminPermissions; // Tu możemy zmienić kogoś w Admina! 
+            userInDb.AdminPermissions = model.AdminPermissions;
 
             _context.Update(userInDb);
             await _context.SaveChangesAsync();
 
+            TempData["Success"] = "Data updated.";
             return RedirectToAction(nameof(Users));
         }
+
         // USUWANIE UŻYTKOWNIKA
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -77,61 +116,62 @@ namespace large_fantasy_model.Controllers
             var user = await _context.Users.FindAsync(id);
             if (user == null) return NotFound();
 
-            // Opcjonalnie: Zabezpieczenie, żeby admin nie mógł usunąć samego siebie
-            var currentUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
-            if (id == currentUserId)
+            if (!CanManage(GetMyPermissions(), user.AdminPermissions) || id == int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
-                TempData["Error"] = "You cannot delete your own admin account!";
+                TempData["Error"] = "You cannot delete this account.";
                 return RedirectToAction(nameof(Users));
             }
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "User has been deleted successfully.";
+            TempData["Success"] = "User deleted.";
             return RedirectToAction(nameof(Users));
         }
-        // DODAWANIE UŻYTKOWNIKA (GET)
-        [HttpGet]
-        public IActionResult CreateUser()
-        {
-            return View(new User()); // Przesyłamy pusty model
-        }
 
-        // DODAWANIE UŻYTKOWNIKA (POST)
+        // DODAWANIE UŻYTKOWNIKA
+        [HttpGet]
+        public IActionResult CreateUser() => View(new User());
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateUser(User user)
         {
-            // Usuwamy walidację Id, bo baza sama je wygeneruje
             ModelState.Remove("Id");
-
             if (ModelState.IsValid)
             {
-                // Sprawdzenie czy mail/login zajęty
                 if (_context.Users.Any(u => u.Email == user.Email || u.Username == user.Username))
                 {
-                    ModelState.AddModelError("", "Użytkownik z tym mailem lub loginem już istnieje.");
+                    ModelState.AddModelError("", "The user already exists.");
                     return View(user);
                 }
 
+                // Blokada tworzenia HeadAdmina
+                if (user.AdminPermissions == 2 && GetMyPermissions() < 2)
+                {
+                    user.AdminPermissions = 1;
+                }
+
                 user.CreatedDate = DateTime.Now;
-                user.LastName = user.LastName ?? ""; // Zabezpieczenie przed nullem
+                user.LastName = user.LastName ?? "";
 
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = $"User {user.Username} created successfully!";
+                TempData["Success"] = "Account created.";
                 return RedirectToAction(nameof(Users));
             }
-
             return View(user);
         }
+
+        // BLOKOWANIE
         [HttpGet]
         public async Task<IActionResult> LockUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound();
+            if (user == null || !CanManage(GetMyPermissions(), user.AdminPermissions))
+                return RedirectToAction(nameof(Users));
+
             return View(user);
         }
 
@@ -140,7 +180,7 @@ namespace large_fantasy_model.Controllers
         public async Task<IActionResult> LockUser(int id, int days, string reason)
         {
             var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound();
+            if (user == null || !CanManage(GetMyPermissions(), user.AdminPermissions)) return NotFound();
 
             user.LockoutEnd = DateTime.Now.AddDays(days);
             user.LockoutReason = reason;
@@ -148,16 +188,16 @@ namespace large_fantasy_model.Controllers
             _context.Update(user);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"User {user.Username} has been locked for {days} days.";
+            TempData["Success"] = "Account blocked.";
             return RedirectToAction(nameof(Users));
         }
 
-        // Dodatkowo: Odblokowywanie
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UnlockUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound();
+            if (user == null || !CanManage(GetMyPermissions(), user.AdminPermissions)) return NotFound();
 
             user.LockoutEnd = null;
             user.LockoutReason = null;
@@ -165,30 +205,42 @@ namespace large_fantasy_model.Controllers
             _context.Update(user);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Account unlocked.";
+            TempData["Success"] = "Account unblocked.";
             return RedirectToAction(nameof(Users));
         }
+
+        // PODSZYWANIE SIĘ
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Impersonate(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound();
+            if (User.HasClaim("IsImpersonating", "true"))
+            {
+                TempData["Error"] = "You must first return to your account to log in as a different user.";
+                return RedirectToAction(nameof(Users));
+            }
 
-            // Zapisujemy ID Admina w sesji, zanim się "przełączymy"
+            var user = await _context.Users.FindAsync(id);
+            if (user == null || !CanManage(GetMyPermissions(), user.AdminPermissions))
+            {
+                TempData["Error"] = "You cannot impersonate this user.";
+                return RedirectToAction(nameof(Users));
+            }
+
             var adminId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             HttpContext.Session.SetString("OriginalAdminId", adminId);
 
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-        new Claim(ClaimTypes.Name, user.Username),
-        new Claim(ClaimTypes.Email, user.Email),
-        new Claim(ClaimTypes.Role, user.AdminPermissions == 1 ? "Admin" : "User"),
-        new Claim("IsImpersonating", "true")
-    };
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim("AdminPermissions", user.AdminPermissions.ToString()),
+                new Claim(ClaimTypes.Role, user.AdminPermissions >= 1 ? "Admin" : "User"),
+                new Claim("IsImpersonating", "true")
+            };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
@@ -201,29 +253,23 @@ namespace large_fantasy_model.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> RevertImpersonation()
         {
-            // Pobieramy Twoje oryginalne ID z sesji
             var originalAdminId = HttpContext.Session.GetString("OriginalAdminId");
-
-            if (string.IsNullOrEmpty(originalAdminId))
-            {
-                return RedirectToAction("Logout", "Auth");
-            }
+            if (string.IsNullOrEmpty(originalAdminId)) return RedirectToAction("Logout", "Auth");
 
             var adminUser = await _context.Users.FindAsync(int.Parse(originalAdminId));
             if (adminUser == null) return RedirectToAction("Logout", "Auth");
 
-            // Czyścimy sesję podszywania
             HttpContext.Session.Remove("OriginalAdminId");
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            // Logujemy Cię z powrotem jako Admina
             var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.NameIdentifier, adminUser.Id.ToString()),
-        new Claim(ClaimTypes.Name, adminUser.Username),
-        new Claim(ClaimTypes.Email, adminUser.Email),
-        new Claim(ClaimTypes.Role, "Admin")
-    };
+            {
+                new Claim(ClaimTypes.NameIdentifier, adminUser.Id.ToString()),
+                new Claim(ClaimTypes.Name, adminUser.Username),
+                new Claim(ClaimTypes.Email, adminUser.Email),
+                new Claim("AdminPermissions", adminUser.AdminPermissions.ToString()),
+                new Claim(ClaimTypes.Role, adminUser.AdminPermissions == 2 ? "HeadAdmin" : "Admin")
+            };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));

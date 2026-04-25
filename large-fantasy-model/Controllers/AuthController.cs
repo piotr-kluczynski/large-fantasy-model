@@ -103,8 +103,12 @@ namespace large_fantasy_model.Controllers
                     new Claim(ClaimTypes.Name, user.Username),               
                     new Claim(ClaimTypes.Email, user.Email),                
                     new Claim("AdminPermissions", user.AdminPermissions.ToString()),
-                    new Claim(ClaimTypes.Role, user.AdminPermissions == 1 ? "Admin" : "User")
+                    
                 };
+
+                if (user.AdminPermissions == 2) claims.Add(new Claim(ClaimTypes.Role, "HeadAdmin"));
+                if (user.AdminPermissions >= 1) claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+                if (user.AdminPermissions == 0) claims.Add(new Claim(ClaimTypes.Role, "User"));
 
                 // Pakujemy to w "tożsamość" opartą na ciasteczkach
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
