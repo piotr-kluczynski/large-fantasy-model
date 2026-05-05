@@ -203,20 +203,74 @@ namespace large_fantasy_model.Controllers
         public async Task<IActionResult> InviteFriend(int gameId, int friendId)
         {
             int myId = GetCurrentUserId();
-            var game = await _context.Games.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == gameId);
 
-            if (game != null && (game.UserId == myId || game.Users.Any(u => u.Id == myId)))
+            
+            var game = await _context.Games
+                .Include(g => g.Users)
+                .FirstOrDefaultAsync(g => g.Id == gameId && g.UserId == myId);
+
+            if (game == null)
             {
-                var friend = await _context.Users.FindAsync(friendId);
-                if (friend != null && !game.Users.Any(u => u.Id == friendId))
-                {
-                    game.Users.Add(friend);
-                    await _context.SaveChangesAsync();
-                    TempData["SuccessMessage"] = $"{friend.Username} has been added to the campaign.";
-                }
+                TempData["DangerMessage"] = "You don't have permission to invite players to this campaign or it doesn't exist.";
+                return RedirectToAction("Campaigns");
             }
-            return RedirectToAction(nameof(LobbyDetails), new { id = gameId });
+
+            
+            var friendToInvite = await _context.Users.FindAsync(friendId);
+            if (friendToInvite == null)
+            {
+                TempData["DangerMessage"] = "Could not find the specified user.";
+                return RedirectToAction("LobbyDetails", new { id = gameId });
+            }
+
+            
+            if (game.Users.Any(u => u.Id == friendId))
+            {
+                TempData["DangerMessage"] = $"{friendToInvite.Username} is already in your adventuring party.";
+                return RedirectToAction("LobbyDetails", new { id = gameId });
+            }
+
+            
+            game.Users.Add(friendToInvite);
+            await _context.SaveChangesAsync();
+
+            
+            TempData["SuccessMessage"] = $"Successfully added {friendToInvite.Username} to your campaign!";
+            return RedirectToAction("LobbyDetails", new { id = gameId });
         }
-       
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemovePlayer(int gameId, int playerId)
+        {
+            int myId = GetCurrentUserId();
+
+            
+            var game = await _context.Games
+                .Include(g => g.Users)
+                .FirstOrDefaultAsync(g => g.Id == gameId && g.UserId == myId);
+
+            if (game == null)
+            {
+                TempData["DangerMessage"] = "You don't have permission to perform this action.";
+                return RedirectToAction("Campaigns");
+            }
+
+            
+            var playerToRemove = game.Users.FirstOrDefault(u => u.Id == playerId);
+
+            if (playerToRemove != null)
+            {
+               
+                game.Users.Remove(playerToRemove);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Player {playerToRemove.Username} has been removed from the party.";
+            }
+            else
+            {
+                TempData["DangerMessage"] = "Player not found in this campaign.";
+            }
+
+            return RedirectToAction("LobbyDetails", new { id = gameId });
+        }
     }
 }

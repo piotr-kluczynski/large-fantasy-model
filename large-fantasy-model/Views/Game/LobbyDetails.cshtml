@@ -21,14 +21,14 @@
                 }
                 else
                 {
-                    <span class="badge bg-secondary rounded-pill px-3 py-2 align-middle"><i class="bi bi-lock-fill"></i> Private Campaign</span>
+                    <span class="badge bg-white text-danger border border-danger rounded-pill px-3 py-2 align-middle">Private Campaign</span>
                 }
             </div>
         </div>
         <div>
             
             <button class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-5">
-                <i class="bi bi-play-fill fs-5 align-middle"></i> Enter Virtual Tabletop
+             Enter Virtual Tabletop
             </button>
         </div>
     </div>
@@ -84,26 +84,45 @@
                             <img src="https://ui-avatars.com/api/?name=@Model.DungeonMaster.Username&size=40&background=random" class="rounded-circle me-3 border border-danger border-2" alt="Avatar" />
                             <div>
                                 <span class="fw-bold d-block">@Model.DungeonMaster.Username</span>
-                                <small class="text-danger fw-bold"><i class="bi bi-star-fill"></i> Dungeon Master</small>
+                                <small class="text-danger fw-bold"> Dungeon Master</small>
                             </div>
                         </li>
 
-                        
-                        @if (Model.Players.Any())
+                        @if (!Model.Players.Any())
                         {
-                            @foreach (var player in Model.Players)
-                            {
-                                <li class="list-group-item d-flex align-items-center py-3">
-                                    <img src="https://ui-avatars.com/api/?name=@player.Username&size=40&background=random" class="rounded-circle me-3" alt="Avatar" />
-                                    <span class="fw-semibold fs-5">@player.Username</span>
-                                </li>
-                            }
+                            <li class="list-group-item text-center py-4 text-muted small italic">
+                                No travelers have joined yet.
+                            </li>
                         }
                         else
                         {
-                            <li class="list-group-item text-center text-muted py-4">
-                                <em>No travelers have joined yet.</em>
-                            </li>
+                            @foreach (var player in Model.Players)
+                            {
+                                <li class="list-group-item p-3 border-top d-flex align-items-center justify-content-between border-0">
+                                    <div class="d-flex align-items-center">
+                                        
+                                        <div class="avatar-circle me-3 border border-success border-2 " style="background-color: #e83e8c;">
+                                            <span class="text-white fw-bold">@player.Username.Substring(0, 2).ToUpper()</span>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">@player.Username</div>
+                                            <small class="text-success fw-bold">Player</small>
+                                        </div>
+                                    </div>
+
+                                    
+                                    @if (Model.IsDungeonMaster)
+                                    {
+                                        <form asp-action="RemovePlayer" method="post" onsubmit="return confirm('Kick this player from the campaign?');">
+                                            <input type="hidden" name="gameId" value="@Model.GameId" />
+                                            <input type="hidden" name="playerId" value="@player.Id" />
+                                            <button type="submit" class="btn btn-sm border-0 bg-transparent shadow-none p-0 ms-2 btn-kick">
+                                                <i class="bi bi-x" style="font-size: 2rem; line-height: 1;"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </li>
+                            }
                         }
                     </ul>
                 </div>
@@ -140,3 +159,41 @@
         </div>
     </div>
 </div>
+<style>
+    
+
+   <style>
+    .btn-kick {
+        background: none;
+        border: none;
+        padding: 0;
+        color: #000; 
+        transition: color 0.2s ease-in-out, transform 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .btn-kick i {
+        font-size: 2rem; 
+        line-height: 1;
+    }
+
+    .btn-kick:hover {
+        color: #dc3545; 
+        
+    }
+    .avatar-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .avatar-circle span {
+    line-height: 1;
+    display: block;
+</style>

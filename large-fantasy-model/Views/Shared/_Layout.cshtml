@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/large_fantasy_model.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -48,12 +49,12 @@
                            
                             <li class="nav-item me-3">
                                 <a class="nav-link @GetActiveMenuClass("Game", "Lobby") px-2" asp-controller="Game" asp-action="Campaigns">
-                                    <i class="bi bi-play-circle"></i> Campaigns
+                                Campaigns
                                 </a>
                             </li>
                             <li class="nav-item me-3">
                                 <a class="nav-link @GetActiveMenuClass("FindGame", "Index") px-2" asp-controller="FindGame" asp-action="Find">
-                                    <i class="bi bi-search"></i> Find Game
+                                Find Game
                                 </a>
                             </li>
                         }
@@ -91,12 +92,12 @@
                                     </li>
                                     <li>
                                         <a class="dropdown-item rounded-3 py-2 mb-1 fw-semibold d-flex align-items-center" asp-controller="Profile" asp-action="Friends">
-                                            <span class="me-3 fs-5"></span> My Friends
+                                            <span class="me-3 fs-5"></span> Friends List
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item rounded-3 py-2 mb-1 fw-semibold d-flex align-items-center" asp-controller="PrivateMessage" asp-action="Index">
-                                            <span class="me-3 fs-5"><i class="bi bi-envelope"></i></span> My Messages
+                                            <span class="me-3 fs-5"></span> Messages
                                         </a>
                                     </li>
                                     <li>
