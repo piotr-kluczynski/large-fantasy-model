@@ -45,8 +45,11 @@
     
                         @if (User.Identity.IsAuthenticated)
                         {
+                           
                             <li class="nav-item me-3">
-                                <a class="nav-link @GetActiveMenuClass("Game", "Find") px-2" href="#"><i class="bi bi-play-circle"></i> Find Game</a>
+                                <a class="nav-link @GetActiveMenuClass("Game", "Lobby") px-2" asp-controller="Game" asp-action="Campaigns">
+                                    <i class="bi bi-play-circle"></i> Campaigns
+                                </a>
                             </li>
                             <li class="nav-item me-3">
                                 <a class="nav-link @GetActiveMenuClass("Ranking", "Index") px-2" href="#">Ranking</a>
