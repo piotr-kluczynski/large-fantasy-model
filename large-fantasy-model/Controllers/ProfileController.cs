@@ -1,9 +1,11 @@
 ﻿using large_fantasy_model.Data;
+using large_fantasy_model.Hubs;
 using large_fantasy_model.Models;
 using large_fantasy_model.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -13,13 +15,15 @@ namespace large_fantasy_model.Controllers
     public class ProfileController : Controller
     {
         private readonly LargeFantasyModelContext _context;
+        private readonly IHubContext<PrivateMessageHub> _hubContext;
 
-        public ProfileController(LargeFantasyModelContext context)
+        public ProfileController(LargeFantasyModelContext context, IHubContext<PrivateMessageHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
-        // Zmienione z Index na ProfilePage
+       
         public async Task<IActionResult> ProfilePage()
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -34,8 +38,112 @@ namespace large_fantasy_model.Controllers
 
             return View(user);
         }
+        
+        [HttpGet]
+        public async Task<IActionResult> Friends(string searchQuery)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int userId = int.Parse(userIdString!);
 
-        // --- EDYCJA PROFILU (GET) ---
+            
+            var user = await _context.Users
+                .Include(u => u.Friends)
+                .Include(u => u.FriendOf)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null) return NotFound();
+
+           
+            var mutualFriends = user.Friends.Where(f => user.FriendOf.Any(fo => fo.Id == f.Id)).ToList();
+            var sentRequests = user.Friends.Where(f => !user.FriendOf.Any(fo => fo.Id == f.Id)).ToList();
+            var receivedRequests = user.FriendOf.Where(fo => !user.Friends.Any(f => f.Id == fo.Id)).ToList();
+
+            var viewModel = new FriendsViewModel
+            {
+                SearchQuery = searchQuery,
+                MutualFriends = mutualFriends.Select(f => new UserViewModel { Id = f.Id, Username = f.Username }).ToList(),
+                SentRequests = sentRequests.Select(f => new UserViewModel { Id = f.Id, Username = f.Username }).ToList(),
+                ReceivedRequests = receivedRequests.Select(fo => new UserViewModel { Id = fo.Id, Username = fo.Username }).ToList()
+            };
+
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                viewModel.SearchResults = await _context.Users
+                    .Where(u => u.Username.Contains(searchQuery) && u.Id != userId)
+                    .Select(u => new UserViewModel { Id = u.Id, Username = u.Username })
+                    .ToListAsync();
+            }
+
+            return View(viewModel);
+        }
+
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddFriend(int friendId)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int userId = int.Parse(userIdString!);
+
+            
+            var user = await _context.Users
+                .Include(u => u.Friends)
+                .Include(u => u.FriendOf)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            var newFriend = await _context.Users.FindAsync(friendId);
+
+            if (user != null && newFriend != null && !user.Friends.Any(f => f.Id == friendId))
+            {
+                user.Friends.Add(newFriend);
+                await _context.SaveChangesAsync();
+
+                
+                if (user.FriendOf.Any(fo => fo.Id == friendId))
+                {
+                    TempData["SuccessMessage"] = $"You and {newFriend.Username} are now friends!";
+
+                    await _hubContext.Clients.Group($"User_{friendId}")
+                         .SendAsync("ReceiveFriendAccept", user.Id, user.Username);
+                }
+                else
+                {
+                    TempData["SuccessMessage"] = $"Friend request sent to {newFriend.Username}!";
+
+                   
+                    await _hubContext.Clients.Group($"User_{friendId}")
+                        .SendAsync("ReceiveFriendRequest", user.Id, user.Username); 
+                }
+            }
+
+            return RedirectToAction(nameof(Friends));
+        }
+
+       
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveFriend(int friendId)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int userId = int.Parse(userIdString!);
+
+            var user = await _context.Users.Include(u => u.Friends).FirstOrDefaultAsync(u => u.Id == userId);
+            var friend = await _context.Users.Include(u => u.Friends).FirstOrDefaultAsync(u => u.Id == friendId);
+
+            if (user != null && friend != null)
+            {
+                if (user.Friends.Any(f => f.Id == friendId)) user.Friends.Remove(friend);
+                if (friend.Friends.Any(f => f.Id == userId)) friend.Friends.Remove(user);
+
+                await _context.SaveChangesAsync();
+
+                TempData["DangerMessage"] = $"Traveler {friend.Username} has been removed.";
+                await _hubContext.Clients.Group($"User_{friendId}")
+                    .SendAsync("ReceiveFriendRemove", user.Id);
+            }
+
+            return RedirectToAction(nameof(Friends));
+        }
         [HttpGet]
         public async Task<IActionResult> Edit()
         {
@@ -45,7 +153,7 @@ namespace large_fantasy_model.Controllers
             var user = await _context.Users.FindAsync(userId);
             if (user == null) return NotFound();
 
-            // ZAMIANA: Pakujemy dane z bazy do naszej "jednorazowej karteczki"
+           
             var viewModel = new EditProfileViewModel
             {
                 Username = user.Username,
@@ -57,25 +165,25 @@ namespace large_fantasy_model.Controllers
             return View(viewModel);
         }
 
-        // --- EDYCJA PROFILU (POST) ---
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditProfileViewModel model)
         {
-            // 1. Sprawdzamy, czy "karteczka" jest poprawnie wypełniona
+            
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            // 2. Pobieramy użytkownika z bazy (ID bierzemy z bezpiecznego ciasteczka, a nie z formularza!)
+            
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             int userId = int.Parse(userIdString!);
 
             var userInDb = await _context.Users.FindAsync(userId);
             if (userInDb == null) return NotFound();
 
-            // Dodatkowe zabezpieczenie: jeśli zmienia Nick, upewnijmy się, że nikt inny go nie ma
+            
             if (userInDb.Username != model.Username)
             {
                 var usernameExists = await _context.Users.AnyAsync(u => u.Username == model.Username && u.Id != userId);
@@ -86,7 +194,7 @@ namespace large_fantasy_model.Controllers
                 }
             }
 
-            // 3. Przepisujemy dane z karteczki do akt w archiwum (do bazy)
+            
             userInDb.Username = model.Username;
             userInDb.FirstName = model.FirstName;
             userInDb.LastName = model.LastName ?? "";
@@ -95,7 +203,7 @@ namespace large_fantasy_model.Controllers
             _context.Update(userInDb);
             await _context.SaveChangesAsync();
 
-            // 4. Odświeżenie ciasteczka logowania (żeby nowy Nick od razu wskoczył do menu)
+           
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userInDb.Id.ToString()),
@@ -109,7 +217,7 @@ namespace large_fantasy_model.Controllers
 
             return RedirectToAction(nameof(ProfilePage));
         }
-        // --- ZMIANA HASŁA ---
+        
         [HttpGet]
         public IActionResult ChangePassword()
         {
@@ -131,15 +239,15 @@ namespace large_fantasy_model.Controllers
                 return View(model);
             }
 
-            // Zmiana hasła
+            
             user.Password = model.NewPassword;
             _context.Update(user);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(ProfilePage)); // Po sukcesie wracamy na profil
+            return RedirectToAction(nameof(ProfilePage)); 
         }
 
-        // --- ZMIANA EMAILA ---
+        
         [HttpGet]
         public IActionResult ChangeEmail()
         {
@@ -161,7 +269,7 @@ namespace large_fantasy_model.Controllers
                 return View(model);
             }
 
-            // Sprawdzamy, czy nowy email nie jest już zajęty
+            
             var emailExists = await _context.Users.AnyAsync(u => u.Email == model.NewEmail && u.Id != userId);
             if (emailExists)
             {
@@ -169,7 +277,7 @@ namespace large_fantasy_model.Controllers
                 return View(model);
             }
 
-            // Zmiana emaila
+            
             user.Email = model.NewEmail;
             _context.Update(user);
             await _context.SaveChangesAsync();

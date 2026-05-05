@@ -2,6 +2,7 @@ using large_fantasy_model.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using large_fantasy_model.Models.CharacterModels.Json;
+using large_fantasy_model.Hubs; // --- SIGNALR: Dodany using, żeby widział Twój Hub ---
 
 namespace large_fantasy_model
 {
@@ -16,6 +17,10 @@ namespace large_fantasy_model
                 new JsonRepository<Spell>("Data/JsonFiles"));
 
             builder.Services.AddControllersWithViews();
+
+            // --- SIGNALR: Rejestracja serwisu w aplikacji ---
+            builder.Services.AddSignalR();
+            // ------------------------------------------------
 
             // --- DODAJ TO: Rejestracja obsługi Sesji ---
             builder.Services.AddDistributedMemoryCache();
@@ -56,6 +61,10 @@ namespace large_fantasy_model
 
             app.UseAuthentication();
             app.UseAuthorization(); // Zostawiamy tylko jedno
+
+            // --- SIGNALR: Mapowanie ścieżki do Huba ---
+            app.MapHub<PrivateMessageHub>("/privateMessageHub");
+            // ------------------------------------------
 
             app.MapControllerRoute(
                 name: "default",

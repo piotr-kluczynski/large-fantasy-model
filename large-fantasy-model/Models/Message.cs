@@ -16,11 +16,13 @@ namespace large_fantasy_model.Models
         public DateTime SendingTime { get; set; }
 
         // Odwołanie do obiektu konwersacji, do której należy ta wiadomość - relacja jeden-do-wielu (wiele wiadomości może należeć do jednej konwersacji)
+        public int ConversationId { get; set; }
         public virtual Conversation Conversation { get; set; }
 
         // Odwołanie do obiektu użytkownika, który wysłał wiadomość - relacja jeden-do-wielu (jeden użytkownik może wysłać wiele wiadomości)
         public int UserId { get; set; }
         public virtual User User { get; set; }
-        
+        public bool IsRead { get; set; } = false;
+
     }
 }
