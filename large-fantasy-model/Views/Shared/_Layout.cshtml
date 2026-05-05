@@ -48,12 +48,12 @@
                         {
                            
                             <li class="nav-item me-3">
-                                <a class="nav-link @GetActiveMenuClass("Game", "Lobby") px-2" asp-controller="Game" asp-action="Campaigns">
+                                <a class="nav-link @GetActiveMenuClass("Game", "Campaigns") px-2" asp-controller="Game" asp-action="Campaigns">
                                 Campaigns
                                 </a>
                             </li>
                             <li class="nav-item me-3">
-                                <a class="nav-link @GetActiveMenuClass("FindGame", "Index") px-2" asp-controller="FindGame" asp-action="Find">
+                                <a class="nav-link @GetActiveMenuClass("FindGame", "Find") px-2" asp-controller="FindGame" asp-action="Find">
                                 Find Game
                                 </a>
                             </li>
@@ -67,7 +67,7 @@
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Users">Admin Panel</a>
+                                <a class="nav-link @GetActiveMenuClass("Admin", "Users") px-2" asp-controller="Admin" asp-action="Users">Admin Panel</a>
                             </li>
                         }
                     </ul>

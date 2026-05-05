@@ -4,7 +4,24 @@
     var myId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
     var activeChat = ViewBag.ActiveChat as large_fantasy_model.Models.Conversation;
 }
+<style>
+body {
+}
+hover-bg:hover {
+    background-color: #f8f9fa !important;
+    transition: 0.2s;
+}
 
+.unread-pop {
+    transform: scale(1.02) translateX(5px);
+    box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.08) !important;
+    border-radius: 8px !important;
+    z-index: 10;
+    position: relative;
+    transition: all 0.3s ease-in-out;
+}
+
+</style>
 <div class="container mt-4">
     <div class="row" style="height: 75vh;">
         
@@ -108,7 +125,7 @@
 
     </div>
 </div>
-}
+
 @section Scripts {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
@@ -161,7 +178,7 @@
     connection.start().then(function () {
     connection.invoke("JoinMyUserGroup", myUserId.toString());
         
-    /
+    
     const chatBox = document.getElementById("chat-messages-box");
     if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
     }).catch(function (err) {

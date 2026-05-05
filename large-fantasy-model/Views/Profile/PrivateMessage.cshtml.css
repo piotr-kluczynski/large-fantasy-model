@@ -1,14 +1,1 @@
-﻿body {
-}
-hover-bg:hover {
-    background-color: #f8f9fa !important;
-    transition: 0.2s;
-}
-
-.unread-pop {
-    transform: scale(1.02) translateX(5px);
-    box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.08) !important;
-    border-radius: 8px !important;
-    z-index: 10;
-    position: relative;
-    transition: all 0.3s ease-in-out;
+﻿
