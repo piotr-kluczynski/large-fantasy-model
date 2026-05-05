@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using large_fantasy_model.Data;
 
@@ -11,9 +12,11 @@ using large_fantasy_model.Data;
 namespace large_fantasy_model.Migrations
 {
     [DbContext(typeof(LargeFantasyModelContext))]
-    partial class UsersContextModelSnapshot : ModelSnapshot
+    [Migration("20260505172034_AddGameLobbySettings")]
+    partial class AddGameLobbySettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -338,10 +341,6 @@ namespace large_fantasy_model.Migrations
                         .IsRequired()
                         .HasMaxLength(25)
                         .HasColumnType("nvarchar(25)");
-
-                    b.Property<string>("Password")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");

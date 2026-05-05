@@ -32,5 +32,13 @@ namespace large_fantasy_model.Models
         // Odwołanie do właściciela gry - relacja jeden-do-wielu (jeden użytkownik może być właścicielem wielu gier)
         public int UserId { get; set; }
         public virtual User User { get; set; }
+
+        public bool IsPublic { get; set; } = false;
+
+        [StringLength(10)]
+        public string? JoinCode { get; set; }
+
+        [StringLength(100)]
+        public string? Password { get; set; }
     }
 }

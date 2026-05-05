@@ -27,7 +27,21 @@
                             <textarea asp-for="Description" class="form-control rounded-3 bg-light border-0" rows="5" placeholder="Describe the world, the goal, or the overall vibe of this campaign..."></textarea>
                             <span asp-validation-for="Description" class="text-danger small fw-semibold"></span>
                         </div>
+                        
+                        <div class="form-check form-switch mb-4 mt-3">
+                            <input asp-for="IsPublic" class="form-check-input fs-4" type="checkbox" role="switch" id="isPublicSwitch" checked>
+                                <label asp-for="IsPublic" class="form-check-label fw-bold text-dark ms-2 mt-1" for="isPublicSwitch">
+                                    Make this campaign Public <br>
+                                    <small class="text-muted fw-normal">Public games will be visible in the 'Find Game' board.</small>
+                                </label>
+                            </div>
 
+                            
+                            <div class="mb-4" id="passwordFieldContainer" style="display: none;">
+                                <label asp-for="Password" class="form-label fw-bold text-secondary">Lobby Password</label>
+                                <input asp-for="Password" class="form-control form-control-lg rounded-3 bg-light border-0" placeholder="Set a password for your private game..." />
+                                <span asp-validation-for="Password" class="text-danger small fw-semibold"></span>
+                            </div>
                         <div class="d-grid gap-2 mt-5">
                             <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">Create Campaign</button>
                             <a asp-action="Campaigns" class="btn btn-danger btn-lg rounded-pill fw-bold shadow-sm">Cancel and return to list</a>
@@ -40,9 +54,30 @@
     </div>
 </div>
 
-<!-- Skrypty walidacyjne z ASP.NET (pokazują błędy pod inputami bez przeładowywania strony) -->
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const publicSwitch = document.getElementById('isPublicSwitch');
+                const passContainer = document.getElementById('passwordFieldContainer');
+                const passInput = document.getElementById('Password');
+
+                function togglePassword() {
+                    if (publicSwitch.checked) {
+                        passContainer.style.display = 'none';
+                        passInput.value = ''; 
+                    } else {
+                        passContainer.style.display = 'block'; 
+                    }
+                }
+
+                
+                togglePassword();
+
+                
+                publicSwitch.addEventListener('change', togglePassword);
+            });
+        </script>
     }
-}

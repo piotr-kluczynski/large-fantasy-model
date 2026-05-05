@@ -1,0 +1,142 @@
+﻿@model large_fantasy_model.ViewModels.GameLobbyViewModel
+
+@{
+    ViewData["Title"] = Model.Name + " - Lobby";
+}
+
+<div class="container mt-4">
+    
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="fw-bold text-primary mb-0">@Model.Name</h1>
+            
+            
+            <div>
+                @if (Model.IsPublic)
+                {
+                    @if (Model.IsPublic)
+                    {
+                        <span class="badge bg-white text-success border border-success rounded-pill px-3 py-2 align-middle">Public Campaign</span>
+                    }
+                }
+                else
+                {
+                    <span class="badge bg-secondary rounded-pill px-3 py-2 align-middle"><i class="bi bi-lock-fill"></i> Private Campaign</span>
+                }
+            </div>
+        </div>
+        <div>
+            
+            <button class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-5">
+                <i class="bi bi-play-fill fs-5 align-middle"></i> Enter Virtual Tabletop
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        
+        <div class="col-lg-8 mb-4">
+            
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                    <strong>Success!</strong> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h4 class="fw-bold">Campaign Description</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted fs-5" style="white-space: pre-line;">@Model.Description</p>
+                </div>
+            </div>
+
+            
+            @if (Model.IsDungeonMaster)
+            {
+                <div class="card border-primary border-2 shadow-sm rounded-4 bg-light mb-4">
+                    <div class="card-body text-center p-4">
+                        <h5 class="fw-bold text-primary mb-3">Invite Code</h5>
+                        <p class="text-muted small mb-3">Share this code with players so they can join your adventure.</p>
+                        <div class="d-inline-block bg-white border border-primary border-2 rounded-3 px-5 py-2">
+                            <span class="fs-1 fw-bold font-monospace tracking-widest text-dark">@Model.JoinCode</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        
+        <div class="col-lg-4 mb-4">
+            
+            
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-header bg-primary text-white border-0 pt-3 pb-2 rounded-top-4">
+                    <h5 class="fw-bold mb-0">Adventuring Party</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush rounded-bottom-4">
+                        
+                        <li class="list-group-item d-flex align-items-center py-3 bg-light">
+                            <img src="https://ui-avatars.com/api/?name=@Model.DungeonMaster.Username&size=40&background=random" class="rounded-circle me-3 border border-danger border-2" alt="Avatar" />
+                            <div>
+                                <span class="fw-bold d-block">@Model.DungeonMaster.Username</span>
+                                <small class="text-danger fw-bold"><i class="bi bi-star-fill"></i> Dungeon Master</small>
+                            </div>
+                        </li>
+
+                        
+                        @if (Model.Players.Any())
+                        {
+                            @foreach (var player in Model.Players)
+                            {
+                                <li class="list-group-item d-flex align-items-center py-3">
+                                    <img src="https://ui-avatars.com/api/?name=@player.Username&size=40&background=random" class="rounded-circle me-3" alt="Avatar" />
+                                    <span class="fw-semibold fs-5">@player.Username</span>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item text-center text-muted py-4">
+                                <em>No travelers have joined yet.</em>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+
+            
+            @if (Model.AvailableFriends.Any())
+            {
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 pb-0">
+                        <h5 class="fw-bold text-dark">Invite Friends</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            @foreach (var friend in Model.AvailableFriends)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://ui-avatars.com/api/?name=@friend.Username&size=32&background=random" class="rounded-circle me-2" alt="Avatar" />
+                                        <span class="fw-semibold">@friend.Username</span>
+                                    </div>
+                                    <form asp-action="InviteFriend" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="gameId" value="@Model.GameId" />
+                                        <input type="hidden" name="friendId" value="@friend.Id" />
+                                        <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill fw-bold">Invite</button>
+                                    </form>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -11,5 +11,10 @@ namespace large_fantasy_model.ViewModels
         [Required(ErrorMessage = "Campaign description is required.")]
         [StringLength(2000, MinimumLength = 5, ErrorMessage = "Description must be between 5 and 2000 characters.")]
         public string Description { get; set; }
+        public bool IsPublic { get; set; }
+
+        [DataType(DataType.Password)]
+        [StringLength(100, MinimumLength = 3, ErrorMessage = "Password must be at least 3 characters long.")]
+        public string? Password { get; set; }
     }
 }
