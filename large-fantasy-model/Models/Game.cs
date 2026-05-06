@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿    using System.ComponentModel.DataAnnotations;
 
 namespace large_fantasy_model.Models
 {
@@ -40,5 +40,7 @@ namespace large_fantasy_model.Models
 
         [StringLength(100)]
         public string? Password { get; set; }
+        public bool IsActive { get; set; } = true; 
+        public int MaxPlayers { get; set; } = 10;
     }
 }

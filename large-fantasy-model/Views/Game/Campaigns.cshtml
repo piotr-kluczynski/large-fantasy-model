@@ -62,7 +62,20 @@
                             <p class="card-text text-muted mb-4 flex-grow-1">
                                 @(game.Description.Length > 100 ? game.Description.Substring(0, 100) + "..." : game.Description)
                             </p>
-                            
+                            <div class="mb-2">
+                                @if (game.IsActive)
+                                {
+                                    <span class="badge bg-success-subtle text-success rounded-pill px-3">
+                                        <i class="bi bi-circle-fill me-1 small"></i> Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-danger rounded-pill px-3">
+                                        <i class="bi bi-pause-fill me-1"></i> Inactive
+                                    </span>
+                                }
+                            </div>
                             <small class="text-secondary fw-semibold mt-auto mb-2">
                                 Created: @game.CreationDate.ToString("MM/dd/yyyy")
                             </small>

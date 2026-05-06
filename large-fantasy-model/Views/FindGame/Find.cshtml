@@ -13,7 +13,6 @@
         </div>
     </div>
 
-    
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-8">
             @if (TempData["SuccessMessage"] != null)
@@ -33,11 +32,8 @@
         </div>
     </div>
 
-    
     <div class="row justify-content-center mb-5">
         <div class="col-lg-8">
-
-           
             <div class="card border-primary border-3 rounded-pill shadow-lg overflow-hidden mb-5"> 
                 <form asp-controller="FindGame" asp-action="Find" method="get" class="d-flex m-0">
                     <span class="bg-white border-0 text-primary ps-4 pe-2 d-flex align-items-center fs-4"><i class="bi bi-search"></i></span>
@@ -49,12 +45,10 @@
                             <i class="bi bi-x-lg"></i>
                         </a>
                     }
-                    
                     <button class="btn btn-primary fw-bold px-5 fs-5 rounded-0" type="submit">Search</button>
                 </form>
             </div>
 
-            
             <div class="row justify-content-center">
                 <div class="col-md-9 col-lg-7"> 
                     <div class="card border-0 bg-light rounded-4 shadow-sm p-3 text-center">
@@ -66,13 +60,9 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
- 
-
-    
     <div class="d-flex flex-column gap-3">
         @if (!Model.Games.Any())
         {
@@ -86,9 +76,11 @@
         {
             @foreach (var game in Model.Games)
             {
+                
+                bool isFull = (game.PlayerCount + 1) >= 10;
+
                 <div class="card shadow-sm border-0 rounded-4 transition-hover">
                     <div class="card-body p-4 d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4">
-                        
                         
                         <div class="flex-grow-1">
                             <div class="d-flex align-items-center gap-3 mb-2">
@@ -101,45 +93,59 @@
                                 {
                                     <span class="badge bg-danger rounded-pill px-2 py-1"><i class="bi bi-lock-fill"></i> Private</span>
                                 }
+                                @if (isFull)
+                                {
+                                    <span class="badge bg-dark rounded-pill px-2 py-1">FULL</span>
+                                }
                             </div>
                             <p class="text-muted mb-2">
                                 @(game.Description.Length > 150 ? game.Description.Substring(0, 150) + "..." : game.Description)
                             </p>
                             <div class="d-flex gap-4 text-secondary small fw-semibold">
-                                <span><i class="bi bi-person-fill text-primary"></i> DM: @game.DungeonMasterName</span>
-                                <span><i class="bi bi-people-fill text-info"></i> Players: @game.PlayerCount</span>
+                                <span class="text-primary"><i class="bi bi-person-fill"></i> Host: @game.DungeonMasterName</span>
+                                <span class="@(isFull ? "text-danger" : "text-success")">
+                                    <i class="bi bi-people-fill"></i> Players: @(game.PlayerCount + 1) / 10
+                                </span>
                                 <span><i class="bi bi-calendar-event"></i> Created: @game.CreationDate.ToString("MM/dd/yyyy")</span>
                             </div>
                         </div>
 
-                        
                         <div class="text-lg-end" style="min-width: 200px;">
-                            @if (game.IsAlreadyMember)
-                            {
-                                <a asp-controller="Game" asp-action="LobbyDetails" asp-route-id="@game.Id" class="btn btn-outline-primary btn-lg rounded-pill fw-bold w-100">Enter Lobby</a>
-                            }
-                            else if (game.HasPassword)
-                            {
-                                
-                                <button type="button" class="btn btn-warning btn-lg rounded-pill fw-bold w-100 text-dark" data-bs-toggle="modal" data-bs-target="#joinPasswordModal-@game.Id">
-                                    <i class="bi bi-lock-fill"></i> Join (Password)
-                                </button>
-                            }
-                            else
-                            {
-                                
-                                <form asp-controller="FindGame" asp-action="JoinCampaign" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="gameId" value="@game.Id" />
-                                    <button type="submit" class="btn btn-success btn-lg rounded-pill fw-bold w-100">Join Campaign</button>
-                                </form>
-                            }
+                         @if (game.IsAlreadyMember)
+                         {
+                            <div class="mb-2">
+                                <span class="badge bg-info text-dark rounded-pill px-3 py-2 w-100">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Already a Member
+                                </span>
+                            </div>
+                            <a asp-controller="Game" asp-action="LobbyDetails" asp-route-id="@game.Id" class="btn btn-primary btn-lg rounded-pill fw-bold w-100">Enter Lobby</a>
+                         }
+                         else if (isFull)
+                         {
+                            <button class="btn btn-secondary btn-lg rounded-pill fw-bold w-100 disabled" disabled>
+                                Lobby Full
+                            </button>
+                         }
+                         else if (game.HasPassword)
+                         {
+                            <button type="button" 
+                                class="btn btn-outline-primary btn-lg rounded-pill fw-bold w-100" data-bs-toggle="modal" data-bs-target="#joinPasswordModal-@game.Id">
+                                Join (Password)
+                            </button>
+                         }
+                         else
+                         {
+                            <form asp-controller="FindGame" asp-action="JoinCampaign" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="gameId" value="@game.Id" />
+                                <button type="submit" class="btn btn-outline-primary btn-lg rounded-pill fw-bold w-100">Join Campaign</button>
+                            </form>
+                         }
                         </div>
                     </div>
                 </div>
 
-                
-                @if (!game.IsAlreadyMember && game.HasPassword)
+                @if (!game.IsAlreadyMember && game.HasPassword && !isFull)
                 {
                     <div class="modal fade" id="joinPasswordModal-@game.Id" tabindex="-1" aria-labelledby="modalLabel-@game.Id" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">

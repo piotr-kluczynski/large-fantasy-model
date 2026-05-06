@@ -23,7 +23,7 @@ namespace large_fantasy_model.Controllers
             return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         }
 
-        // --- GŁÓWNA TABLICA WYSZUKIWANIA GIER ---
+        
         [HttpGet]
         public async Task<IActionResult> Find(string searchQuery)
         {
@@ -32,6 +32,7 @@ namespace large_fantasy_model.Controllers
             var query = _context.Games
                 .Include(g => g.User)
                 .Include(g => g.Users)
+                .Where(g => g.IsActive)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(searchQuery))
@@ -59,6 +60,75 @@ namespace large_fantasy_model.Controllers
             };
 
             return View(viewModel);
+        }
+        
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> JoinCampaign(int gameId)
+        {
+            int myId = GetCurrentUserId();
+            var game = await _context.Games.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == gameId);
+
+            if (game == null) return NotFound();
+
+            if (game.Users.Count + 1 >= 10)
+            {
+                TempData["DangerMessage"] = "This Campaigne is already full";
+                return RedirectToAction("Find"); 
+            }
+            
+
+           
+            if (!game.Users.Any(u => u.Id == myId) && game.UserId != myId)
+            {
+                var user = await _context.Users.FindAsync(myId);
+                game.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+
+            
+            if (!game.IsActive)
+            {
+                TempData["DangerMessage"] = "This campaign is currently inactive.";
+                return RedirectToAction("Find");
+            }
+
+            if (game.UserId != myId && !game.Users.Any(u => u.Id == myId))
+            {
+                var me = await _context.Users.FindAsync(myId);
+                game.Users.Add(me);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Successfully joined {game.Name}!";
+            }
+
+            return RedirectToAction("LobbyDetails", "Game", new { id = gameId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> JoinCampaignWithPassword(int gameId, string password)
+        {
+            int myId = GetCurrentUserId();
+            var game = await _context.Games.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == gameId);
+
+            if (game == null) return NotFound();
+
+            if (game.Password != password)
+            {
+                TempData["DangerMessage"] = "Incorrect password for this campaign.";
+                return RedirectToAction("Find");
+            }
+
+            if (game.UserId != myId && !game.Users.Any(u => u.Id == myId))
+            {
+                var me = await _context.Users.FindAsync(myId);
+                game.Users.Add(me);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Successfully joined {game.Name}!";
+            }
+
+            return RedirectToAction("LobbyDetails", "Game", new { id = gameId });
         }
     }
 }

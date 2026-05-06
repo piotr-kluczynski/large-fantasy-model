@@ -29,7 +29,7 @@
                         </div>
                         
                         <div class="form-check form-switch mb-4 mt-3">
-                            <input asp-for="IsPublic" class="form-check-input fs-4" type="checkbox" role="switch" id="isPublicSwitch" checked>
+                            <input asp-for="IsPublic" class="form-check-input fs-4" type="checkbox" role="switch" id="isPublicSwitch">
                                 <label asp-for="IsPublic" class="form-check-label fw-bold text-dark ms-2 mt-1" for="isPublicSwitch">
                                     Make this campaign Public <br>
                                     <small class="text-muted fw-normal">Public games will be visible in the 'Find Game' board.</small>
@@ -37,7 +37,8 @@
                             </div>
 
                             
-                            <div class="mb-4" id="passwordFieldContainer" style="display: none;">
+                            
+                            <div class="mb-4 d-none" id="passwordField">
                                 <label asp-for="Password" class="form-label fw-bold text-secondary">Lobby Password</label>
                                 <input asp-for="Password" class="form-control form-control-lg rounded-3 bg-light border-0" placeholder="Set a password for your private game..." />
                                 <span asp-validation-for="Password" class="text-danger small fw-semibold"></span>
@@ -55,29 +56,47 @@
 </div>
 
     @section Scripts {
-        @{
-            await Html.RenderPartialAsync("_ValidationScriptsPartial");
-        }
         <script>
             document.addEventListener("DOMContentLoaded", function () {
-                const publicSwitch = document.getElementById('isPublicSwitch');
-                const passContainer = document.getElementById('passwordFieldContainer');
-                const passInput = document.getElementById('Password');
+                const isPublicSwitch = document.getElementById('isPublicSwitch');
+                const passwordField = document.getElementById('passwordField');
+
+                if (!isPublicSwitch || !passwordField) {
+                    console.error("Nie znaleziono przełącznika lub pola hasła!");
+                    return;
+                }
 
                 function togglePassword() {
-                    if (publicSwitch.checked) {
-                        passContainer.style.display = 'none';
-                        passInput.value = ''; 
+                    
+                    if (isPublicSwitch.checked) {
+                        passwordField.classList.add('d-none');
                     } else {
-                        passContainer.style.display = 'block'; 
+                        passwordField.classList.remove('d-none');
                     }
                 }
 
                 
                 togglePassword();
 
-                
-                publicSwitch.addEventListener('change', togglePassword);
+              
+                isPublicSwitch.addEventListener('change', togglePassword);
             });
         </script>
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+        

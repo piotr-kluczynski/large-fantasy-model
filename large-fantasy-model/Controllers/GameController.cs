@@ -51,6 +51,10 @@ namespace large_fantasy_model.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateGameViewModel model)
         {
+            if (!model.IsPublic && string.IsNullOrWhiteSpace(model.Password))
+            {
+                ModelState.AddModelError("Password", "Password is Required.");
+            }
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -79,6 +83,7 @@ namespace large_fantasy_model.Controllers
                 UserId = myId,
                 ConversationId = gameConversation.Id,
                 IsPublic = model.IsPublic,
+                IsActive = true,
                 JoinCode = generatedCode,
                 Password = model.IsPublic ? null : model.Password 
             };
@@ -156,9 +161,12 @@ namespace large_fantasy_model.Controllers
                 JoinCode = game.JoinCode,
                 IsPublic = game.IsPublic,
                 IsDungeonMaster = game.UserId == myId,
+                IsActive = game.IsActive,
                 DungeonMaster = new UserViewModel { Id = game.User.Id, Username = game.User.Username },
                 Players = game.Users.Select(u => new UserViewModel { Id = u.Id, Username = u.Username }).ToList(),
-                AvailableFriends = friendsToInvite.Select(f => new UserViewModel { Id = f.Id, Username = f.Username }).ToList()
+                AvailableFriends = friendsToInvite.Select(f => new UserViewModel { Id = f.Id, Username = f.Username }).ToList(),
+                CurrentPlayers = game.Users.Count + 1,
+                MaxPlayers = game.MaxPlayers > 0 ? game.MaxPlayers : 10  
             };
 
             return View(viewModel);
@@ -271,6 +279,70 @@ namespace large_fantasy_model.Controllers
             }
 
             return RedirectToAction("LobbyDetails", new { id = gameId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleStatus(int id)
+        {
+            int myId = GetCurrentUserId();
+            var game = await _context.Games.FirstOrDefaultAsync(g => g.Id == id && g.UserId == myId);
+
+            if (game == null) return NotFound();
+
+            game.IsActive = !game.IsActive; 
+            await _context.SaveChangesAsync();
+
+            string status = game.IsActive ? "visible" : "hidden";
+            TempData["SuccessMessage"] = $"Campaign '{game.Name}' is {status}.";
+
+            return RedirectToAction(nameof(LobbyDetails), new { id = game.Id });
+        }
+        
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            int myId = GetCurrentUserId();
+            var game = await _context.Games.FirstOrDefaultAsync(g => g.Id == id && g.UserId == myId);
+
+            if (game == null) return NotFound();
+
+            var model = new CreateGameViewModel
+            {
+                Name = game.Name,
+                Description = game.Description,
+                IsPublic = game.IsPublic,
+                Password = game.Password
+            };
+
+            ViewBag.GameId = id;
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, CreateGameViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            int myId = GetCurrentUserId();
+            var game = await _context.Games.FirstOrDefaultAsync(g => g.Id == id && g.UserId == myId);
+
+            if (game == null) return NotFound();
+
+            game.Name = model.Name;
+            game.Description = model.Description;
+            game.IsPublic = model.IsPublic;
+
+            
+            game.Password = model.IsPublic ? null : model.Password;
+
+            _context.Update(game);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Campaign settings updated successfully!";
+            return RedirectToAction(nameof(LobbyDetails), new { id = game.Id });
         }
     }
 }

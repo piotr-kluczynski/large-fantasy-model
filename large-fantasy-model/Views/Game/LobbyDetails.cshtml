@@ -9,39 +9,64 @@
     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
         <div class="d-flex align-items-center gap-3">
             <h1 class="fw-bold text-primary mb-0">@Model.Name</h1>
-            
-            
+            @if (Model.IsDungeonMaster)
+    {
+        <a asp-action="Edit" asp-controller="Game" asp-route-id="@Model.GameId" 
+           class="text-primary opacity-75 d-inline-block" 
+           style="text-decoration: none; line-height: 1;">
+            <i class="bi bi-pencil-square" style="font-size: 1.2rem; vertical-align: baseline;"></i>
+        </a>
+    }
             <div>
                 @if (Model.IsPublic)
                 {
-                    @if (Model.IsPublic)
-                    {
-                        <span class="badge bg-white text-success border border-success rounded-pill px-3 py-2 align-middle">Public Campaign</span>
-                    }
+                    <span class="badge bg-white text-success border border-success rounded-pill px-3 py-2 align-middle" style="font-size: 0.75rem; margin-top:10px;">Public </span>
                 }
                 else
                 {
-                    <span class="badge bg-white text-danger border border-danger rounded-pill px-3 py-2 align-middle">Private Campaign</span>
+                    <span class="badge bg-white text-danger border border-danger rounded-pill px-3 py-2 align-middle" style="font-size: 0.75rem; margin-top:10px;">Private </span>
                 }
             </div>
         </div>
-        <div>
-            
-            <button class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-5">
-             Enter Virtual Tabletop
-            </button>
+
+        <div class="d-flex gap-2 align-items-center">
+             <button class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-5">
+                    Enter VTT
+                </button>
         </div>
     </div>
 
     <div class="row">
-        
         <div class="col-lg-8 mb-4">
             
+            @if (!Model.IsActive)
+            {
+                <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center">
+                    <i class="bi bi-pause-circle-fill fs-4 me-3"></i>
+                    <div>
+                        <strong>Campaign Hidden!</strong> The Dungeon Master has temporarily hidde this lobby. New players cannot find it in search.
+                    </div>
+                </div>
+            }
+
             @if (TempData["SuccessMessage"] != null)
             {
                 <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
                     <strong>Success!</strong> @TempData["SuccessMessage"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (Model.IsDungeonMaster)
+            {
+                <div class="card border-primary border-2 shadow-sm rounded-4 bg-light mb-4">
+                    <div class="card-body text-center p-3">
+                        <h5 class="fw-bold text-primary mb-2">Invite Code</h5>
+                        <p class="text-muted small mb-2">Share this code to let players join directly.</p>
+                        <div class="d-inline-block bg-white border border-primary border-2 rounded-3 px-4 py-1">
+                            <span class="fs-2 fw-bold font-monospace tracking-widest text-dark">@Model.JoinCode</span>
+                        </div>
+                    </div>
                 </div>
             }
 
@@ -54,37 +79,66 @@
                 </div>
             </div>
 
-            
             @if (Model.IsDungeonMaster)
             {
-                <div class="card border-primary border-2 shadow-sm rounded-4 bg-light mb-4">
-                    <div class="card-body text-center p-4">
-                        <h5 class="fw-bold text-primary mb-3">Invite Code</h5>
-                        <p class="text-muted small mb-3">Share this code with players so they can join your adventure.</p>
-                        <div class="d-inline-block bg-white border border-primary border-2 rounded-3 px-5 py-2">
-                            <span class="fs-1 fw-bold font-monospace tracking-widest text-dark">@Model.JoinCode</span>
+                <div class="card shadow-sm border-0 rounded-4 bg-white mb-4">
+                    <div class="card-body d-flex justify-content-between align-items-center p-4">
+                        <div>
+                            <h5 class="fw-bold mb-1">Session Visibility</h5>
+                            <p class="text-muted small mb-0">
+                                @if (Model.IsActive)
+                                {
+                                    <span>Currently <strong>Visible</strong> in search results.</span>
+                                }
+                                else
+                                {
+                                    <span>Currently <strong>Hidden</strong> from search.</span>
+                                }
+                            </p>
                         </div>
+                        
+                        <form asp-action="ToggleStatus" asp-controller="Game" method="post" class="m-0">
+                            <input type="hidden" name="id" value="@Model.GameId" />
+                            @if (Model.IsActive)
+                            {
+                                <button type="submit" class="btn btn-outline-danger rounded-pill fw-bold px-4 shadow-sm">
+                                    <i class="bi bi-eye-slash-fill me-2"></i> Hidde Lobby
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-success rounded-pill fw-bold px-4 shadow-sm">
+                                    <i class="bi bi-eye-fill me-2"></i> Show Lobby
+                                </button>
+                            }
+                        </form>
                     </div>
                 </div>
             }
         </div>
 
-        
         <div class="col-lg-4 mb-4">
-            
-            
             <div class="card shadow-sm border-0 rounded-4 mb-4">
                 <div class="card-header bg-primary text-white border-0 pt-3 pb-2 rounded-top-4">
-                    <h5 class="fw-bold mb-0">Adventuring Party</h5>
+                    <div class="card-header bg-primary text-white pt-3 pb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0">
+                                Adventuring Party
+                            </h5>
+                            
+                            <span class="badge rounded-pill bg-white text-primary fw-bold px-3">
+                                @Model.CurrentPlayers / 10
+                            </span>
+                        </div>
+                </div>
                 </div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush rounded-bottom-4">
-                        
                         <li class="list-group-item d-flex align-items-center py-3 bg-light">
-                            <img src="https://ui-avatars.com/api/?name=@Model.DungeonMaster.Username&size=40&background=random" class="rounded-circle me-3 border border-danger border-2" alt="Avatar" />
+                            <img src="https://ui-avatars.com/api/?name=@Model.DungeonMaster.Username&size=40&background=random" class="rounded-circle me-3 border border-danger border-2" alt="DM Avatar" />
                             <div>
                                 <span class="fw-bold d-block">@Model.DungeonMaster.Username</span>
-                                <small class="text-danger fw-bold"> Dungeon Master</small>
+                                <small class="text-danger fw-bold">Dungeon Master</small>
                             </div>
                         </li>
 
@@ -100,8 +154,7 @@
                             {
                                 <li class="list-group-item p-3 border-top d-flex align-items-center justify-content-between border-0">
                                     <div class="d-flex align-items-center">
-                                        
-                                        <div class="avatar-circle me-3 border border-success border-2 " style="background-color: #e83e8c;">
+                                        <div class="avatar-circle me-3 border border-success border-2" style="background-color: #e83e8c;">
                                             <span class="text-white fw-bold">@player.Username.Substring(0, 2).ToUpper()</span>
                                         </div>
                                         <div>
@@ -110,14 +163,13 @@
                                         </div>
                                     </div>
 
-                                    
                                     @if (Model.IsDungeonMaster)
                                     {
-                                        <form asp-action="RemovePlayer" method="post" onsubmit="return confirm('Kick this player from the campaign?');">
+                                        <form asp-action="RemovePlayer" method="post" onsubmit="return confirm('Kick this player?');">
                                             <input type="hidden" name="gameId" value="@Model.GameId" />
                                             <input type="hidden" name="playerId" value="@player.Id" />
                                             <button type="submit" class="btn btn-sm border-0 bg-transparent shadow-none p-0 ms-2 btn-kick">
-                                                <i class="bi bi-x" style="font-size: 2rem; line-height: 1;"></i>
+                                                <i class="bi bi-x"></i>
                                             </button>
                                         </form>
                                     }
@@ -128,7 +180,6 @@
                 </div>
             </div>
 
-            
             @if (Model.AvailableFriends.Any())
             {
                 <div class="card shadow-sm border-0 rounded-4">
@@ -141,7 +192,7 @@
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                                     <div class="d-flex align-items-center">
-                                        <img src="https://ui-avatars.com/api/?name=@friend.Username&size=32&background=random" class="rounded-circle me-2" alt="Avatar" />
+                                        <img src="https://ui-avatars.com/api/?name=@friend.Username&size=32&background=random" class="rounded-circle me-2" alt="Friend Avatar" />
                                         <span class="fw-semibold">@friend.Username</span>
                                     </div>
                                     <form asp-action="InviteFriend" method="post">
@@ -159,32 +210,18 @@
         </div>
     </div>
 </div>
-<style>
-    
 
-   <style>
+<style>
     .btn-kick {
-        background: none;
-        border: none;
-        padding: 0;
-        color: #000; 
-        transition: color 0.2s ease-in-out, transform 0.2s;
+        color: #000;
+        transition: color 0.2s ease-in-out;
         display: flex;
         align-items: center;
         justify-content: center;
-        outline: none !important;
-        box-shadow: none !important;
     }
+    .btn-kick i { font-size: 2rem; line-height: 1; }
+    .btn-kick:hover { color: #dc3545; }
 
-    .btn-kick i {
-        font-size: 2rem; 
-        line-height: 1;
-    }
-
-    .btn-kick:hover {
-        color: #dc3545; 
-        
-    }
     .avatar-circle {
         width: 45px;
         height: 45px;
@@ -193,7 +230,5 @@
         align-items: center;
         justify-content: center;
     }
-    .avatar-circle span {
-    line-height: 1;
-    display: block;
+    .avatar-circle span { line-height: 1; display: block; }
 </style>

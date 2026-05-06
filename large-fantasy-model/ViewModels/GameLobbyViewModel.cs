@@ -9,6 +9,9 @@
         public bool IsPublic { get; set; }
         public bool IsDungeonMaster { get; set; }
 
+        public bool IsActive { get; set; }
+        public int CurrentPlayers { get; set; }
+        public int MaxPlayers { get; set; }
         public UserViewModel DungeonMaster { get; set; }
         public List<UserViewModel> Players { get; set; } = new();
 
