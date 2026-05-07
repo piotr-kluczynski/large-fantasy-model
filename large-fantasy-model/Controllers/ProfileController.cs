@@ -22,8 +22,11 @@ namespace large_fantasy_model.Controllers
             _context = context;
             _hubContext = hubContext;
         }
+        private int GetCurrentUserId()
+        {
+            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        }
 
-       
         public async Task<IActionResult> ProfilePage()
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -109,8 +112,17 @@ namespace large_fantasy_model.Controllers
                 else
                 {
                     TempData["SuccessMessage"] = $"Friend request sent to {newFriend.Username}!";
+                    var notification = new Notification
+                    {
+                        ReceiverId = friendId,
+                        SenderId = user.Id,
+                        Type = "FriendRequest", 
+                        Message = "wants to add you to their friends list.",
+                        RelatedEntityId = user.Id 
+                    };
+                    _context.Notifications.Add(notification);
+                    await _context.SaveChangesAsync();
 
-                   
                     await _hubContext.Clients.Group($"User_{friendId}")
                         .SendAsync("ReceiveFriendRequest", user.Id, user.Username); 
                 }
@@ -284,5 +296,55 @@ namespace large_fantasy_model.Controllers
 
             return RedirectToAction(nameof(ProfilePage));
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AcceptFriendInvite(int notificationId)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int myId = int.Parse(userIdString!);
+
+            var notification = await _context.Notifications
+                .FirstOrDefaultAsync(n => n.Id == notificationId && n.ReceiverId == myId && n.Type == "FriendRequest");
+
+            if (notification != null && notification.SenderId.HasValue)
+            {
+                int friendId = notification.SenderId.Value;
+
+                var user = await _context.Users.Include(u => u.Friends).FirstOrDefaultAsync(u => u.Id == myId);
+                var newFriend = await _context.Users.FindAsync(friendId);
+
+                if (user != null && newFriend != null && !user.Friends.Any(f => f.Id == friendId))
+                {
+                    user.Friends.Add(newFriend);
+                    TempData["SuccessMessage"] = $"You and {newFriend.Username} are now friends!";
+
+                    
+                    await _hubContext.Clients.Group($"User_{friendId}")
+                         .SendAsync("ReceiveFriendAccept", user.Id, user.Username);
+                }
+
+                
+                _context.Notifications.Remove(notification);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Friends");
+        }
+        [HttpPost]
+        public async Task<IActionResult> MarkNotificationsAsRead()
+        {
+            int myId = GetCurrentUserId();
+            var notifications = await _context.Notifications
+                .Where(n => n.ReceiverId == myId && !n.IsRead)
+                .ToListAsync();
+
+            foreach (var n in notifications)
+            {
+                n.IsRead = true; 
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(); 
+        }
     }
+
 }

@@ -70,7 +70,31 @@ body {
         background-color: #007bff;
     }
 
+    
+    .nav-link.nav-link-success:not(.btn):hover {
+        color: #198754 !important; 
+    }
 
+    .nav-link.nav-link-success:not(.dropdown-toggle, .btn)::after {
+        background-color: #198754;
+    }
+
+    .nav-link.nav-link-success.active-link::after {
+        background-color: #198754 !important;
+    }
+
+    
+    .nav-link.nav-link-danger:not(.btn):hover {
+        color: #dc3545 !important; 
+    }
+
+    .nav-link.nav-link-danger:not(.dropdown-toggle, .btn)::after {
+        background-color: #dc3545;
+    }
+
+    .nav-link.nav-link-danger.active-link::after {
+        background-color: #dc3545 !important;
+    }
 .dropdown-menu {
     display: block !important;
     visibility: hidden;

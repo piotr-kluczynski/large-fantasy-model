@@ -22,7 +22,11 @@
                             <textarea asp-for="Description" class="form-control" rows="5"></textarea>
                             <span asp-validation-for="Description" class="text-danger"></span>
                         </div>
-
+                        <div class="mb-3">
+                            <label asp-for="MaxPlayers" class="form-label fw-bold">Max Players</label>
+                            <input asp-for="MaxPlayers" type="number" class="form-control" min="2" max="50" />
+                            <span asp-validation-for="MaxPlayers" class="text-danger small"></span>
+                        </div>
                         <div class="form-check form-switch mb-3">
                             <input asp-for="IsPublic" class="form-check-input" type="checkbox" id="isPublicSwitch">
                                 <label class="form-check-label fw-bold" for="isPublicSwitch">Public Campaign</label>

@@ -1,17 +1,27 @@
 ﻿@{
-    
+    @using System.Security.Claims
+@using large_fantasy_model.Data
+    @inject LargeFantasyModelContext _context
+
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
 
-  
-    string GetActiveMenuClass(string controller, string action)
+    string GetActiveMenuClass(string controller, string action, string activeTextColor = "text-primary")
     {
         return (currentController == controller && currentAction == action)
-            ? "text-primary fw-bold active-link"
+            ? $"{activeTextColor} fw-bold active-link"
             : "text-dark";
     }
-}
 
+    string GetUserColor(string username)
+    {
+        if (string.IsNullOrEmpty(username)) return "0d6efd";
+        var colors = new[] { "0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0" };
+        int hash = 0;
+        foreach (char c in username) { hash += c; }
+        return colors[hash % colors.Length];
+    }
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -27,6 +37,22 @@
 </head>
 <body>
     <header>
+        @{
+            int unreadMessagesCount = 0;
+            int friendRequestsCount = 0;
+
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (int.TryParse(userIdString, out int myId))
+                {
+                    unreadMessagesCount = _context.Messages
+                        .Count(m => !m.IsRead && m.UserId != myId && m.Conversation.Game == null && m.Conversation.Users.Any(u => u.Id == myId));
+                    friendRequestsCount = _context.Notifications
+                        .Count(n => n.ReceiverId == myId && !n.IsRead && n.Type == "FriendRequest");
+                }
+            }
+        }
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom shadow-sm py-3 mb-3">
             <div class="container-fluid px-md-5">
                 <a class="navbar-brand fw-bold fs-3 text-primary fantasy-font" asp-area="" asp-controller="Home" asp-action="Index">
@@ -43,72 +69,90 @@
                         <li class="nav-item me-3">
                             <a class="nav-link @GetActiveMenuClass("Home", "Index") px-2" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-    
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                           
-                            <li class="nav-item me-3">
-                                <a class="nav-link @GetActiveMenuClass("Game", "Campaigns") px-2" asp-controller="Game" asp-action="Campaigns">
-                                Campaigns
-                                </a>
-                            </li>
-                            <li class="nav-item me-3">
-                                <a class="nav-link @GetActiveMenuClass("FindGame", "Find") px-2" asp-controller="FindGame" asp-action="Find">
-                                Find Game
-                                </a>
-                            </li>
-                        }
-
-                        <li class="nav-item me-3">
-                            <a class="nav-link @GetActiveMenuClass("Compendium", "Index") px-2"
-                               asp-controller="Compendium"
-                               asp-action="Index">Compendium</a>
-                        </li>
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link @GetActiveMenuClass("Admin", "Users") px-2" asp-controller="Admin" asp-action="Users">Admin Panel</a>
                             </li>
                         }
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item me-3">
+                                <a class="nav-link @GetActiveMenuClass("FindGame", "Find") px-2" asp-controller="FindGame" asp-action="Find">Find Lobby</a>
+                            </li>
+                            <li class="nav-item me-3">
+                                <a class="nav-link nav-link-success @GetActiveMenuClass("Game", "Campaigns", "text-success") px-2" asp-controller="Game" asp-action="Campaigns">My Campaigns</a>
+                            </li>
+                        }
+                        <li class="nav-item me-3">
+                            <a class="nav-link nav-link-danger @GetActiveMenuClass("Compendium", "Index", "text-danger") px-2" asp-controller="Compendium" asp-action="Index">Compendium</a>
+                        </li>
+                        
                     </ul>
 
                     <ul class="navbar-nav align-items-center">
                         @if (User.Identity.IsAuthenticated)
                         {
+                            @await Component.InvokeAsync("NotificationBell")
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-dark fw-bold border rounded-pill px-4 py-2 bg-light shadow-sm"
-                                       href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-                                       data-bs-display="static">
-        
-                                    <img src="https://ui-avatars.com/api/?name=@User.Identity.Name&size=32&background=random"
+                                       href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-display="static">
+                                    <img src="https://ui-avatars.com/api/?name=@User.Identity.Name&size=32&background=@GetUserColor(User.Identity.Name)&color=fff&length=2"
                                          class="rounded-circle me-2" alt="Avatar" />
                                     @User.Identity.Name
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 rounded-4 p-2" aria-labelledby="userDropdown">
                                     <li>
-                                        <a class="dropdown-item rounded-3 py-2 mb-1 fw-semibold d-flex align-items-center" asp-controller="Profile" asp-action="ProfilePage">
-                                            <span class="me-3 fs-5"></span> My Profile
+                                        <a class="dropdown-item d-flex align-items-center py-2" asp-controller="Profile" asp-action="ProfilePage">
+                                            <div class="d-flex justify-content-center flex-shrink-0 me-3" style="width: 30px;">
+                                                <i class="bi bi-person-circle text-dark fs-5 mt-1"></i>
+                                            </div>
+                                            <span class="fw-semibold">My Profile</span>
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item rounded-3 py-2 mb-1 fw-semibold d-flex align-items-center" asp-controller="Profile" asp-action="Friends">
-                                            <span class="me-3 fs-5"></span> Friends List
+                                        <a class="dropdown-item d-flex align-items-center justify-content-between py-2" asp-controller="Profile" asp-action="Friends">
+                                            <div class="d-flex align-items-center">
+                                                <div class="d-flex justify-content-center flex-shrink-0 me-3" style="width: 30px;">
+                                                    <i class="bi bi-people text-dark fs-5 mt-1"></i>
+                                                </div>
+                                                <span class="fw-semibold">Friends List</span>
+                                            </div>
+                                            @if (friendRequestsCount > 0)
+                                            {
+                                                <span class="badge bg-danger rounded-pill shadow-sm">@friendRequestsCount</span>
+                                            }
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item rounded-3 py-2 mb-1 fw-semibold d-flex align-items-center" asp-controller="PrivateMessage" asp-action="Index">
-                                            <span class="me-3 fs-5"></span> Messages
+                                        <a class="dropdown-item d-flex align-items-center justify-content-between py-2" asp-controller="PrivateMessage" asp-action="Index">
+                                            <div class="d-flex align-items-center">
+                                                <div class="d-flex justify-content-center flex-shrink-0 me-3" style="width: 30px;">
+                                                    <i class="bi bi-chat-dots text-dark fs-5 mt-1"></i>
+                                                </div>
+                                                <span class="fw-semibold">Messages</span>
+                                            </div>
+                                            @if (unreadMessagesCount > 0)
+                                            {
+                                                <span class="badge bg-danger rounded-pill shadow-sm">@unreadMessagesCount</span>
+                                            }
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item rounded-3 py-2 mb-1 fw-semibold d-flex align-items-center" asp-controller="Profile" asp-action="Edit">
-                                            <span class="me-3 fs-5"></span> Edit Details
+                                        <a class="dropdown-item d-flex align-items-center py-2" asp-controller="Profile" asp-action="Edit">
+                                            <div class="d-flex justify-content-center flex-shrink-0 me-3" style="width: 30px;">
+                                                <i class="bi bi-gear text-dark fs-5 mt-1"></i>
+                                            </div>
+                                            <span class="fw-semibold">Settings</span>
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider my-2 opacity-25"></li>
                                     <li>
-                                        <a class="dropdown-item rounded-3 py-2 fw-bold text-danger d-flex align-items-center logout-item" asp-controller="Auth" asp-action="Logout">
-                                            <span class="me-3 fs-5"></span> Logout
+                                        <a class="dropdown-item d-flex align-items-center py-2 logout-item text-danger" asp-controller="Auth" asp-action="Logout">
+                                            <div class="d-flex justify-content-center flex-shrink-0 me-3" style="width: 30px;">
+                                                <i class="bi bi-box-arrow-right fs-5 mt-1"></i>
+                                            </div>
+                                            <span class="fw-bold">Logout</span>
                                         </a>
                                     </li>
                                 </ul>
@@ -156,5 +200,15 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+            function getUserColor(username) {
+                if (!username) return "0d6efd";
+                const colors = ["0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0"];
+                let hash = 0;
+                for (let i = 0; i < username.length; i++) hash += username.charCodeAt(i);
+                return colors[hash % colors.length];
+            }
+    </script>
 </body>
 </html>

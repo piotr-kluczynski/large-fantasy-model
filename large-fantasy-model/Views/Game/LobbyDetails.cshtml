@@ -2,37 +2,41 @@
 
 @{
     ViewData["Title"] = Model.Name + " - Lobby";
+
+  
+    string GetUserColor(string username) {
+        if (string.IsNullOrEmpty(username)) return "0d6efd";
+        var colors = new[] { "0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0" };
+        int hash = 0;
+        foreach(char c in username) { hash += c; }
+        return colors[hash % colors.Length];
+    }
 }
 
 <div class="container mt-4">
     
     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
         <div class="d-flex align-items-center gap-3">
-            <h1 class="fw-bold text-primary mb-0">@Model.Name</h1>
+            <h1 class="fw-bold text-success mb-0">@Model.Name</h1>
             @if (Model.IsDungeonMaster)
-    {
-        <a asp-action="Edit" asp-controller="Game" asp-route-id="@Model.GameId" 
-           class="text-primary opacity-75 d-inline-block" 
-           style="text-decoration: none; line-height: 1;">
-            <i class="bi bi-pencil-square" style="font-size: 1.2rem; vertical-align: baseline;"></i>
-        </a>
-    }
+            {
+                <a asp-action="Edit" asp-controller="Game" asp-route-id="@Model.GameId" 
+                   class="text-success opacity-75 d-inline-block" 
+                   style="text-decoration: none; line-height: 1;">
+                    <i class="bi bi-pencil-square" style="font-size: 1.2rem; vertical-align: baseline;"></i>
+                </a>
+            }
             <div>
-                @if (Model.IsPublic)
-                {
-                    <span class="badge bg-white text-success border border-success rounded-pill px-3 py-2 align-middle" style="font-size: 0.75rem; margin-top:10px;">Public </span>
-                }
-                else
-                {
-                    <span class="badge bg-white text-danger border border-danger rounded-pill px-3 py-2 align-middle" style="font-size: 0.75rem; margin-top:10px;">Private </span>
-                }
+                <span class="badge bg-white @(Model.IsPublic ? "text-success border-success" : "text-danger border-danger") border rounded-pill px-3 py-2 align-middle" style="font-size: 0.75rem; margin-top:10px;">
+                    @(Model.IsPublic ? "Public" : "Private")
+                </span>
             </div>
         </div>
 
         <div class="d-flex gap-2 align-items-center">
-             <button class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-5">
+             <button class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm px-5">
                     Enter VTT
-                </button>
+             </button>
         </div>
     </div>
 
@@ -44,7 +48,7 @@
                 <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center">
                     <i class="bi bi-pause-circle-fill fs-4 me-3"></i>
                     <div>
-                        <strong>Campaign Hidden!</strong> The Dungeon Master has temporarily hidde this lobby. New players cannot find it in search.
+                        <strong>Campaign Hidden!</strong> The Dungeon Master has temporarily hidden this lobby. New players cannot find it in search.
                     </div>
                 </div>
             }
@@ -59,13 +63,11 @@
 
             @if (Model.IsDungeonMaster)
             {
-                <div class="card border-primary border-2 shadow-sm rounded-4 bg-light mb-4">
-                    <div class="card-body text-center p-3">
-                        <h5 class="fw-bold text-primary mb-2">Invite Code</h5>
-                        <p class="text-muted small mb-2">Share this code to let players join directly.</p>
-                        <div class="d-inline-block bg-white border border-primary border-2 rounded-3 px-4 py-1">
-                            <span class="fs-2 fw-bold font-monospace tracking-widest text-dark">@Model.JoinCode</span>
-                        </div>
+                <div class="card border-success border-2 shadow-sm rounded-4 bg-light mb-4 text-center p-3">
+                    <h5 class="fw-bold text-success mb-2">Invite Code</h5>
+                    <p class="text-muted small mb-2">Share this code to let players join directly.</p>
+                    <div class="d-inline-block bg-white border border-success border-2 rounded-3 px-4 py-1">
+                        <span class="fs-2 fw-bold font-monospace text-dark">@Model.JoinCode</span>
                     </div>
                 </div>
             }
@@ -102,7 +104,7 @@
                             @if (Model.IsActive)
                             {
                                 <button type="submit" class="btn btn-outline-danger rounded-pill fw-bold px-4 shadow-sm">
-                                    <i class="bi bi-eye-slash-fill me-2"></i> Hidde Lobby
+                                    <i class="bi bi-eye-slash-fill me-2"></i> Hide Lobby
                                 </button>
                             }
                             else
@@ -114,28 +116,55 @@
                         </form>
                     </div>
                 </div>
+
+                <div class="card shadow-sm border-danger border-1 rounded-4 bg-white mb-4">
+                    <div class="card-body d-flex justify-content-between align-items-center p-4">
+                        <div>
+                            <h5 class="fw-bold text-danger mb-1">Danger Zone</h5>
+                            <p class="text-muted small mb-0">Permanently delete this campaign and all its data.</p>
+                        </div>
+                        <form asp-action="Delete" asp-controller="Game" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this campaign? This action cannot be undone.');" class="m-0">
+                            <input type="hidden" name="id" value="@Model.GameId" />
+                            <button type="submit" class="btn btn-outline-danger rounded-pill fw-bold px-4 shadow-sm">
+                                <i class="bi bi-trash3-fill me-2"></i> Delete Campaign
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card shadow-sm border-danger border-1 rounded-4 bg-white mb-4">
+                    <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center p-4 gap-3">
+                        <div>
+                            <h5 class="fw-bold text-danger mb-1">Leave Campaign</h5>
+                            <p class="text-muted small mb-0">You will be removed from the party and lose access to this lobby.</p>
+                        </div>
+                        <form asp-action="LeaveCampaign" asp-controller="Game" method="post" onsubmit="return confirm('Are you sure you want to leave this campaign?');" class="m-0 flex-shrink-0">
+                            <input type="hidden" name="gameId" value="@Model.GameId" />
+                            <button type="submit" class="btn btn-outline-danger text-danger rounded-pill fw-bold px-4 shadow-sm text-nowrap">
+                                <i class="bi bi-box-arrow-right me-2 text-danger"></i> Leave Campaign
+                            </button>
+                        </form>
+                    </div>
+                </div>
             }
         </div>
 
         <div class="col-lg-4 mb-4">
             <div class="card shadow-sm border-0 rounded-4 mb-4">
-                <div class="card-header bg-primary text-white border-0 pt-3 pb-2 rounded-top-4">
-                    <div class="card-header bg-primary text-white pt-3 pb-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="fw-bold mb-0">
-                                Adventuring Party
-                            </h5>
-                            
-                            <span class="badge rounded-pill bg-white text-primary fw-bold px-3">
-                                @Model.CurrentPlayers / 10
-                            </span>
-                        </div>
-                </div>
+                <div class="card-header bg-success text-white border-0 pt-3 pb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">Adventuring Party</h5>
+                        <span class="badge rounded-pill bg-white text-success fw-bold px-3">
+                            @Model.CurrentPlayers / @Model.MaxPlayers
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush rounded-bottom-4">
                         <li class="list-group-item d-flex align-items-center py-3 bg-light">
-                            <img src="https://ui-avatars.com/api/?name=@Model.DungeonMaster.Username&size=40&background=random" class="rounded-circle me-3 border border-danger border-2" alt="DM Avatar" />
+                            <img src="https://ui-avatars.com/api/?name=@Model.DungeonMaster.Username&size=40&background=@GetUserColor(Model.DungeonMaster.Username)&color=fff&length=2" class="rounded-circle me-3 border border-danger border-2" alt="DM Avatar" />
                             <div>
                                 <span class="fw-bold d-block">@Model.DungeonMaster.Username</span>
                                 <small class="text-danger fw-bold">Dungeon Master</small>
@@ -154,9 +183,7 @@
                             {
                                 <li class="list-group-item p-3 border-top d-flex align-items-center justify-content-between border-0">
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar-circle me-3 border border-success border-2" style="background-color: #e83e8c;">
-                                            <span class="text-white fw-bold">@player.Username.Substring(0, 2).ToUpper()</span>
-                                        </div>
+                                        <img src="https://ui-avatars.com/api/?name=@player.Username&size=45&background=@GetUserColor(player.Username)&color=fff&length=2" class="rounded-circle me-3 border border-success border-2" alt="Avatar" />
                                         <div>
                                             <div class="fw-bold text-dark">@player.Username</div>
                                             <small class="text-success fw-bold">Player</small>
@@ -192,14 +219,14 @@
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                                     <div class="d-flex align-items-center">
-                                        <img src="https://ui-avatars.com/api/?name=@friend.Username&size=32&background=random" class="rounded-circle me-2" alt="Friend Avatar" />
+                                        <img src="https://ui-avatars.com/api/?name=@friend.Username&size=32&background=@GetUserColor(friend.Username)&color=fff&length=2" class="rounded-circle me-2" alt="Friend Avatar" />
                                         <span class="fw-semibold">@friend.Username</span>
                                     </div>
                                     <form asp-action="InviteFriend" method="post">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="gameId" value="@Model.GameId" />
                                         <input type="hidden" name="friendId" value="@friend.Id" />
-                                        <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill fw-bold">Invite</button>
+                                        <button type="submit" class="btn btn-outline-success btn-sm rounded-pill fw-bold">Invite</button>
                                     </form>
                                 </li>
                             }
@@ -221,14 +248,4 @@
     }
     .btn-kick i { font-size: 2rem; line-height: 1; }
     .btn-kick:hover { color: #dc3545; }
-
-    .avatar-circle {
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .avatar-circle span { line-height: 1; display: block; }
 </style>

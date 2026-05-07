@@ -15,6 +15,7 @@ namespace large_fantasy_model.Data
         public DbSet<Game> Games { get; set; }
         public DbSet<Conversation> Conversations { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         // Postacie gracza
         public DbSet<Character> Characters { get; set; }

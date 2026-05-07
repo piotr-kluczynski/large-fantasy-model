@@ -16,5 +16,9 @@ namespace large_fantasy_model.ViewModels
         [DataType(DataType.Password)]
         [StringLength(100, MinimumLength = 3, ErrorMessage = "Password must be at least 3 characters long.")]
         public string? Password { get; set; }
+
+        [Required(ErrorMessage = "Proszę podać maksymalną liczbę graczy.")]
+        [Range(2, 50, ErrorMessage = "Kampania musi mieć od 2 do 16 graczy.")]
+        public int MaxPlayers { get; set; } = 10; 
     }
 }

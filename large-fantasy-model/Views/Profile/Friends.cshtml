@@ -2,8 +2,16 @@
 
 @{
     ViewData["Title"] = "My Friends";
-}
 
+    string GetUserColor(string username)
+    {
+        if (string.IsNullOrEmpty(username)) return "0d6efd";
+        var colors = new[] { "0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0" };
+        int hash = 0;
+        foreach (char c in username) { hash += c; }
+        return colors[hash % colors.Length];
+    }
+}
 
 @Html.AntiForgeryToken()
 
@@ -12,7 +20,6 @@
 
         <div class="col-md-6 mb-4">
             
-      
             <div class="card shadow-sm border-primary rounded-4 mb-4" id="received-requests-card" style="@(Model.ReceivedRequests.Any() ? "" : "display: none;")">
                 <div class="card-header bg-primary text-white border-0 pt-3 pb-2 rounded-top-4">
                     <h5 class="fw-bold mb-0">Pending Requests</h5>
@@ -23,7 +30,7 @@
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-light">
                                 <div class="d-flex align-items-center">
-                                    <img src="https://ui-avatars.com/api/?name=@request.Username&size=40&background=random" class="rounded-circle me-3" alt="Avatar" />
+                                    <img src="https://ui-avatars.com/api/?name=@request.Username&size=40&background=@GetUserColor(request.Username)&color=fff&length=2" class="rounded-circle me-3" alt="Avatar" />
                                     <span class="fw-semibold">@request.Username</span>
                                 </div>
                                 <div class="d-flex gap-2">
@@ -41,7 +48,7 @@
                     </ul>
                 </div>
             </div>
-            
+    
             @if (TempData["SuccessMessage"] != null)
             {
                 <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
@@ -58,7 +65,6 @@
                 </div>
             }
 
-          
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-header bg-white border-0 pt-4 pb-0">
                     <h3 class="fw-bold text-primary">My Friends</h3>
@@ -69,7 +75,7 @@
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                                 <div class="d-flex align-items-center">
-                                    <img src="https://ui-avatars.com/api/?name=@friend.Username&size=40&background=random" class="rounded-circle me-3" alt="Avatar" />
+                                    <img src="https://ui-avatars.com/api/?name=@friend.Username&size=40&background=@GetUserColor(friend.Username)&color=fff&length=2" class="rounded-circle me-3" alt="Avatar" />
                                     <span class="fw-semibold fs-5">@friend.Username</span>
                                 </div>
                                 <div class="d-flex gap-2">
@@ -115,13 +121,12 @@
                                     bool isFriend = Model.MutualFriends.Any(f => f.Id == result.Id);
                                     bool isSent = Model.SentRequests.Any(f => f.Id == result.Id);
                                     bool isReceived = Model.ReceivedRequests.Any(f => f.Id == result.Id);
-
                                     <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                                         <div class="d-flex align-items-center">
-                                            <img src="https://ui-avatars.com/api/?name=@result.Username&size=40&background=random" class="rounded-circle me-3" alt="Avatar" />
+                                            <img src="https://ui-avatars.com/api/?name=@result.Username&size=40&background=@GetUserColor(result.Username)&color=fff&length=2" class="rounded-circle me-3" alt="Avatar" />
                                             <span class="fw-semibold">@result.Username</span>
                                         </div>
-                                        
+                                       
                                         @if (isFriend)
                                         {
                                             <span class="badge border border-success text-success bg-white rounded-pill py-2 px-3 shadow-sm">Friend</span>
@@ -183,6 +188,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     
     <script>
+        function getUserColor(username) {
+        if (!username) return "0d6efd";
+        const colors = ["0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0"];
+        let hash = 0;
+        for (let i = 0; i < username.length; i++) hash += username.charCodeAt(i);
+        return colors[hash % colors.length];
+        }
+
         const myUserId = @int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
         const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
 
@@ -198,10 +211,11 @@
         if (requestsCard) requestsCard.style.display = "block";
                 
         if (requestsList) {
+        const color = getUserColor(senderName);
         const newRequestHtml = `
         <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-light unread-pop border-bottom border-priamry border-3">
         <div class="d-flex align-items-center">
-        <img src="https://ui-avatars.com/api/?name=${senderName}&size=40&background=random" class="rounded-circle me-3" />
+        <img src="https://ui-avatars.com/api/?name=${senderName}&size=40&background=${color}&color=fff&length=2" class="rounded-circle me-3" />
         <span class="fw-bold">${senderName}</span>
         </div>
         <div class="d-flex gap-2">
@@ -230,16 +244,17 @@
 
         if (friendsList) {
         friendsList.style.display = "block";
+        const color = getUserColor(senderName);
         const newFriendHtml = `
         <li class="list-group-item d-flex justify-content-between align-items-center py-3 unread-pop">
         <div class="d-flex align-items-center">
-        <img src="https://ui-avatars.com/api/?name=${senderName}&size=40&background=random" class="rounded-circle me-3" />
+        <img src="https://ui-avatars.com/api/?name=${senderName}&size=40&background=${color}&color=fff&length=2" class="rounded-circle me-3" />
         <span class="fw-bold fs-5">${senderName}</span>
         </div>
         <div class="d-flex gap-2">
         <form action="/PrivateMessage/StartPrivateChat" method="post">
         <input type="hidden" name="friendId" value="${senderId}" />
-        <input type="hidden" name="__RequestVerificationToken" value="${token}" />
+        <input type="hidden" name="__RequestVerificationToken" value="${token}" />z
         <button type="submit" class="btn btn-primary btn-sm rounded-pill fw-bold px-3">Message</button>
         </form>
         <form action="/Profile/RemoveFriend" method="post">
@@ -251,15 +266,24 @@
         </li>`;
         friendsList.insertAdjacentHTML('afterbegin', newFriendHtml);
         }
+
         const sentInputs = document.querySelectorAll(`form[action="/Profile/RemoveFriend"] input[name="friendId"][value="${senderId}"]`);
-            
         sentInputs.forEach(input => {
         const form = input.closest('form');
-        
         if (form && form.querySelector('button.btn-link')) {
         const liToRemove = form.closest('li');
         if (liToRemove) {
+        const ulList = liToRemove.closest('ul'); 
+        const cardContainer = liToRemove.closest('.card'); 
+                        
         liToRemove.remove(); 
+                        
+        
+        if (ulList && ulList.querySelectorAll('li').length === 0) {
+        if (cardContainer) {
+        cardContainer.style.display = "none";
+        }
+        }
         }
         }
         });
@@ -271,20 +295,17 @@
         const removeFormInput = document.querySelector(`#mutual-friends-list form[action="/Profile/RemoveFriend"] input[name="friendId"][value="${senderId}"]`);
             
         if (removeFormInput) {
-        
         const liToRemove = removeFormInput.closest('li');
         if (liToRemove) {
         liToRemove.remove();
         }
                 
-        
         const friendsList = document.getElementById("mutual-friends-list");
         const noFriendsMsg = document.getElementById("no-friends-msg");
                 
-        
         if (friendsList && friendsList.querySelectorAll('li').length === 0) {
-        friendsList.style.display = "none"; 
-        if (noFriendsMsg) noFriendsMsg.style.display = "block"; 
+        friendsList.style.display = "none";
+        if (noFriendsMsg) noFriendsMsg.style.display = "block";
         }
         }
         });

@@ -55,7 +55,8 @@ namespace large_fantasy_model.Controllers
                     DungeonMasterName = g.User.Username,
                     PlayerCount = g.Users.Count + 1,
                     CreationDate = g.CreationDate,
-                    IsAlreadyMember = g.UserId == myId || g.Users.Any(u => u.Id == myId)
+                    IsAlreadyMember = g.UserId == myId || g.Users.Any(u => u.Id == myId),
+                    MaxPlayers = g.MaxPlayers > 0 ? g.MaxPlayers : 10
                 }).ToList()
             };
 
@@ -72,14 +73,16 @@ namespace large_fantasy_model.Controllers
 
             if (game == null) return NotFound();
 
-            if (game.Users.Count + 1 >= 10)
-            {
-                TempData["DangerMessage"] = "This Campaigne is already full";
-                return RedirectToAction("Find"); 
-            }
-            
+            int actualMaxPlayers = game.MaxPlayers > 0 ? game.MaxPlayers : 10;
 
-           
+            if (game.Users.Count + 1 >= actualMaxPlayers)
+            {
+                TempData["DangerMessage"] = "This Campaign is already full";
+                return RedirectToAction("Find");
+            }
+
+
+
             if (!game.Users.Any(u => u.Id == myId) && game.UserId != myId)
             {
                 var user = await _context.Users.FindAsync(myId);

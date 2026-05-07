@@ -27,7 +27,11 @@
                             <textarea asp-for="Description" class="form-control rounded-3 bg-light border-0" rows="5" placeholder="Describe the world, the goal, or the overall vibe of this campaign..."></textarea>
                             <span asp-validation-for="Description" class="text-danger small fw-semibold"></span>
                         </div>
-                        
+                        <div class="mb-4">
+                            <label asp-for="MaxPlayers" class="form-label fw-bold">Max Players</label>
+                            <input asp-for="MaxPlayers" type="number" class="form-control" min="2" max="50" />
+                            <span asp-validation-for="MaxPlayers" class="text-danger small"></span>
+                        </div>
                         <div class="form-check form-switch mb-4 mt-3">
                             <input asp-for="IsPublic" class="form-check-input fs-4" type="checkbox" role="switch" id="isPublicSwitch">
                                 <label asp-for="IsPublic" class="form-check-label fw-bold text-dark ms-2 mt-1" for="isPublicSwitch">

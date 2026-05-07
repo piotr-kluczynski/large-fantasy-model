@@ -19,5 +19,6 @@
         public int PlayerCount { get; set; }
         public DateTime CreationDate { get; set; }
         public bool IsAlreadyMember { get; set; }
+        public int MaxPlayers { get; set; }
     }
 }
