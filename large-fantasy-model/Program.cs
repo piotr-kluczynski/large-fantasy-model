@@ -2,7 +2,7 @@ using large_fantasy_model.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using large_fantasy_model.Models.CharacterModels.Json;
-using large_fantasy_model.Hubs; // --- SIGNALR: Dodany using, żeby widział Twój Hub ---
+using large_fantasy_model.Hubs; 
 
 namespace large_fantasy_model
 {
@@ -12,25 +12,23 @@ namespace large_fantasy_model
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Rejestrowanie repozytoriów dla plików JSON
             builder.Services.AddScoped<JsonRepository<Spell>>(sp =>
                 new JsonRepository<Spell>("Data/JsonFiles"));
 
             builder.Services.AddControllersWithViews();
 
-            // --- SIGNALR: Rejestracja serwisu w aplikacji ---
-            builder.Services.AddSignalR();
-            // ------------------------------------------------
 
-            // --- DODAJ TO: Rejestracja obsługi Sesji ---
+            builder.Services.AddSignalR();
+
+
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30); // Sesja wygaśnie po 30 min bezczynności
+                options.IdleTimeout = TimeSpan.FromMinutes(30); 
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
-            // ------------------------------------------
+
 
             builder.Services.AddDbContext<LargeFantasyModelContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("LargeFantasyModelDB"))
@@ -55,16 +53,15 @@ namespace large_fantasy_model
 
             app.UseRouting();
 
-            // --- DODAJ TO: Włączenie Sesji w potoku (MUSI BYĆ PRZED Authentication) ---
             app.UseSession();
-            // -------------------------------------------------------------------------
+
 
             app.UseAuthentication();
-            app.UseAuthorization(); // Zostawiamy tylko jedno
+            app.UseAuthorization(); 
 
-            // --- SIGNALR: Mapowanie ścieżki do Huba ---
+     
             app.MapHub<PrivateMessageHub>("/privateMessageHub");
-            // ------------------------------------------
+            app.MapHub<large_fantasy_model.Hubs.GameHub>("/gameHub");
 
             app.MapControllerRoute(
                 name: "default",

@@ -34,9 +34,11 @@
         </div>
 
         <div class="d-flex gap-2 align-items-center">
-             <button class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm px-5">
+            <form asp-controller="ActiveGame" asp-action="Index" asp-route-id="@Model.GameId" method="get">
+                <button class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm px-5">
                     Enter VTT
-             </button>
+                </button>
+             </form>
         </div>
     </div>
 
