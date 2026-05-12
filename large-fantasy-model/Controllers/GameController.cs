@@ -1,9 +1,11 @@
 ﻿using large_fantasy_model.Data;
+using large_fantasy_model.Hubs;
 using large_fantasy_model.Migrations;
 using large_fantasy_model.Models;
 using large_fantasy_model.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -13,10 +15,11 @@ namespace large_fantasy_model.Controllers
     public class GameController : Controller
     {
         private readonly LargeFantasyModelContext _context;
-
-        public GameController(LargeFantasyModelContext context)
+        private readonly IHubContext<LobbyHub> _lobbyHub;
+        public GameController(LargeFantasyModelContext context, IHubContext<LobbyHub> lobbyHub)
         {
             _context = context;
+            _lobbyHub = lobbyHub;
         }
 
         private int GetCurrentUserId()
@@ -93,9 +96,12 @@ namespace large_fantasy_model.Controllers
             _context.Games.Add(newGame);
             await _context.SaveChangesAsync();
 
+
+            await _lobbyHub.Clients.All.SendAsync("RefreshLobbyList");
             TempData["SuccessMessage"] = $"Campaign '{newGame.Name}' has been successfully created!";
             return RedirectToAction(nameof(Campaigns));
         }
+        
 
         
         [HttpGet]
@@ -169,6 +175,7 @@ namespace large_fantasy_model.Controllers
 
             _context.Games.Remove(game);
             await _context.SaveChangesAsync();
+            await _lobbyHub.Clients.All.SendAsync("RefreshLobbyList");
 
             TempData["DangerMessage"] = $"Campaign '{game.Name}' has been permanently deleted.";
             return RedirectToAction(nameof(Campaigns));
@@ -230,6 +237,7 @@ namespace large_fantasy_model.Controllers
 
             string status = game.IsActive ? "visible" : "hidden";
             TempData["SuccessMessage"] = $"Campaign '{game.Name}' is now {status}.";
+            await _lobbyHub.Clients.All.SendAsync("RefreshLobbyList");
 
             return RedirectToAction(nameof(LobbyDetails), new { id = game.Id });
         }

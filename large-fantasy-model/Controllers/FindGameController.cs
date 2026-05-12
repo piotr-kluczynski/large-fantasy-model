@@ -133,5 +133,43 @@ namespace large_fantasy_model.Controllers
 
             return RedirectToAction("LobbyDetails", "Game", new { id = gameId });
         }
+        [HttpGet]
+        public async Task<IActionResult> GetGamesList(string searchQuery)
+        {
+            int myId = GetCurrentUserId();
+
+            var query = _context.Games
+                .Include(g => g.User)
+                .Include(g => g.Users)
+                .Where(g => g.IsActive)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                query = query.Where(g => g.Name.Contains(searchQuery));
+            }
+
+            var gamesList = await query.ToListAsync();
+
+            var viewModel = new FindGameViewModel
+            {
+                Games = gamesList.Select(g => new GameListItemViewModel
+                {
+                    Id = g.Id,
+                    Name = g.Name,
+                    Description = g.Description,
+                    IsPublic = g.IsPublic,
+                    HasPassword = !string.IsNullOrWhiteSpace(g.Password),
+                    DungeonMasterName = g.User.Username,
+                    PlayerCount = g.Users.Count + 1,
+                    CreationDate = g.CreationDate,
+                    IsAlreadyMember = g.UserId == myId || g.Users.Any(u => u.Id == myId),
+                    MaxPlayers = g.MaxPlayers > 0 ? g.MaxPlayers : 10
+                }).ToList()
+            };
+
+            return PartialView("_GamesListPartial", viewModel);
+        }
+
     }
 }

@@ -1,0 +1,42 @@
+﻿@model large_fantasy_model.ViewModels.FindGameViewModel
+
+@if (!Model.Games.Any())
+{
+    <div class="text-center text-muted py-5 shadow-sm bg-light rounded-4">
+        <div class="display-3 mb-3"><i class="bi bi-binoculars"></i></div>
+        <h4>No campaigns found.</h4>
+        <p>Try adjusting your search criteria or create your own game!</p>
+    </div>
+}
+else
+{
+    @foreach (var game in Model.Games)
+    {
+        bool isFull = game.PlayerCount >= game.MaxPlayers; 
+        <div class="card shadow-sm border-0 rounded-4 transition-hover mb-3">
+            <div class="card-body p-4 d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <h4 class="fw-bold mb-0">@game.Name</h4> 
+                        <span class="badge @(game.IsPublic ? "bg-success" : "bg-danger") rounded-pill px-2 py-1">
+                            <i class="bi @(game.IsPublic ? "bi-globe" : "bi-lock-fill")"></i> @(game.IsPublic ? "Public" : "Private") 
+                        </span>
+                        @if (isFull) { <span class="badge bg-dark rounded-pill px-2 py-1">FULL</span> } 
+                    </div>
+                    <p class="text-muted mb-2">@game.Description</p> 
+                    <div class="d-flex gap-4 text-secondary small fw-semibold">
+                        <span class="text-primary"><i class="bi bi-person-fill"></i> Host: @game.DungeonMasterName</span> 
+                        <span class="@(isFull ? "text-danger" : "text-success")">
+                            <i class="bi bi-people-fill"></i> Players: @game.PlayerCount / @game.MaxPlayers 
+                        </span>
+                    </div>
+                </div>
+                <div class="text-lg-end" style="min-width: 200px;">
+                    <a asp-controller="Game" asp-action="LobbyDetails" asp-route-id="@game.Id" class="btn btn-primary btn-lg rounded-pill fw-bold w-100">
+                        @(game.IsAlreadyMember ? "Enter Lobby" : "Join Game") 
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+}
