@@ -1,8 +1,10 @@
 ﻿using large_fantasy_model.Data;
 using large_fantasy_model.Models;
 using large_fantasy_model.ViewModels;
+using large_fantasy_model.Hubs; 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR; 
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -12,10 +14,12 @@ namespace large_fantasy_model.Controllers
     public class FindGameController : Controller
     {
         private readonly LargeFantasyModelContext _context;
+        private readonly IHubContext<LobbyHub> _lobbyHub; 
 
-        public FindGameController(LargeFantasyModelContext context)
+        public FindGameController(LargeFantasyModelContext context, IHubContext<LobbyHub> lobbyHub) 
         {
             _context = context;
+            _lobbyHub = lobbyHub;
         }
 
         private int GetCurrentUserId()
@@ -23,7 +27,6 @@ namespace large_fantasy_model.Controllers
             return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         }
 
-        
         [HttpGet]
         public async Task<IActionResult> Find(string searchQuery)
         {
@@ -62,7 +65,6 @@ namespace large_fantasy_model.Controllers
 
             return View(viewModel);
         }
-        
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -72,6 +74,7 @@ namespace large_fantasy_model.Controllers
             var game = await _context.Games.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == gameId);
 
             if (game == null) return NotFound();
+            if (!game.IsActive) return BadRequest();
 
             int actualMaxPlayers = game.MaxPlayers > 0 ? game.MaxPlayers : 10;
 
@@ -81,27 +84,15 @@ namespace large_fantasy_model.Controllers
                 return RedirectToAction("Find");
             }
 
-
-
-            if (!game.Users.Any(u => u.Id == myId) && game.UserId != myId)
-            {
-                var user = await _context.Users.FindAsync(myId);
-                game.Users.Add(user);
-                await _context.SaveChangesAsync();
-            }
-
-            
-            if (!game.IsActive)
-            {
-                TempData["DangerMessage"] = "This campaign is currently inactive.";
-                return RedirectToAction("Find");
-            }
-
             if (game.UserId != myId && !game.Users.Any(u => u.Id == myId))
             {
                 var me = await _context.Users.FindAsync(myId);
                 game.Users.Add(me);
                 await _context.SaveChangesAsync();
+
+
+                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerJoinedLobby", me.Id, me.Username);
+
                 TempData["SuccessMessage"] = $"Successfully joined {game.Name}!";
             }
 
@@ -128,11 +119,16 @@ namespace large_fantasy_model.Controllers
                 var me = await _context.Users.FindAsync(myId);
                 game.Users.Add(me);
                 await _context.SaveChangesAsync();
+
+
+                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerJoinedLobby", me.Id, me.Username);
+
                 TempData["SuccessMessage"] = $"Successfully joined {game.Name}!";
             }
 
             return RedirectToAction("LobbyDetails", "Game", new { id = gameId });
         }
+
         [HttpGet]
         public async Task<IActionResult> GetGamesList(string searchQuery)
         {
@@ -170,6 +166,5 @@ namespace large_fantasy_model.Controllers
 
             return PartialView("_GamesListPartial", viewModel);
         }
-
     }
 }

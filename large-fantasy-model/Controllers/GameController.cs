@@ -218,7 +218,12 @@ namespace large_fantasy_model.Controllers
                 CurrentPlayers = game.Users.Count + 1,
                 MaxPlayers = game.MaxPlayers > 0 ? game.MaxPlayers : 10
             };
+            var invitedIds = await _context.Notifications
+    .Where(n => n.RelatedEntityId == id && n.Type == "GameInvite")
+    .Select(n => n.ReceiverId)
+    .ToListAsync();
 
+            viewModel.InvitedFriendIds = invitedIds;
             return View(viewModel);
         }
 
@@ -357,7 +362,9 @@ namespace large_fantasy_model.Controllers
                 if (me != null)
                 {
                     game.Users.Add(me);
-                    await _context.SaveChangesAsync(); 
+                    await _context.SaveChangesAsync();
+                    await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerJoinedLobby", me.Id, me.Username);
+
                     TempData["SuccessMessage"] = $"Successfully joined {game.Name}!";
                     return RedirectToAction("LobbyDetails", new { id = gameId });
                 }
@@ -411,6 +418,9 @@ namespace large_fantasy_model.Controllers
             {
                 game.Users.Remove(playerToRemove);
                 await _context.SaveChangesAsync();
+                // Zamień istniejący sygnał na ten:
+                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerLeftLobby", playerId, playerToRemove.Username);
+
                 TempData["SuccessMessage"] = $"Player {playerToRemove.Username} has been removed from the party.";
             }
 
@@ -468,6 +478,8 @@ namespace large_fantasy_model.Controllers
             {
                 game.Users.Remove(me);
                 await _context.SaveChangesAsync();
+                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerLeftLobby", myId, me.Username);
+
                 TempData["SuccessMessage"] = $"You have left the campaign {game.Name}.";
             }
 
