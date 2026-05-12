@@ -3,68 +3,81 @@
     ViewData["Title"] = "My Messages";
     var myId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
     var activeChat = ViewBag.ActiveChat as large_fantasy_model.Models.Conversation;
+    var friends = ViewBag.Friends as List<large_fantasy_model.Models.User> ?? new List<large_fantasy_model.Models.User>();
 
-    string GetUserColor(string username) {
+    string GetUserColor(string username)
+    {
         if (string.IsNullOrEmpty(username)) return "0d6efd";
         var colors = new[] { "0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0" };
         int hash = 0;
-        foreach(char c in username) { hash += c; }
+        foreach (char c in username) { hash += c; }
         return colors[hash % colors.Length];
     }
 }
 <style>
-body {
-}
-hover-bg:hover {
-    background-color: #f8f9fa !important;
-    transition: 0.2s;
-}
+    .hover-bg:hover {
+        background-color: #f8f9fa !important;
+        transition: 0.2s;
+    }
 
-.unread-pop {
-    transform: scale(1.02) translateX(5px);
-    box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.08) !important;
-    border-radius: 8px !important;
-    z-index: 10;
-    position: relative;
-    transition: all 0.3s ease-in-out;
-}
+    .unread-pop {
+        transform: scale(1.02) translateX(5px);
+        box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.08) !important;
+        border-radius: 8px !important;
+        z-index: 10;
+        position: relative;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .chat-btn {
+        cursor: pointer;
+        border: none;
+        outline: none;
+    }
 </style>
 <div class="container mt-4">
     <div class="row" style="height: 75vh;">
         
         <div class="col-md-4 h-100">
-            <div class="card h-100 shadow-sm border-0 rounded-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4 d-flex flex-column">
                 <div class="card-header bg-white border-bottom pt-4 pb-3">
-                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-chat-dots text-primary me-2"></i> Messages</h5>
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-people text-primary me-2"></i> Friends</h5>
+                    <input type="text" id="friend-search" class="form-control rounded-pill shadow-sm px-4" placeholder="Search friends by username..." autocomplete="off">
                 </div>
-                <div class="card-body p-0 overflow-auto">
+                <div class="card-body p-0 overflow-auto" id="friends-list-container">
                     <ul class="list-group list-group-flush">
-                        @foreach (var chat in Model)
+                        @foreach (var friend in friends)
                         {
-                            var otherUser = chat.Users.FirstOrDefault(u => u.Id != myId);
-                            if (otherUser == null) continue;
 
-                            bool isActive = ViewBag.ActiveConversationId == chat.Id;
-    
-                            int unreadCount = ViewBag.UnreadCounts != null && ViewBag.UnreadCounts.ContainsKey(chat.Id) ? ViewBag.UnreadCounts[chat.Id] : 0;
+                            var conv = Model.FirstOrDefault(c => c.Users.Any(u => u.Id == friend.Id));
+                            
+                            int unreadCount = 0;
+                            bool isActive = false;
+                            
+                            if (conv != null)
+                            {
+                                unreadCount = ViewBag.UnreadCounts != null && ViewBag.UnreadCounts.ContainsKey(conv.Id) ? ViewBag.UnreadCounts[conv.Id] : 0;
+                                isActive = ViewBag.ActiveConversationId != null && (int)ViewBag.ActiveConversationId == conv.Id;
+                            }
+                            
                             bool hasUnread = unreadCount > 0;
+                            string itemClass = isActive ? "bg-light border-bottom border-3 border-primary" : (hasUnread ? "bg-white border-bottom border-3 border-warning fw-bold unread-pop" : "bg-white border-bottom");
 
-                            string itemClass = isActive ? "bg-light border-0 border-bottom border-3 border-primary" 
-                                                        : (hasUnread ? "bg-white border-0 border-bottom border-3 border-warning fw-bold unread-pop" : "bg-white border-0 border-bottom");
-                            <a asp-action="Index" asp-route-conversationId="@chat.Id" class="text-decoration-none">
-                                <li id="conv-box-@chat.Id" class="list-group-item d-flex justify-content-between align-items-center py-3 @itemClass hover-bg">
+                            <form asp-controller="PrivateMessage" asp-action="StartPrivateChat" method="post" class="m-0 friend-item" data-name="@friend.Username.ToLower()">
+                                <input type="hidden" name="friendId" value="@friend.Id" />
+                                <button type="submit" id="friend-btn-@friend.Id" class="list-group-item w-100 text-start d-flex justify-content-between align-items-center py-3 @itemClass hover-bg chat-btn">
                                     <div class="d-flex align-items-center">
-                                        <img src="https://ui-avatars.com/api/?name=@otherUser.Username&size=40&background=@GetUserColor(otherUser.Username)&color=fff&length=2" class="rounded-circle me-3 shadow-sm" />
-                                        <div class="text-dark">@otherUser.Username</div>
+                                        <img src="https://ui-avatars.com/api/?name=@friend.Username&size=40&background=@GetUserColor(friend.Username)&color=fff&length=2" class="rounded-circle me-3 shadow-sm" />
+                                        <div class="text-dark">@friend.Username</div>
                                     </div>
-                                    <span id="unread-badge-@chat.Id" class="badge bg-danger rounded-pill @(hasUnread && !isActive ? "" : "d-none")">@unreadCount</span>
-                                </li>
-                            </a>
+                                    <span id="unread-badge-friend-@friend.Id" class="badge bg-danger rounded-pill @(hasUnread && !isActive ? "" : "d-none")">@unreadCount</span>
+                                </button>
+                            </form>
                         }
                     </ul>
-                    @if (!Model.Any())
+                    @if (!friends.Any())
                     {
-                        <p class="text-muted text-center py-4">No active conversations. Go to your friends list to start chatting!</p>
+                        <p class="text-muted text-center py-4">You have no friends yet. Add some to start chatting!</p>
                     }
                 </div>
             </div>
@@ -76,9 +89,16 @@ hover-bg:hover {
                 var otherUser = activeChat.Users.FirstOrDefault(u => u.Id != myId);
                 <div class="card h-100 shadow-sm border-0 rounded-4 d-flex flex-column">
                     
-                    <div class="card-header bg-white border-bottom py-3 d-flex align-items-center">
-                        <img src="https://ui-avatars.com/api/?name=@otherUser?.Username&size=40&background=@GetUserColor(otherUser?.Username)&color=fff&length=2" class="rounded-circle me-3 shadow-sm" />
-                        <h5 class="fw-bold mb-0">@otherUser?.Username</h5>
+                    <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <img src="https://ui-avatars.com/api/?name=@otherUser?.Username&size=40&background=@GetUserColor(otherUser?.Username)&color=fff&length=2" class="rounded-circle me-3 shadow-sm" />
+                            <h5 class="fw-bold mb-0">@otherUser?.Username</h5>
+                        </div>
+                        <a asp-action="PrivateMessage" class="btn btn-sm border-0 bg-transparent shadow-none p-0 ms-2 btn-kick" title="Close Chat">
+                            <i class="bi bi-x"></i>
+                        </a>
+
+                        
                     </div>
 
                     <div class="card-body overflow-auto bg-light p-4" id="chat-messages-box" style="flex-grow: 1;">
@@ -115,7 +135,7 @@ hover-bg:hover {
                 <div class="card h-100 shadow-sm border-0 rounded-4 d-flex justify-content-center align-items-center bg-light">
                     <div class="text-center text-muted">
                         <i class="bi bi-chat-square-text fs-1 mb-3 d-block"></i>
-                        <h5>Select a conversation to start chatting</h5>
+                        <h5>Select a friend to start chatting</h5>
                     </div>
                 </div>
             }
@@ -123,84 +143,141 @@ hover-bg:hover {
 
     </div>
 </div>
-
+<style>
+    .btn-kick { color: #000; transition: color 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; }
+    .btn-kick i { font-size: 2rem; line-height: 1; }
+    .btn-kick:hover { color: #dc3545; }
+    .btn-invited { cursor: default !important; opacity: 0.7; }
+</style>
 @section Scripts {
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
-<script>
-    function getUserColor(username) {
-        if (!username) return "0d6efd";
-        const colors = ["0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0"];
-        let hash = 0;
-        for (let i = 0; i < username.length; i++) hash += username.charCodeAt(i);
-        return colors[hash % colors.length];
-    }
+    <script>
+        const myUserId = @myId;
+        const activeConversationId = "@(activeChat?.Id.ToString() ?? "")";
 
-    const myUserId = @myId;
-    const activeConversationId = "@(activeChat?.Id.ToString() ?? "")";
-
-    const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/privateMessageHub")
-    .build();
-
-    connection.on("ReceiveMessage", function (convId, content, time, senderId) {
-        const isMine = (senderId === myUserId);
+        document.getElementById('friend-search').addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase();
+        const items = document.querySelectorAll('.friend-item');
             
+        items.forEach(item => {
+        const name = item.getAttribute('data-name');
+        if (name.includes(searchTerm)) {
+        item.style.display = 'block';
+        } else {
+        item.style.display = 'none';
+        }
+        });
+        });
+
+        const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/privateMessageHub")
+        .build();
+            
+        connection.on("ReceiveMessage", function (convId, content, time, senderId) {
+        const isMine = (senderId === myUserId);
+                
         if (convId.toString() === activeConversationId) {
-            const chatBox = document.getElementById("chat-messages-box");
-            if (chatBox) {
-                const messageHtml = `
-                <div class="mb-3 d-flex ${isMine ? 'justify-content-end' : 'justify-content-start'}">
-                    <div class="px-3 py-2 rounded-4 shadow-sm ${isMine ? 'bg-primary text-white' : 'bg-white text-dark'}" style="max-width: 75%;">
-                        <div>${content}</div>
-                        <small class="${isMine ? 'text-light' : 'text-muted'}" style="font-size: 0.7rem;">${time}</small>
-                    </div>
-                </div>
-                `;
-                chatBox.innerHTML += messageHtml;
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
+        const chatBox = document.getElementById("chat-messages-box");
+        if (chatBox) {
+        const messageHtml = `
+        <div class="mb-3 d-flex ${isMine ? 'justify-content-end' : 'justify-content-start'}">
+        <div class="px-3 py-2 rounded-4 shadow-sm ${isMine ? 'bg-primary text-white' : 'bg-white text-dark'}" style="max-width: 75%;">
+        <div>${content}</div>
+        <small class="${isMine ? 'text-light' : 'text-muted'}" style="font-size: 0.7rem;">${time}</small>
+        </div>
+        </div>
+        `;
+        chatBox.innerHTML += messageHtml;
+        chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+
+        if (!isMine) {
+        fetch(`/PrivateMessage/MarkConversationAsRead?conversationId=${convId}`, { method: 'POST' })
+        .then(() => {
+        if (typeof updateAllCounts === 'function') updateAllCounts();
+        })
+        .catch(err => console.error("Błąd auto-odczytu:", err));
+        }
         }
         else if (!isMine) {
-            const convBox = document.getElementById("conv-box-" + convId);
-            const badge = document.getElementById("unread-badge-" + convId);
+        const friendBtn = document.getElementById("friend-btn-" + senderId);
+        const badge = document.getElementById("unread-badge-friend-" + senderId);
 
-            if (convBox && badge) {
-                
-                convBox.classList.add("border-0", "border-bottom", "border-3", "border-warning", "fw-bold", "unread-pop");
-                badge.classList.remove("d-none");
-                let currentCount = parseInt(badge.innerText) || 0;
-                badge.innerText = currentCount + 1;
-            }
+        if (friendBtn && badge) {
+        friendBtn.classList.add("border-warning", "fw-bold", "unread-pop");
+        friendBtn.classList.remove("border-primary");
+        badge.classList.remove("d-none");
+        let currentCount = parseInt(badge.innerText) || 0;
+        badge.innerText = currentCount + 1;
         }
-    });
-
-    connection.start().then(function () {
+        }
+        });
+        
+        connection.start().then(function () {
         connection.invoke("JoinMyUserGroup", myUserId.toString());
         const chatBox = document.getElementById("chat-messages-box");
         if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
-    }).catch(function (err) {
+        }).catch(function (err) {
         console.error(err.toString());
-    });
-
-    const chatForm = document.getElementById("chat-form");
-    if(chatForm) {
-        chatForm.addEventListener("submit", function (e) {
-            e.preventDefault();
-            const input = document.getElementById("chat-input");
-            const content = input.value;
-            if(!content.trim()) return;
-
-            const formData = new FormData(chatForm);
-            fetch(chatForm.action, {
-                method: 'POST',
-                body: formData
-            }).then(response => {
-                if(response.ok) {
-                    input.value = "";
-                }
-            }).catch(error => console.error('Error:', error));
         });
-    }
-</script>
+        
+
+        const chatForm = document.getElementById("chat-form");
+        if(chatForm) {
+        chatForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const input = document.getElementById("chat-input");
+        const content = input.value;
+        if(!content.trim()) return;
+
+        const formData = new FormData(chatForm);
+        fetch(chatForm.action, {
+        method: 'POST',
+        body: formData
+        }).then(response => {
+        if(response.ok) {
+        input.value = "";
+        }
+        }).catch(error => console.error('Error:', error));
+        });
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+        const chatInput = document.getElementById("chat-input");
+            
+        if (chatInput) {
+        chatInput.addEventListener('focus', function () {
+        const convIdInput = document.querySelector('input[name="conversationId"]');
+        if (convIdInput) {
+        const convId = convIdInput.value;
+                        
+        fetch(`/PrivateMessage/MarkConversationAsRead?conversationId=${convId}`, {
+        method: 'POST'
+        })
+        .then(response => {
+        if (response.ok) {
+
+        if (typeof updateAllCounts === 'function') {
+        updateAllCounts();
+        }
+
+
+        const activeBtns = document.querySelectorAll('.friend-item button');
+        activeBtns.forEach(btn => {
+        if(btn.classList.contains('border-primary')) {
+        const badge = btn.querySelector('.badge');
+        if (badge) badge.classList.add('d-none');
+        }
+        });
+        }
+        })
+        .catch(err => console.error("Błąd oznaczania jako przeczytane:", err));
+        }
+        });
+        }
+        });
+    </script>
 }

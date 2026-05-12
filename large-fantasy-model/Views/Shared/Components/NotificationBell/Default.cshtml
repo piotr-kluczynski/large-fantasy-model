@@ -72,7 +72,7 @@
                                     <input type="hidden" name="notificationId" value="@notification.Id" />
                                     <button type="submit" class="btn btn-sm btn-primary w-100 fw-bold">Accept</button>
                                 </form>
-                                <form asp-controller="Game" asp-action="RejectNotification" method="post" class="flex-grow-1">
+                                <form asp-controller="Profile" asp-action="DeclineFriendInvite" method="post" class="flex-grow-1">
                                     <input type="hidden" name="notificationId" value="@notification.Id" />
                                     <button type="submit" class="btn btn-sm btn-outline-danger w-100 fw-bold">Decline</button>
                                 </form>
@@ -85,33 +85,3 @@
     </ul>
 </li>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const dropdownLink = document.getElementById('notificationsDropdown');
-        const badge = document.getElementById('bell-badge');
-
-        if (dropdownLink) {
-            
-            dropdownLink.addEventListener('click', function () {
-                
-                if (badge) {
-                    badge.style.display = 'none';
-                }
-
-                
-                fetch('/Game/MarkNotificationsAsRead', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        console.error('Błąd serwera przy odczytywaniu powiadomień.');
-                    }
-                })
-                .catch(err => console.error('Błąd sieci:', err));
-            });
-        }
-    });
-</script>

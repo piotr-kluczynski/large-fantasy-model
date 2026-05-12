@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = Model.Name + " - Lobby";
+
     string GetUserColor(string username) {
         if (string.IsNullOrEmpty(username)) return "0d6efd";
         var colors = new[] { "0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0" };
@@ -18,92 +19,186 @@
     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
         <div class="d-flex align-items-center gap-3">
             <h1 class="fw-bold text-success mb-0">@Model.Name</h1>
-            @if (Model.IsDungeonMaster) {
-                <a asp-action="Edit" asp-controller="Game" asp-route-id="@Model.GameId" class="text-success opacity-75">
-                    <i class="bi bi-pencil-square fs-4"></i>
+            @if (Model.IsDungeonMaster)
+            {
+                <a asp-action="Edit" asp-controller="Game" asp-route-id="@Model.GameId" 
+                   class="text-success opacity-75 d-inline-block" 
+                   style="text-decoration: none; line-height: 1;">
+                    <i class="bi bi-pencil-square" style="font-size: 1.2rem; vertical-align: baseline;"></i>
                 </a>
             }
-            <span class="badge bg-white @(Model.IsPublic ? "text-success border-success" : "text-danger border-danger") border rounded-pill px-3 py-2">
-                @(Model.IsPublic ? "Public" : "Private")
-            </span>
+            <div>
+                 <span class="badge bg-white @(Model.IsPublic ? "text-success border-success" : "text-danger border-danger") border rounded-pill px-3 py-2 align-middle" style="font-size: 0.75rem; margin-top:10px;">
+                    @(Model.IsPublic ? "Public" : "Private")
+                </span>
+            </div>
         </div>
-        <form asp-controller="ActiveGame" asp-action="Index" asp-route-id="@Model.GameId" method="get">
-            <button class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm px-5">Enter VTT</button>
-        </form>
+
+        <div class="d-flex gap-2 align-items-center">
+            <form asp-controller="ActiveGame" asp-action="Index" asp-route-id="@Model.GameId" method="get">
+                <button class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm px-5">
+                    Enter VTT
+                </button>
+             </form>
+        </div>
     </div>
 
     <div class="row">
         <div class="col-lg-8 mb-4">
+            
+            @if (!Model.IsActive)
+            {
+                <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center">
+                    <i class="bi bi-pause-circle-fill fs-4 me-3"></i>
+                    <div>
+                        <strong>Campaign Hidden!</strong> The Dungeon Master has temporarily hidden this lobby.
+                        New players cannot find it in search.
+                    </div>
+                </div>
+            }
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                    <strong>Success!</strong> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (Model.IsDungeonMaster)
+            {
+                <div class="card border-success border-2 shadow-sm rounded-4 bg-light mb-4 text-center p-3">
+                    <h5 class="fw-bold text-success mb-2">Invite Code</h5>
+                    <p class="text-muted small mb-2">Share this code to let players join directly.</p>
+                    <div class="d-inline-block bg-white border border-success border-2 rounded-3 px-4 py-1">
+                        <span class="fs-2 fw-bold font-monospace text-dark">@Model.JoinCode</span>
+                    </div>
+                </div>
+            }
+
             <div class="card shadow-sm border-0 rounded-4 mb-4">
-                <div class="card-header bg-white border-0 pt-4"><h4 class="fw-bold">Campaign Description</h4></div>
-                <div class="card-body"><p class="text-muted fs-5" style="white-space: pre-line;">@Model.Description</p></div>
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h4 class="fw-bold">Campaign Description</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted fs-5" style="white-space: pre-line;">@Model.Description</p>
+                </div>
             </div>
 
-            @if (Model.IsDungeonMaster) {
-                <div class="card shadow-sm border-0 rounded-4 bg-white mb-4 p-4 d-flex flex-row justify-content-between align-items-center">
-                    <div>
-                        <h5 class="fw-bold mb-1">Session Visibility</h5>
-                        <p class="text-muted small mb-0">@(Model.IsActive ? "Currently Visible in search results." : "Currently Hidden from search.")</p>
+            @if (Model.IsDungeonMaster)
+            {
+                <div class="card shadow-sm border-0 rounded-4 bg-white mb-4">
+                    <div class="card-body d-flex justify-content-between align-items-center p-4">
+                        <div>
+                            <h5 class="fw-bold mb-1">Session Visibility</h5>
+                            <p class="text-muted small mb-0">
+                                @if (Model.IsActive)
+                                {
+                                    <span>Currently <strong>Visible</strong> in search results.</span>
+                                }
+                                else
+                                {
+                                    <span>Currently <strong>Hidden</strong> from search.</span>
+                                }
+                            </p>
+                        </div>
+                        <form asp-action="ToggleStatus" asp-controller="Game" method="post" class="m-0">
+                            <input type="hidden" name="id" value="@Model.GameId" />
+                            @if (Model.IsActive)
+                            {
+                                <button type="submit" class="btn btn-outline-danger rounded-pill fw-bold px-4 shadow-sm">
+                                    <i class="bi bi-eye-slash-fill me-2"></i> Hide Lobby
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-success rounded-pill fw-bold px-4 shadow-sm">
+                                    <i class="bi bi-eye-fill me-2"></i> Show Lobby
+                                </button>
+                            }
+                        </form>
                     </div>
-                    <form asp-action="ToggleStatus" asp-controller="Game" method="post" class="m-0">
-                        <input type="hidden" name="id" value="@Model.GameId" />
-                        <button type="submit" class="btn @(Model.IsActive ? "btn-outline-danger" : "btn-success") rounded-pill fw-bold px-4">
-                            <i class="bi @(Model.IsActive ? "bi-eye-slash-fill" : "bi-eye-fill") me-2"></i> @(Model.IsActive ? "Hide Lobby" : "Show Lobby")
-                        </button>
-                    </form>
                 </div>
 
-                <div class="card shadow-sm border-danger border-1 rounded-4 bg-white mb-4 p-4 d-flex flex-row justify-content-between align-items-center">
-                    <div>
-                        <h5 class="fw-bold text-danger mb-1">Danger Zone</h5>
-                        <p class="text-muted small mb-0">Permanently delete this campaign and all its data.</p>
+                <div class="card shadow-sm border-danger border-1 rounded-4 bg-white mb-4">
+                    <div class="card-body d-flex justify-content-between align-items-center p-4">
+                        <div>
+                            <h5 class="fw-bold text-danger mb-1">Danger Zone</h5>
+                            <p class="text-muted small mb-0">Permanently delete this campaign and all its data.</p>
+                        </div>
+                        <form asp-action="Delete" asp-controller="Game" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this campaign? This action cannot be undone.');" class="m-0">
+                            <input type="hidden" name="id" value="@Model.GameId" />
+                            <button type="submit" class="btn btn-outline-danger rounded-pill fw-bold px-4 shadow-sm">
+                                <i class="bi bi-trash3-fill me-2"></i> Delete Campaign
+                            </button>
+                        </form>
                     </div>
-                    <form asp-action="Delete" asp-controller="Game" method="post" onsubmit="return confirm('Are you sure?');" class="m-0">
-                        <input type="hidden" name="id" value="@Model.GameId" />
-                        <button type="submit" class="btn btn-outline-danger rounded-pill fw-bold px-4 shadow-sm">Delete Campaign</button>
-                    </form>
                 </div>
-            } else {
-                <div class="card shadow-sm border-danger border-1 rounded-4 bg-white mb-4 p-4 d-flex flex-row justify-content-between align-items-center">
-                    <div>
-                        <h5 class="fw-bold text-danger mb-1">Leave Campaign</h5>
-                        <p class="text-muted small mb-0">You will be removed from the party.</p>
+            }
+            else
+            {
+                <div class="card shadow-sm border-danger border-1 rounded-4 bg-white mb-4">
+                    <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center p-4 gap-3">
+                        <div>
+                            <h5 class="fw-bold text-danger mb-1">Leave Campaign</h5>
+                            <p class="text-muted small mb-0">You will be removed from the party and lose access to this lobby.</p>
+                        </div>
+                        <form asp-action="LeaveCampaign" asp-controller="Game" method="post" onsubmit="return confirm('Are you sure you want to leave this campaign?');" class="m-0 flex-shrink-0">
+                            <input type="hidden" name="gameId" value="@Model.GameId" />
+                            <button type="submit" class="btn btn-outline-danger text-danger rounded-pill fw-bold px-4 shadow-sm text-nowrap">
+                                <i class="bi bi-box-arrow-right me-2 text-danger"></i> Leave Campaign
+                            </button>
+                        </form>
                     </div>
-                    <form asp-action="LeaveCampaign" asp-controller="Game" method="post" onsubmit="return confirm('Leave campaign?');" class="m-0">
-                        <input type="hidden" name="gameId" value="@Model.GameId" />
-                        <button type="submit" class="btn btn-outline-danger rounded-pill fw-bold px-4">Leave Campaign</button>
-                    </form>
                 </div>
             }
         </div>
 
-        <div class="col-lg-4">
+        <div class="col-lg-4 mb-4">
             <div class="card shadow-sm border-0 rounded-4 mb-4">
-                <div class="card-header bg-success text-white p-3 d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0">Adventuring Party</h5>
-                    <span class="badge rounded-pill bg-white text-success fw-bold px-3">
-                        <span id="player-count">@Model.CurrentPlayers</span> / @Model.MaxPlayers
-                    </span>
+                <div class="card-header bg-success text-white border-0 pt-3 pb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">Adventuring Party</h5>
+                        <span class="badge rounded-pill bg-white text-success fw-bold px-3">
+                            <span id="player-count">@Model.CurrentPlayers</span> / @Model.MaxPlayers
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body p-0">
-                    <ul class="list-group list-group-flush" id="players-list">
+                    <ul class="list-group list-group-flush rounded-bottom-4" id="players-list">
                         <li class="list-group-item d-flex align-items-center py-3 bg-light">
-                            <img src="https://ui-avatars.com/api/?name=@Model.DungeonMaster.Username&background=@GetUserColor(Model.DungeonMaster.Username)&color=fff" class="rounded-circle me-3 border border-danger border-2" width="40" />
-                            <div><span class="fw-bold d-block">@Model.DungeonMaster.Username</span><small class="text-danger fw-bold">Dungeon Master</small></div>
+                            <img src="https://ui-avatars.com/api/?name=@Model.DungeonMaster.Username&size=40&background=@GetUserColor(Model.DungeonMaster.Username)&color=fff&length=2" class="rounded-circle me-3 border border-danger border-2" alt="DM Avatar" />
+                            <div>
+                                <span class="fw-bold d-block">@Model.DungeonMaster.Username</span>
+                                <small class="text-danger fw-bold">Dungeon Master</small>
+                            </div>
                         </li>
-                        @if (!Model.Players.Any()) {
-                            <li id="empty-players-msg" class="list-group-item text-center py-4 text-muted small italic">No travelers have joined yet.</li>
+
+                        @if (!Model.Players.Any())
+                        {
+                            <li id="empty-players-msg" class="list-group-item text-center py-4 text-muted small italic">
+                                No travelers have joined yet.
+                            </li>
                         }
-                        @foreach (var player in Model.Players) {
-                            <li id="player-row-@player.Id" class="list-group-item p-3 d-flex align-items-center justify-content-between border-0 border-top">
+                        
+                        @foreach (var player in Model.Players)
+                        {
+                            <li id="player-row-@player.Id" class="list-group-item p-3 border-top d-flex align-items-center justify-content-between border-0">
                                 <div class="d-flex align-items-center">
-                                    <img src="https://ui-avatars.com/api/?name=@player.Username&background=@GetUserColor(player.Username)&color=fff" class="rounded-circle me-3 border border-success border-2" width="45" />
-                                    <div><div class="fw-bold text-dark">@player.Username</div><small class="text-success fw-bold">Player</small></div>
+                                    <img src="https://ui-avatars.com/api/?name=@player.Username&size=45&background=@GetUserColor(player.Username)&color=fff&length=2" class="rounded-circle me-3 border border-success border-2" alt="Avatar" />
+                                    <div>
+                                        <div class="fw-bold text-dark">@player.Username</div>
+                                        <small class="text-success fw-bold">Player</small>
+                                    </div>
                                 </div>
-                                @if (Model.IsDungeonMaster) {
+                                @if (Model.IsDungeonMaster)
+                                {
                                     <form asp-action="RemovePlayer" method="post" class="kick-form m-0">
-                                        <input type="hidden" name="gameId" value="@Model.GameId" /><input type="hidden" name="playerId" value="@player.Id" />
-                                        <button type="submit" class="btn btn-sm border-0 bg-transparent shadow-none p-0 ms-2 btn-kick"><i class="bi bi-x"></i></button>
+                                        <input type="hidden" name="gameId" value="@Model.GameId" />
+                                        <input type="hidden" name="playerId" value="@player.Id" />
+                                        <button type="submit" class="btn btn-sm border-0 bg-transparent shadow-none p-0 ms-2 btn-kick">
+                                            <i class="bi bi-x"></i>
+                                        </button>
                                     </form>
                                 }
                             </li>
@@ -112,34 +207,42 @@
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0 rounded-4 @(Model.AvailableFriends.Any() ? "" : "d-none")" id="invite-friends-card">
-                <div class="card-header bg-white border-0 pt-4"><h5 class="fw-bold text-dark">Invite Friends</h5></div>
-                <div class="card-body p-0">
-                    <ul id="friends-invite-list" class="list-group list-group-flush">
-                        @foreach (var friend in Model.AvailableFriends) {
-                            bool isInvited = Model.InvitedFriendIds.Contains(friend.Id);
-                            <li id="friend-row-@friend.Id" class="list-group-item d-flex justify-content-between align-items-center py-3">
-                                <div class="d-flex align-items-center">
-                                    <img src="https://ui-avatars.com/api/?name=@friend.Username&background=@GetUserColor(friend.Username)&color=fff" class="rounded-circle me-2" width="32" />
-                                    <span class="fw-semibold">@friend.Username</span>
-                                </div>
-                                <form asp-action="InviteFriend" method="post" class="invite-form m-0">
-                                    <input type="hidden" name="gameId" value="@Model.GameId" /><input type="hidden" name="friendId" value="@friend.Id" />
-                                    <button type="submit" class="btn @(isInvited ? "btn-secondary btn-invited" : "btn-outline-success") btn-sm rounded-pill fw-bold" @(isInvited ? "disabled" : "")>
-                                        @(isInvited ? "Invited" : "Invite")
-                                    </button>
-                                </form>
-                            </li>
-                        }
-                    </ul>
+            @if (Model.AvailableFriends.Any())
+            {
+                <div class="card shadow-sm border-0 rounded-4" id="invite-friends-card">
+                    <div class="card-header bg-white border-0 pt-4 pb-0">
+                        <h5 class="fw-bold text-dark">Invite Friends</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul id="friends-invite-list" class="list-group list-group-flush">
+                            @foreach (var friend in Model.AvailableFriends)
+                            {
+                                bool isInvited = Model.InvitedFriendIds != null && Model.InvitedFriendIds.Contains(friend.Id);
+                                <li id="friend-row-@friend.Id" class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://ui-avatars.com/api/?name=@friend.Username&size=32&background=@GetUserColor(friend.Username)&color=fff&length=2" class="rounded-circle me-2" alt="Friend Avatar" />
+                                        <span class="fw-semibold">@friend.Username</span>
+                                    </div>
+                                    <form asp-action="InviteFriend" method="post" class="invite-form m-0">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="gameId" value="@Model.GameId" />
+                                        <input type="hidden" name="friendId" value="@friend.Id" />
+                                        <button type="submit" class="btn @(isInvited ? "btn-secondary btn-invited" : "btn-outline-success") btn-sm rounded-pill fw-bold" @(isInvited ? "disabled" : "")>
+                                            @(isInvited ? "Invited" : "Invite")
+                                        </button>
+                                    </form>
+                                </li>
+                            }
+                        </ul>
+                    </div>
                 </div>
-            </div>
+            }
         </div>
     </div>
 </div>
 
 <style>
-    .btn-kick { color: #000; transition: color 0.2s; display: flex; align-items: center; justify-content: center; }
+    .btn-kick { color: #000; transition: color 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; }
     .btn-kick i { font-size: 2rem; line-height: 1; }
     .btn-kick:hover { color: #dc3545; }
     .btn-invited { cursor: default !important; opacity: 0.7; }
@@ -151,17 +254,22 @@
         const gameId = @Model.GameId;
         const isDM = @(Model.IsDungeonMaster ? "true" : "false");
         const currentUserId = "@User.FindFirstValue(ClaimTypes.NameIdentifier)";
-        const getAfToken = () => document.querySelector('input[name="__RequestVerificationToken"]').value;
-
-        const lobbyConnection = new signalR.HubConnectionBuilder().withUrl("/lobbyHub").build();
+        const getAfToken = () => document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        
+        const lobbyConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/lobbyHub") 
+            .build();
 
         lobbyConnection.on("PlayerJoinedLobby", function (playerId, username) {
-
             const friendRow = document.getElementById(`friend-row-${playerId}`);
-            if (friendRow) friendRow.remove();
-            
-            const inviteList = document.getElementById("friends-invite-list");
-            if (inviteList && inviteList.querySelectorAll('li').length === 0) document.getElementById("invite-friends-card").classList.add("d-none");
+            if (friendRow) {
+                friendRow.remove();
+                const inviteList = document.getElementById("friends-invite-list");
+                if (inviteList && inviteList.querySelectorAll('li').length === 0) {
+                    const card = document.getElementById("invite-friends-card");
+                    if(card) card.classList.add("d-none");
+                }
+            }
 
             const emptyMsg = document.getElementById("empty-players-msg");
             if (emptyMsg) emptyMsg.remove();
@@ -169,10 +277,28 @@
             const playersList = document.getElementById("players-list");
             if (playersList && !document.getElementById(`player-row-${playerId}`)) {
                 const countElem = document.getElementById("player-count");
-                countElem.innerText = parseInt(countElem.innerText) + 1;
+                if (countElem) countElem.innerText = parseInt(countElem.innerText) + 1;
 
-                const kickBtn = isDM ? `<form action="/Game/RemovePlayer" method="post" class="kick-form m-0"><input type="hidden" name="gameId" value="${gameId}" /><input type="hidden" name="playerId" value="${playerId}" /><button type="submit" class="btn btn-sm border-0 bg-transparent shadow-none p-0 ms-2 btn-kick"><i class="bi bi-x"></i></button></form>` : "";
-                const html = `<li id="player-row-${playerId}" class="list-group-item p-3 d-flex align-items-center justify-content-between border-0 border-top"><div class="d-flex align-items-center"><img src="https://ui-avatars.com/api/?name=${username}&background=${getUserColor(username)}&color=fff" class="rounded-circle me-3 border border-success border-2" width="45" /><div><div class="fw-bold text-dark">${username}</div><small class="text-success fw-bold">Player</small></div></div>${kickBtn}</li>`;
+                let kickButton = isDM ? `
+                    <form action="/Game/RemovePlayer" method="post" class="kick-form m-0">
+                        <input type="hidden" name="gameId" value="${gameId}" />
+                        <input type="hidden" name="playerId" value="${playerId}" />
+                        <button type="submit" class="btn btn-sm border-0 bg-transparent shadow-none p-0 ms-2 btn-kick">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </form>` : "";
+
+                const html = `
+                    <li id="player-row-${playerId}" class="list-group-item p-3 border-top d-flex align-items-center justify-content-between border-0">
+                        <div class="d-flex align-items-center">
+                            <img src="https://ui-avatars.com/api/?name=${username}&size=45&background=${getUserColor(username)}&color=fff&length=2" class="rounded-circle me-3 border border-success border-2" />
+                            <div>
+                                <div class="fw-bold text-dark">${username}</div>
+                                <small class="text-success fw-bold">Player</small>
+                            </div>
+                        </div>
+                        ${kickButton}
+                    </li>`;
                 playersList.insertAdjacentHTML('beforeend', html);
             }
         });
@@ -186,7 +312,7 @@
             if (row) {
                 row.remove();
                 const countElem = document.getElementById("player-count");
-                countElem.innerText = parseInt(countElem.innerText) - 1;
+                if (countElem) countElem.innerText = parseInt(countElem.innerText) - 1;
 
                 const playersList = document.getElementById("players-list");
                 if (playersList && playersList.querySelectorAll('li').length === 1) {
@@ -195,34 +321,68 @@
             }
 
             if (username) {
-                document.getElementById("invite-friends-card").classList.remove("d-none");
+                const inviteCard = document.getElementById("invite-friends-card");
+                if(inviteCard) inviteCard.classList.remove("d-none");
                 const inviteList = document.getElementById("friends-invite-list");
-                if (!document.getElementById(`friend-row-${playerId}`)) {
-                    const friendHtml = `<li id="friend-row-${playerId}" class="list-group-item d-flex justify-content-between align-items-center py-3"><div class="d-flex align-items-center"><img src="https://ui-avatars.com/api/?name=${username}&background=${getUserColor(username)}&color=fff" class="rounded-circle me-2" width="32" /><span class="fw-semibold">${username}</span></div><form action="/Game/InviteFriend" method="post" class="invite-form m-0"><input type="hidden" name="gameId" value="${gameId}" /><input type="hidden" name="friendId" value="${playerId}" /><button type="submit" class="btn btn-outline-success btn-sm rounded-pill fw-bold">Invite</button></form></li>`;
+                
+                if (inviteList && !document.getElementById(`friend-row-${playerId}`)) {
+                    const friendHtml = `
+                        <li id="friend-row-${playerId}" class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <div class="d-flex align-items-center">
+                                <img src="https://ui-avatars.com/api/?name=${username}&size=32&background=${getUserColor(username)}&color=fff&length=2" class="rounded-circle me-2" />
+                                <span class="fw-semibold">${username}</span>
+                            </div>
+                            <form action="/Game/InviteFriend" method="post" class="invite-form m-0">
+                                <input type="hidden" name="__RequestVerificationToken" value="${getAfToken()}" />
+                                <input type="hidden" name="gameId" value="${gameId}" />
+                                <input type="hidden" name="friendId" value="${playerId}" />
+                                <button type="submit" class="btn btn-outline-success btn-sm rounded-pill fw-bold">Invite</button>
+                            </form>
+                        </li>`;
                     inviteList.insertAdjacentHTML('beforeend', friendHtml);
                 }
             }
         });
 
-        lobbyConnection.start().then(() => lobbyConnection.invoke("JoinLobbyGroup", gameId));
+
+        lobbyConnection.on("GameInviteDeclined", function (declinerId) {
+            console.log("Gracz odrzucił zaproszenie do gry:", declinerId);
+            const friendRow = document.getElementById(`friend-row-${declinerId}`);
+            if (friendRow) {
+                const btn = friendRow.querySelector('button');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.className = 'btn btn-outline-success btn-sm rounded-pill fw-bold';
+                    btn.innerText = 'Invite';
+                }
+            }
+        });
+
+        lobbyConnection.start().then(() => {
+            lobbyConnection.invoke("JoinLobbyGroup", gameId);
+        });
 
         document.addEventListener('submit', function (e) {
             if (e.target.classList.contains('invite-form')) {
                 e.preventDefault();
                 const btn = e.target.querySelector('button');
-                btn.disabled = true; btn.className = 'btn btn-secondary btn-sm rounded-pill fw-bold btn-invited';
+                btn.disabled = true; 
+                btn.className = 'btn btn-secondary btn-sm rounded-pill fw-bold btn-invited';
                 btn.innerText = 'Invited';
                 fetch(e.target.action, { method: 'POST', body: new FormData(e.target), headers: { 'RequestVerificationToken': getAfToken() } });
             }
             if (e.target.classList.contains('kick-form')) {
                 e.preventDefault();
-                if (confirm('Kick player?')) fetch(e.target.action, { method: 'POST', body: new FormData(e.target), headers: { 'RequestVerificationToken': getAfToken() } });
+                if (confirm('Kick this player?')) {
+                    fetch(e.target.action, { method: 'POST', body: new FormData(e.target), headers: { 'RequestVerificationToken': getAfToken() } });
+                }
             }
         });
 
         function getUserColor(username) {
             const colors = ["0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0"];
-            let hash = 0; for (let i = 0; i < username.length; i++) hash += username.charCodeAt(i);
+            let hash = 0;
+            for (let i = 0; i < username.length; i++) hash += username.charCodeAt(i);
             return colors[hash % colors.length];
         }
     </script>

@@ -126,7 +126,7 @@
                                             <img src="https://ui-avatars.com/api/?name=@result.Username&size=40&background=@GetUserColor(result.Username)&color=fff&length=2" class="rounded-circle me-3" alt="Avatar" />
                                             <span class="fw-semibold">@result.Username</span>
                                         </div>
-                                       
+                                        
                                         @if (isFriend)
                                         {
                                             <span class="badge border border-success text-success bg-white rounded-pill py-2 px-3 shadow-sm">Friend</span>
@@ -160,15 +160,15 @@
             
             @if (Model.SentRequests.Any())
             {
-                <div class="card shadow-sm border-0 rounded-4">
+                <div class="card shadow-sm border-0 rounded-4" id="sent-requests-section">
                     <div class="card-header bg-light border-0 pt-3 pb-2 rounded-top-4">
                         <h6 class="fw-bold text-muted mb-0">Sent Requests</h6>
                     </div>
                     <div class="card-body p-0">
-                        <ul class="list-group list-group-flush rounded-bottom-4">
+                        <ul class="list-group list-group-flush rounded-bottom-4" id="sent-requests-list">
                             @foreach (var request in Model.SentRequests)
                             {
-                                <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                <li id="sent-request-@request.Id" class="list-group-item d-flex justify-content-between align-items-center py-2">
                                     <span><small class="fw-semibold">@request.Username</small></span>
                                     <form asp-action="RemoveFriend" method="post">
                                         <input type="hidden" name="friendId" value="@request.Id" />
@@ -198,18 +198,18 @@
 
         const myUserId = @int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
         const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
-
+        
         const connection = new signalR.HubConnectionBuilder()
         .withUrl("/privateMessageHub")
         .build();
-
+            
         connection.on("ReceiveFriendRequest", function (senderId, senderName) {
         console.log("SIGNALR: Przyszło zaproszenie od:", senderName);
         const requestsList = document.getElementById("friend-requests-list");
         const requestsCard = document.getElementById("received-requests-card");
-            
-        if (requestsCard) requestsCard.style.display = "block";
                 
+        if (requestsCard) requestsCard.style.display = "block";
+                    
         if (requestsList) {
         const color = getUserColor(senderName);
         const newRequestHtml = `
@@ -234,7 +234,7 @@
         requestsList.insertAdjacentHTML('afterbegin', newRequestHtml);
         }
         });
-
+        
         connection.on("ReceiveFriendAccept", function (senderId, senderName) {
         console.log("SIGNALR: Zaakceptowano od:", senderName);
         const friendsList = document.getElementById("mutual-friends-list");
@@ -254,7 +254,7 @@
         <div class="d-flex gap-2">
         <form action="/PrivateMessage/StartPrivateChat" method="post">
         <input type="hidden" name="friendId" value="${senderId}" />
-        <input type="hidden" name="__RequestVerificationToken" value="${token}" />z
+        <input type="hidden" name="__RequestVerificationToken" value="${token}" />
         <button type="submit" class="btn btn-primary btn-sm rounded-pill fw-bold px-3">Message</button>
         </form>
         <form action="/Profile/RemoveFriend" method="post">
@@ -273,12 +273,10 @@
         if (form && form.querySelector('button.btn-link')) {
         const liToRemove = form.closest('li');
         if (liToRemove) {
-        const ulList = liToRemove.closest('ul'); 
-        const cardContainer = liToRemove.closest('.card'); 
+        const ulList = liToRemove.closest('ul');
+        const cardContainer = liToRemove.closest('.card');
+        liToRemove.remove();
                         
-        liToRemove.remove(); 
-                        
-        
         if (ulList && ulList.querySelectorAll('li').length === 0) {
         if (cardContainer) {
         cardContainer.style.display = "none";
@@ -288,21 +286,21 @@
         }
         });
         });
-       
+        
         connection.on("ReceiveFriendRemove", function (senderId) {
         console.log("SIGNALR: Usunięto ze znajomych przez ID:", senderId);
-            
+                
         const removeFormInput = document.querySelector(`#mutual-friends-list form[action="/Profile/RemoveFriend"] input[name="friendId"][value="${senderId}"]`);
-            
+                
         if (removeFormInput) {
         const liToRemove = removeFormInput.closest('li');
         if (liToRemove) {
         liToRemove.remove();
         }
-                
+                    
         const friendsList = document.getElementById("mutual-friends-list");
         const noFriendsMsg = document.getElementById("no-friends-msg");
-                
+                    
         if (friendsList && friendsList.querySelectorAll('li').length === 0) {
         friendsList.style.display = "none";
         if (noFriendsMsg) noFriendsMsg.style.display = "block";

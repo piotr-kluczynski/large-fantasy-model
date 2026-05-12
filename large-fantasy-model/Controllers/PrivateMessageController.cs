@@ -15,6 +15,7 @@ namespace large_fantasy_model.Controllers
         private readonly LargeFantasyModelContext _context;
         private readonly IHubContext<PrivateMessageHub> _hubContext;
 
+
         public PrivateMessageController(LargeFantasyModelContext context, IHubContext<PrivateMessageHub> hubContext)
         {
             _context = context;
@@ -42,7 +43,7 @@ namespace large_fantasy_model.Controllers
             if (existingChat != null)
             {
                 
-                return RedirectToAction(nameof(Index), new { conversationId = existingChat.Id });
+                return RedirectToAction(nameof(PrivateMessage), new { conversationId = existingChat.Id });
             }
 
             
@@ -60,58 +61,65 @@ namespace large_fantasy_model.Controllers
             _context.Conversations.Add(newConversation);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index), new { conversationId = newConversation.Id });
+            return RedirectToAction(nameof(PrivateMessage), new { conversationId = newConversation.Id });
         }
 
-       
         [HttpGet]
-        public async Task<IActionResult> Index(int? conversationId)
+        public async Task<IActionResult> PrivateMessage(int? conversationId)
         {
-            int myId = GetCurrentUserId();
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString)) return Unauthorized();
+
+            int myId = int.Parse(userIdString);
+
+          
+            if (conversationId.HasValue)
+            {
+                var unreadMessages = await _context.Messages
+                    .Where(m => m.ConversationId == conversationId.Value && m.UserId != myId && !m.IsRead)
+                    .ToListAsync();
+
+                if (unreadMessages.Any())
+                {
+                    foreach (var msg in unreadMessages)
+                    {
+                        msg.IsRead = true;
+                    }
+                    await _context.SaveChangesAsync();
+                }
+            }
+          
+
+            var user = await _context.Users
+                .Include(u => u.Friends)
+                .Include(u => u.FriendOf)
+                .FirstOrDefaultAsync(u => u.Id == myId);
+
+            var mutualFriends = user.Friends.Where(f => user.FriendOf.Any(fo => fo.Id == f.Id)).ToList();
+            ViewBag.Friends = mutualFriends;
 
            
             var myConversations = await _context.Conversations
                 .Include(c => c.Users)
                 .Include(c => c.Messages)
-                .Where(c => c.Users.Any(u => u.Id == myId) && c.Game == null)
+                .Where(c => c.Game == null && c.Users.Any(u => u.Id == myId))
                 .ToListAsync();
 
+            var unreadCounts = new Dictionary<int, int>();
+            foreach (var conv in myConversations)
+            {
+                unreadCounts[conv.Id] = conv.Messages.Count(m => m.UserId != myId && !m.IsRead);
+            }
+
+            ViewBag.UnreadCounts = unreadCounts;
             ViewBag.ActiveConversationId = conversationId;
+            ViewBag.ActiveChat = myConversations.FirstOrDefault(c => c.Id == conversationId);
 
             
-            var unreadCounts = new Dictionary<int, int>();
-            foreach (var c in myConversations)
-            {
-                unreadCounts[c.Id] = c.Messages.Count(m => !m.IsRead && m.UserId != myId);
-            }
-            ViewBag.UnreadCounts = unreadCounts;
-
-            if (conversationId.HasValue)
-            {
-                
-                var unreadMsgs = await _context.Messages
-                    .Where(m => m.ConversationId == conversationId.Value && !m.IsRead && m.UserId != myId)
-                    .ToListAsync();
-
-                if (unreadMsgs.Any())
-                {
-                    unreadMsgs.ForEach(m => m.IsRead = true);
-                    await _context.SaveChangesAsync();
-                }
-
-                var activeChat = await _context.Conversations
-                    .Include(c => c.Users)
-                    .Include(c => c.Messages)
-                        .ThenInclude(m => m.User)
-                    .FirstOrDefaultAsync(c => c.Id == conversationId.Value && c.Users.Any(u => u.Id == myId));
-
-                ViewBag.ActiveChat = activeChat;
-            }
-
             return View("~/Views/Profile/PrivateMessage.cshtml", myConversations);
         }
 
-       
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SendMessage(int conversationId, string content)
@@ -146,6 +154,30 @@ namespace large_fantasy_model.Controllers
             if (friendId != null)
             {
                 await _hubContext.Clients.Group($"User_{friendId}").SendAsync("ReceiveMessage", conversationId, content, timeString, myId);
+            }
+
+            return Ok();
+        }
+        [HttpPost]
+        public async Task<IActionResult> MarkConversationAsRead(int conversationId)
+        {
+            var userIdString = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString)) return Unauthorized();
+
+            int myId = int.Parse(userIdString);
+
+       
+            var unreadMessages = await _context.Messages
+                .Where(m => m.ConversationId == conversationId && m.UserId != myId && !m.IsRead)
+                .ToListAsync();
+
+            if (unreadMessages.Any())
+            {
+                foreach (var msg in unreadMessages)
+                {
+                    msg.IsRead = true; 
+                }
+                await _context.SaveChangesAsync();
             }
 
             return Ok();

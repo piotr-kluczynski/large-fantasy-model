@@ -32,9 +32,24 @@ else
                     </div>
                 </div>
                 <div class="text-lg-end" style="min-width: 200px;">
-                    <a asp-controller="Game" asp-action="LobbyDetails" asp-route-id="@game.Id" class="btn btn-primary btn-lg rounded-pill fw-bold w-100">
-                        @(game.IsAlreadyMember ? "Enter Lobby" : "Join Game") 
-                    </a>
+                    @if (game.IsAlreadyMember)
+                    {
+                        <div class="text-dark fw-bold mb-2 small d-flex justify-content-center align-items-center gap-1">
+                            <i class="bi bi-check-circle-fill"></i> Already a Member
+                        </div>
+                        <a asp-controller="Game" asp-action="LobbyDetails" asp-route-id="@game.Id" class="btn btn-primary btn-lg rounded-pill fw-bold w-100">
+                            Enter Lobby
+                        </a>
+                    }
+                    else
+                    {
+                        <form asp-controller="FindGame" asp-action="JoinCampaign" method="post" class="m-0">
+                            <input type="hidden" name="gameId" value="@game.Id" />
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold w-100">
+                                Join Game
+                            </button>
+                        </form>
+                    }
                 </div>
             </div>
         </div>

@@ -16,10 +16,13 @@ namespace large_fantasy_model.Controllers
     {
         private readonly LargeFantasyModelContext _context;
         private readonly IHubContext<LobbyHub> _lobbyHub;
-        public GameController(LargeFantasyModelContext context, IHubContext<LobbyHub> lobbyHub)
+        private readonly IHubContext<PrivateMessageHub> _privateMessageHub; 
+
+        public GameController(LargeFantasyModelContext context, IHubContext<LobbyHub> lobbyHub, IHubContext<PrivateMessageHub> privateMessageHub)
         {
             _context = context;
             _lobbyHub = lobbyHub;
+            _privateMessageHub = privateMessageHub;
         }
 
         private int GetCurrentUserId()
@@ -27,13 +30,11 @@ namespace large_fantasy_model.Controllers
             return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         }
 
-        
         [HttpGet]
         public async Task<IActionResult> Campaigns()
         {
             int myId = GetCurrentUserId();
 
-            
             var myGames = await _context.Games
                 .Include(g => g.User)
                 .Include(g => g.Users)
@@ -43,7 +44,6 @@ namespace large_fantasy_model.Controllers
             return View(myGames);
         }
 
-        
         [HttpGet]
         public IActionResult Create()
         {
@@ -66,7 +66,6 @@ namespace large_fantasy_model.Controllers
 
             int myId = GetCurrentUserId();
 
-            
             var gameConversation = new Conversation
             {
                 Title = $"{model.Name} - Campaign Chat"
@@ -75,7 +74,6 @@ namespace large_fantasy_model.Controllers
             _context.Conversations.Add(gameConversation);
             await _context.SaveChangesAsync();
 
-            
             string generatedCode = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper();
 
             var newGame = new Game
@@ -101,9 +99,7 @@ namespace large_fantasy_model.Controllers
             TempData["SuccessMessage"] = $"Campaign '{newGame.Name}' has been successfully created!";
             return RedirectToAction(nameof(Campaigns));
         }
-        
 
-        
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -140,8 +136,6 @@ namespace large_fantasy_model.Controllers
             game.Description = model.Description;
             game.IsPublic = model.IsPublic;
             game.MaxPlayers = model.MaxPlayers;
-
-            
             game.Password = model.IsPublic ? null : model.Password;
 
             _context.Update(game);
@@ -151,7 +145,6 @@ namespace large_fantasy_model.Controllers
             return RedirectToAction(nameof(LobbyDetails), new { id = game.Id });
         }
 
-        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -181,7 +174,6 @@ namespace large_fantasy_model.Controllers
             return RedirectToAction(nameof(Campaigns));
         }
 
-        
         [HttpGet]
         public async Task<IActionResult> LobbyDetails(int id)
         {
@@ -198,10 +190,15 @@ namespace large_fantasy_model.Controllers
                 return RedirectToAction(nameof(Campaigns));
             }
 
-            
             var me = await _context.Users.Include(u => u.Friends).Include(u => u.FriendOf).FirstOrDefaultAsync(u => u.Id == myId);
             var mutualFriends = me.Friends.Where(f => me.FriendOf.Any(fo => fo.Id == f.Id)).ToList();
             var friendsToInvite = mutualFriends.Where(f => !game.Users.Any(u => u.Id == f.Id) && game.UserId != f.Id).ToList();
+
+           
+            var invitedIds = await _context.Notifications
+                .Where(n => n.RelatedEntityId == id && n.Type == "GameInvite")
+                .Select(n => n.ReceiverId)
+                .ToListAsync();
 
             var viewModel = new GameLobbyViewModel
             {
@@ -216,18 +213,13 @@ namespace large_fantasy_model.Controllers
                 Players = game.Users.Select(u => new UserViewModel { Id = u.Id, Username = u.Username }).ToList(),
                 AvailableFriends = friendsToInvite.Select(f => new UserViewModel { Id = f.Id, Username = f.Username }).ToList(),
                 CurrentPlayers = game.Users.Count + 1,
-                MaxPlayers = game.MaxPlayers > 0 ? game.MaxPlayers : 10
+                MaxPlayers = game.MaxPlayers > 0 ? game.MaxPlayers : 10,
+                InvitedFriendIds = invitedIds
             };
-            var invitedIds = await _context.Notifications
-    .Where(n => n.RelatedEntityId == id && n.Type == "GameInvite")
-    .Select(n => n.ReceiverId)
-    .ToListAsync();
 
-            viewModel.InvitedFriendIds = invitedIds;
             return View(viewModel);
         }
 
-        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatus(int id)
@@ -237,7 +229,7 @@ namespace large_fantasy_model.Controllers
 
             if (game == null) return NotFound();
 
-            game.IsActive = !game.IsActive; 
+            game.IsActive = !game.IsActive;
             await _context.SaveChangesAsync();
 
             string status = game.IsActive ? "visible" : "hidden";
@@ -246,8 +238,6 @@ namespace large_fantasy_model.Controllers
 
             return RedirectToAction(nameof(LobbyDetails), new { id = game.Id });
         }
-
-        
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -261,14 +251,12 @@ namespace large_fantasy_model.Controllers
             var friendToInvite = await _context.Users.FindAsync(friendId);
             if (friendToInvite == null) return NotFound();
 
-            
             if (game.Users.Any(u => u.Id == friendId))
             {
                 TempData["DangerMessage"] = $"{friendToInvite.Username} is already in your party.";
                 return RedirectToAction("LobbyDetails", new { id = gameId });
             }
 
-            
             var existingInvite = await _context.Notifications
                 .AnyAsync(n => n.ReceiverId == friendId && n.Type == "GameInvite" && n.RelatedEntityId == gameId);
 
@@ -278,7 +266,6 @@ namespace large_fantasy_model.Controllers
                 return RedirectToAction("LobbyDetails", new { id = gameId });
             }
 
-            
             var notification = new Notification
             {
                 ReceiverId = friendId,
@@ -291,6 +278,9 @@ namespace large_fantasy_model.Controllers
             _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
 
+            
+            await _privateMessageHub.Clients.Group($"User_{friendId}").SendAsync("UpdateNotifications");
+
             TempData["SuccessMessage"] = $"Invitation sent to {friendToInvite.Username}!";
             return RedirectToAction("LobbyDetails", new { id = gameId });
         }
@@ -300,8 +290,6 @@ namespace large_fantasy_model.Controllers
         public async Task<IActionResult> AcceptGameInvite(int notificationId)
         {
             int myId = GetCurrentUserId();
-
-            
             var notification = await _context.Notifications
                 .FirstOrDefaultAsync(n => n.Id == notificationId && n.ReceiverId == myId);
 
@@ -320,13 +308,10 @@ namespace large_fantasy_model.Controllers
             }
 
             int gameId = notification.RelatedEntityId.Value;
-
-            
             var game = await _context.Games
                 .Include(g => g.Users)
                 .FirstOrDefaultAsync(g => g.Id == gameId);
 
-            
             if (game == null)
             {
                 _context.Notifications.Remove(notification);
@@ -335,27 +320,26 @@ namespace large_fantasy_model.Controllers
                 return RedirectToAction("Campaigns");
             }
 
-            
             _context.Notifications.Remove(notification);
+            await _context.SaveChangesAsync();
 
-            
+         
+            await _privateMessageHub.Clients.Group($"User_{myId}").SendAsync("UpdateNotifications");
+
             if (game.UserId == myId)
             {
-                await _context.SaveChangesAsync();
                 TempData["DangerMessage"] = "You are already the Dungeon Master of this campaign.";
                 return RedirectToAction("LobbyDetails", new { id = gameId });
             }
 
             int actualMaxPlayers = game.MaxPlayers > 0 ? game.MaxPlayers : 10;
-            
+
             if (game.Users.Count + 1 >= actualMaxPlayers)
             {
-                await _context.SaveChangesAsync();
                 TempData["DangerMessage"] = "This campaign is already full.";
                 return RedirectToAction("Campaigns");
             }
 
-           
             if (!game.Users.Any(u => u.Id == myId))
             {
                 var me = await _context.Users.FirstOrDefaultAsync(u => u.Id == myId);
@@ -370,8 +354,6 @@ namespace large_fantasy_model.Controllers
                 }
             }
 
-            
-            await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "You are already in this campaign!";
             return RedirectToAction("LobbyDetails", new { id = gameId });
         }
@@ -386,21 +368,29 @@ namespace large_fantasy_model.Controllers
 
             if (notification != null)
             {
+                string type = notification.Type;
+                int? gameId = notification.RelatedEntityId;
+
                 _context.Notifications.Remove(notification);
                 await _context.SaveChangesAsync();
+
+    
+                await _privateMessageHub.Clients.Group($"User_{myId}").SendAsync("UpdateNotifications");
+
+                if (type == "GameInvite" && gameId.HasValue)
+                {
+                    await _lobbyHub.Clients.Group($"Lobby_{gameId.Value}").SendAsync("GameInviteDeclined", myId);
+                }
+
                 TempData["SuccessMessage"] = "Zaproszenie zostało odrzucone.";
             }
 
-            
             string referer = Request.Headers["Referer"].ToString();
-
-            
             if (!string.IsNullOrEmpty(referer))
             {
                 return Redirect(referer);
             }
 
-            
             return RedirectToAction("Index", "Home");
         }
 
@@ -416,16 +406,18 @@ namespace large_fantasy_model.Controllers
             var playerToRemove = game.Users.FirstOrDefault(u => u.Id == playerId);
             if (playerToRemove != null)
             {
+                string username = playerToRemove.Username;
                 game.Users.Remove(playerToRemove);
                 await _context.SaveChangesAsync();
-                // Zamień istniejący sygnał na ten:
-                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerLeftLobby", playerId, playerToRemove.Username);
 
-                TempData["SuccessMessage"] = $"Player {playerToRemove.Username} has been removed from the party.";
+                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerLeftLobby", playerId, username);
+
+                TempData["SuccessMessage"] = $"Player {username} has been removed from the party.";
             }
 
             return RedirectToAction("LobbyDetails", new { id = gameId });
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteNotification(int notificationId)
@@ -438,9 +430,10 @@ namespace large_fantasy_model.Controllers
             {
                 _context.Notifications.Remove(notification);
                 await _context.SaveChangesAsync();
+
+                await _privateMessageHub.Clients.Group($"User_{myId}").SendAsync("UpdateNotifications");
             }
 
-            
             string referer = Request.Headers["Referer"].ToString();
             if (!string.IsNullOrEmpty(referer))
             {
@@ -449,41 +442,43 @@ namespace large_fantasy_model.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LeaveCampaign(int gameId)
         {
             int myId = GetCurrentUserId();
-
-            
             var game = await _context.Games
                 .Include(g => g.Users)
                 .FirstOrDefaultAsync(g => g.Id == gameId);
 
-            if (game == null)
-            {
-                return NotFound();
-            }
+            if (game == null) return NotFound();
 
-            
             if (game.UserId == myId)
             {
                 TempData["DangerMessage"] = "The owner cannot leave the campaign. You can only delete it.";
                 return RedirectToAction("LobbyDetails", new { id = gameId });
             }
 
-            
             var me = game.Users.FirstOrDefault(u => u.Id == myId);
             if (me != null)
             {
+                string username = me.Username;
                 game.Users.Remove(me);
                 await _context.SaveChangesAsync();
-                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerLeftLobby", myId, me.Username);
+
+                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerLeftLobby", myId, username);
 
                 TempData["SuccessMessage"] = $"You have left the campaign {game.Name}.";
             }
 
             return RedirectToAction(nameof(Campaigns));
+        }
+
+        [HttpGet]
+        public IActionResult GetNotificationBell()
+        {
+            return ViewComponent("NotificationBell");
         }
     }
 }

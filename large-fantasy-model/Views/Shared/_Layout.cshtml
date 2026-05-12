@@ -87,13 +87,14 @@
                         <li class="nav-item me-3">
                             <a class="nav-link nav-link-danger @GetActiveMenuClass("Compendium", "Index", "text-danger") px-2" asp-controller="Compendium" asp-action="Index">Compendium</a>
                         </li>
-                        
                     </ul>
 
                     <ul class="navbar-nav align-items-center">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            @await Component.InvokeAsync("NotificationBell")
+                            <div id="notification-bell-container" style="display: contents;">
+                                @await Component.InvokeAsync("NotificationBell")
+                            </div>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-dark fw-bold border rounded-pill px-4 py-2 bg-light shadow-sm"
                                        href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-display="static">
@@ -118,24 +119,22 @@
                                                 </div>
                                                 <span class="fw-semibold">Friends List</span>
                                             </div>
-                                            @if (friendRequestsCount > 0)
-                                            {
-                                                <span class="badge bg-danger rounded-pill shadow-sm">@friendRequestsCount</span>
-                                            }
+                                            <span id="friend-requests-badge" class="badge bg-danger rounded-pill shadow-sm" style="display: @(friendRequestsCount > 0 ? "inline-block" : "none");">
+                                                @friendRequestsCount
+                                            </span>
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item d-flex align-items-center justify-content-between py-2" asp-controller="PrivateMessage" asp-action="Index">
+                                        <a class="dropdown-item d-flex align-items-center justify-content-between py-2" asp-controller="PrivateMessage" asp-action="PrivateMessage">
                                             <div class="d-flex align-items-center">
                                                 <div class="d-flex justify-content-center flex-shrink-0 me-3" style="width: 30px;">
                                                     <i class="bi bi-chat-dots text-dark fs-5 mt-1"></i>
                                                 </div>
                                                 <span class="fw-semibold">Messages</span>
                                             </div>
-                                            @if (unreadMessagesCount > 0)
-                                            {
-                                                <span class="badge bg-danger rounded-pill shadow-sm">@unreadMessagesCount</span>
-                                            }
+                                            <span id="unread-messages-badge" class="badge bg-danger rounded-pill shadow-sm" style="display: @(unreadMessagesCount > 0 ? "inline-block" : "none");">
+                                                @unreadMessagesCount
+                                            </span>
                                         </a>
                                     </li>
                                     <li>
@@ -210,5 +209,105 @@
                 return colors[hash % colors.length];
             }
     </script>
-</body>
+    
+    @if (User.Identity.IsAuthenticated)
+    {
+        @section Scripts {
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+        <script>
+            const globalUserId = "@User.FindFirstValue(ClaimTypes.NameIdentifier)";
+            const globalHubConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/privateMessageHub")
+            .build();
+            
+          
+            function updateAllCounts() {
+            fetch('/Profile/GetNotificationCounts')
+            .then(response => response.json())
+            .then(data => {
+            const friendBadge = document.getElementById('friend-requests-badge');
+            if (friendBadge) {
+            if (data.friendRequestsCount > 0) {
+            friendBadge.innerText = data.friendRequestsCount;
+            friendBadge.style.display = 'inline-block';
+            } else {
+            friendBadge.style.display = 'none';
+            }
+            }
+
+            const msgBadge = document.getElementById('unread-messages-badge');
+            if (msgBadge) {
+            if (data.unreadMessagesCount > 0) {
+            msgBadge.innerText = data.unreadMessagesCount;
+            msgBadge.style.display = 'inline-block';
+            } else {
+            msgBadge.style.display = 'none';
+            }
+            }
+            })
+            .catch(err => console.error("Błąd aktualizacji liczników:", err));
+            }
+
+
+            globalHubConnection.on("UpdateNotifications", function () {
+            fetch('/Game/GetNotificationBell')
+            .then(response => response.text())
+            .then(html => {
+            document.getElementById('notification-bell-container').innerHTML = html;
+            })
+            .catch(err => console.error("Błąd ładowania dzwoneczka:", err));
+
+            updateAllCounts();
+            });
+
+            globalHubConnection.on("ReceiveMessage", function (conversationId, content, timeString, senderId) {
+            updateAllCounts();
+            });
+
+            globalHubConnection.on("FriendRequestDeclined", function (declinerId) {
+            console.log("🔥 SignalR: Odrzucono zaproszenie od ID:", declinerId);
+            const sentRequestRow = document.getElementById(`sent-request-${declinerId}`);
+                
+            if (sentRequestRow) {
+            const parentList = document.getElementById("sent-requests-list");
+            sentRequestRow.remove();
+            console.log("✅ Usunięto wiersz zaproszenia z listy.");
+                    
+            if (parentList) {
+            const remaining = parentList.querySelectorAll('li').length;
+            console.log("Pozostało na liście:", remaining);
+            if (remaining === 0) {
+            const section = document.getElementById("sent-requests-section");
+            if (section) {
+            section.classList.add("d-none");
+            console.log("✅ Ukryto całą sekcję Sent Requests.");
+            }
+            }
+            }
+            } else {
+            console.warn(`❌ Nie znaleziono wiersza o ID: sent-request-${declinerId}`);
+            }
+            });
+
+            globalHubConnection.start().then(() => {
+            globalHubConnection.invoke("JoinMyUserGroup", globalUserId);
+            }).catch(err => console.error(err));
+
+            document.addEventListener('click', function (e) {
+         
+            const bellToggle = e.target.closest('#notificationsDropdown') || e.target.closest('#notification-bell-container');
+            if (bellToggle) {
+            const badge = bellToggle.querySelector('.badge');
+            if (badge) badge.style.display = 'none';
+
+            fetch('/Profile/MarkNotificationsAsRead', {
+            method: 'POST'
+            }).catch(err => console.error("Błąd oznaczania powiadomień:", err));
+            }
+            });
+        </script>
+        }
+        }
+    </body>
 </html>
