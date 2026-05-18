@@ -76,5 +76,18 @@ namespace large_fantasy_model.Hubs
 
             await Clients.OthersInGroup(groupName).SendAsync("TokenMoved", tokenId, x, y);
         }
+        
+        public async Task ChangeMap(int gameId, string mapUrl)
+        {
+            var game = await _context.Games.FindAsync(gameId);
+            if (game != null)
+            {
+                game.MapImageUrl = mapUrl;
+                await _context.SaveChangesAsync();
+            }
+
+            string groupName = $"Game_{gameId}";
+            await Clients.Group(groupName).SendAsync("MapChanged", mapUrl);
+        }
     }
 }

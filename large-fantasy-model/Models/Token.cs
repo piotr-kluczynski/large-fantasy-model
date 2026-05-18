@@ -18,10 +18,11 @@ namespace large_fantasy_model.Models
         public string Name { get; set; } = null!;
 
 
-        public int X { get; set; } = 2500; /
+        public int X { get; set; } = 2500;
         public int Y { get; set; } = 2500;
 
         [Required]
         [MaxLength(7)]
-        public string Color { get; set; } = "#0d6efd"; 
+        public string Color { get; set; } = "#0d6efd";
+    }
 }

@@ -46,7 +46,7 @@ namespace large_fantasy_model.Controllers
 
             if (!existingTokens.Any(t => t.UserId == game.User.Id))
             {
-                var dmToken = new Token { GameId = id, UserId = game.User.Id, Name = game.User.Username, Color = "#ffc107", X = 2450, Y = 2450 };
+                var dmToken = new Token { GameId = id, UserId = game.User.Id, Name = game.User.Username, Color = "#ffc107", X = 500, Y = 500 };
                 _context.Tokens.Add(dmToken);
                 existingTokens.Add(dmToken);
             }
@@ -59,7 +59,7 @@ namespace large_fantasy_model.Controllers
                     int offsetX = rand.Next(-2, 3) * 50;
                     int offsetY = rand.Next(-2, 3) * 50;
 
-                    var playerToken = new Token { GameId = id, UserId = player.Id, Name = player.Username, Color = "#0d6efd", X = 2500 + offsetX, Y = 2500 + offsetY };
+                    var playerToken = new Token { GameId = id, UserId = player.Id, Name = player.Username, Color = "#0d6efd", X = 500 + offsetX, Y = 500 + offsetY };
                     _context.Tokens.Add(playerToken);
                     existingTokens.Add(playerToken);
                 }
@@ -78,6 +78,7 @@ namespace large_fantasy_model.Controllers
                 IsDungeonMaster = game.UserId == myId,
                 DungeonMaster = new UserViewModel { Id = game.User.Id, Username = game.User.Username },
                 Players = game.Users.Select(u => new UserViewModel { Id = u.Id, Username = u.Username }).ToList(),
+                MapImageUrl = game.MapImageUrl, 
 
                 Tokens = existingTokens.Select(t => new TokenViewModel
                 {

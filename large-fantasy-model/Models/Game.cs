@@ -43,5 +43,6 @@ namespace large_fantasy_model.Models
         public bool IsActive { get; set; } = true; 
         public int MaxPlayers { get; set; } = 10;
         public string? Lore { get; set; }
+        public string? MapImageUrl { get; set; }
     }
 }

@@ -10,6 +10,7 @@
         public List<UserViewModel> Players { get; set; } = new();
         public List<TokenViewModel> Tokens { get; set; } = new();
         public List<ChatMessageViewModel> ChatMessages { get; set; } = new();
+        public string? MapImageUrl { get; set; }
     }
 
     public class TokenViewModel

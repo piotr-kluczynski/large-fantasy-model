@@ -23,7 +23,18 @@
             user-select: none;
         }
 
+       
+        .map-option {
+            transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease !important;
+            border: 1px solid ;
+        }
 
+        .map-option:hover {
+            filter: brightness(1.2); 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.6); 
+            border: 1px solid #6c757d; 
+        }
         #viewport {
             position: absolute;
             top: 0;
@@ -192,15 +203,30 @@
                 @foreach (var msg in Model.ChatMessages)
                 {
                     bool isMe = msg.SenderName == User.Identity.Name;
-                    <div class="d-flex w-100 mb-2" style="justify-content: @(isMe ? "flex-end" : "flex-start")">
-                        <div style="max-width: 80%; padding: 8px 12px; border-radius: 10px; word-wrap: break-word; background-color: @(isMe ? "#0d6efd" : "#333333"); color: white;">
-                            <div class="d-flex justify-content-between align-items-baseline mb-1">
-                                <strong class="@(isMe ? "" : "text-warning") small me-3">@(isMe ? "Me" : msg.SenderName)</strong> 
-                                <span class="@(isMe ? "text-light opacity-75" : "text-muted")" style="font-size: 0.65rem;">@msg.Time</span>
+                    bool isDice = msg.Text.StartsWith("[DICE]");
+                    string cleanText = isDice ? msg.Text.Replace("[DICE]", "") : msg.Text;
+
+                    if (isDice)
+                    {
+                        <div class="d-flex w-100 mb-2 justify-content-center">
+                            <div class="w-100 border border-warning text-center p-2 rounded-3 bg-dark text-warning" style="max-width: 90%; font-size: 0.9rem; box-shadow: 0 0 10px rgba(255,193,7,0.2);">
+                                <div class="text-muted" style="font-size: 0.65rem;">@msg.Time - @(isMe ? "You" : msg.SenderName) rolled:</div>
+                                <div class="fw-bold">@cleanText</div>
                             </div>
-                            <div>@msg.Text</div>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex w-100 mb-2" style="justify-content: @(isMe ? "flex-end" : "flex-start")">
+                            <div style="max-width: 80%; padding: 8px 12px; border-radius: 10px; word-wrap: break-word; background-color: @(isMe ? "#0d6efd" : "#333333"); color: white;">
+                                <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                    <strong class="@(isMe ? "" : "text-warning") small me-3">@(isMe ? "Me" : msg.SenderName)</strong> 
+                                    <span class="@(isMe ? "text-light opacity-75" : "text-muted")" style="font-size: 0.65rem;">@msg.Time</span>
+                                </div>
+                                <div>@cleanText</div>
+                            </div>
+                        </div>
+                    }
                 }
             </div>
             <div class="input-group mt-auto">
@@ -211,210 +237,424 @@
         <div id="content-tools" class="sidebar-content">
             <h5>Tools</h5>
             <div class="d-grid gap-2 mt-3">
-                <button class="btn btn-outline-light"><i class="bi bi-dice-6"></i> Roll Dice</button>
+                <div class="dropdown d-grid">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="diceDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-dice-6 me-2"></i> Roll Dice
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark w-100 shadow" aria-labelledby="diceDropdown">
+                        <li><button class="dropdown-item dice-btn" data-sides="4">D4 (Triangle)</button></li>
+                        <li><button class="dropdown-item dice-btn" data-sides="6">D6 (Standard Cube)</button></li>
+                        <li><button class="dropdown-item dice-btn" data-sides="8">D8 (Octahedron)</button></li>
+                        <li><button class="dropdown-item dice-btn" data-sides="10">D10 (Pentagonal Trapezohedron)</button></li>
+                        <li><button class="dropdown-item dice-btn" data-sides="12">D12 (Dodecahedron)</button></li>
+                        <li><button class="dropdown-item dice-btn" data-sides="20"><strong>D20 (Core D&D)</strong></button></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item dice-btn" data-sides="100">D100 (Percentile)</button></li>
+                    </ul>
+                </div>
                 <button class="btn btn-outline-light"><i class="bi bi-person-vcard"></i> Character Sheet</button>
                 <button class="btn btn-outline-light"><i class="bi bi-journal-text"></i> Notes</button>
                 @if (Model.IsDungeonMaster)
                 {
                     <hr class="border-secondary" />
-                    <button class="btn btn-outline-warning"><i class="bi bi-map"></i> Change Map</button>
+                    <button id="btn-change-map" class="btn btn-outline-warning"><i class="bi bi-map"></i> Change Map</button>
                     <button class="btn btn-outline-danger"><i class="bi bi-robot"></i> AI Assistant (LLM)</button>
                 }
             </div>
         </div>
     </div>
+    @if (Model.IsDungeonMaster)
+    {
+        <div class="modal fade" id="mapGalleryModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark text-white border-secondary">
+              <div class="modal-header border-secondary">
+                <h5 class="modal-title">Select Battlemap</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card bg-secondary text-white map-option" data-url="/maps/grass.png" style="cursor: pointer; transition: 0.2s;">
+                            <div class="card-body text-center p-4">
+                                <i class="bi bi-tree-fill fs-1 mb-2 text-success"></i>
+                                <h6>Grass Plains</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-secondary text-white map-option" data-url="/maps/tavern.png" style="cursor: pointer; transition: 0.2s;">
+                            <div class="card-body text-center p-4">
+                                <i class="bi bi-house-door-fill fs-1 mb-2 text-warning"></i>
+                                <h6>Tavern</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-secondary text-white map-option" data-url="/maps/dungeon.png" style="cursor: pointer; transition: 0.2s;">
+                            <div class="card-body text-center p-4">
+                                <i class="bi bi-bricks fs-1 mb-2 text-danger"></i>
+                                <h6>Dungeon</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-4">
+                        <button class="btn btn-outline-danger w-100 map-option" data-url="">
+                            <i class="bi bi-x-circle me-2"></i> Clear Map (Grid only)
+                        </button>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+    const gameId = @Model.GameId;
+    const currentUserId = "@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value";
+    const myUsername = "@User.Identity.Name";
+    const isDM = @(Model.IsDungeonMaster ? "true" : "false");
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
-    <script>
-        const gameId = @Model.GameId;
-       
-        const currentUserId = "@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value";
-        const myUsername = "@User.Identity.Name";
-        const isDM = @(Model.IsDungeonMaster ? "true" : "false");
+    const viewport = document.getElementById('viewport');
+    const mapContainer = document.getElementById('map-container');
+    let isMapDragging = false;
+    let mapStartX, mapStartY;
+    let mapX = -2000; 
+    let mapY = -2000;
+    let mapScale = 1; 
 
+    function updateMapTransform() {
+        mapContainer.style.transform = `translate(${mapX}px, ${mapY}px) scale(${mapScale})`;
+    }
+    updateMapTransform();
 
-        const viewport = document.getElementById('viewport');
-        const mapContainer = document.getElementById('map-container');
-        let isMapDragging = false;
-        let mapStartX, mapStartY;
-        let mapX = -2000; 
-        let mapY = -2000;
-        let mapScale = 1; 
+    viewport.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.game-token') || e.target.closest('#right-sidebar') || e.target.closest('#players-container') || e.target.closest('#exit-vtt') || e.target.closest('#toggle-sidebar-btn')) return; 
+        isMapDragging = true;
+        mapStartX = e.clientX - mapX;
+        mapStartY = e.clientY - mapY;
+    });
 
-        function updateMapTransform() {
-            mapContainer.style.transform = `translate(${mapX}px, ${mapY}px) scale(${mapScale})`;
-        }
+    window.addEventListener('mousemove', (e) => {
+        if (!isMapDragging) return;
+        mapX = e.clientX - mapStartX;
+        mapY = e.clientY - mapStartY;
         updateMapTransform();
+    });
 
-        viewport.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.game-token') || e.target.closest('#right-sidebar') || e.target.closest('#players-container') || e.target.closest('#exit-vtt') || e.target.closest('#toggle-sidebar-btn')) return; 
-            isMapDragging = true;
-            mapStartX = e.clientX - mapX;
-            mapStartY = e.clientY - mapY;
+    window.addEventListener('mouseup', () => { isMapDragging = false; });
+
+    viewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const zoomDirection = e.deltaY < 0 ? 1 : -1;
+        const oldScale = mapScale;
+        mapScale += zoomDirection * 0.1;
+        mapScale = Math.min(Math.max(0.2, mapScale), 3.0);
+        const mouseMapX = (e.clientX - mapX) / oldScale;
+        const mouseMapY = (e.clientY - mapY) / oldScale;
+        mapX = e.clientX - (mouseMapX * mapScale);
+        mapY = e.clientY - (mouseMapY * mapScale);
+        updateMapTransform();
+    }, { passive: false }); 
+
+    let activeToken = null;
+    let tokenOffsetX = 0;
+    let tokenOffsetY = 0;
+
+    document.querySelectorAll('.game-token').forEach(token => {
+        token.addEventListener('mousedown', (e) => {
+            if (!isDM && token.getAttribute('data-owner-id') !== currentUserId) {
+                return; 
+            }
+
+            e.stopPropagation(); 
+            activeToken = token;
+            activeToken.classList.add('dragging');
+
+            activeToken.style.transition = "none";
+
+            const rect = activeToken.getBoundingClientRect();
+            tokenOffsetX = (e.clientX - rect.left) / mapScale;
+            tokenOffsetY = (e.clientY - rect.top) / mapScale;
         });
+    });
 
-        window.addEventListener('mousemove', (e) => {
-            if (!isMapDragging) return;
-            mapX = e.clientX - mapStartX;
-            mapY = e.clientY - mapStartY;
-            updateMapTransform();
-        });
+    window.addEventListener('mousemove', (e) => {
+        if (!activeToken) return;
+        const mapRect = mapContainer.getBoundingClientRect();
+        let newX = (e.clientX - mapRect.left) / mapScale - tokenOffsetX;
+        let newY = (e.clientY - mapRect.top) / mapScale - tokenOffsetY;
+        
 
-        window.addEventListener('mouseup', () => { isMapDragging = false; });
+        activeToken.style.transition = "none";
+        activeToken.style.left = `${newX}px`;
+        activeToken.style.top = `${newY}px`;
+    });
 
-        viewport.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const zoomDirection = e.deltaY < 0 ? 1 : -1;
-            const oldScale = mapScale;
-            mapScale += zoomDirection * 0.1;
-            mapScale = Math.min(Math.max(0.2, mapScale), 3.0);
-            const mouseMapX = (e.clientX - mapX) / oldScale;
-            const mouseMapY = (e.clientY - mapY) / oldScale;
-            mapX = e.clientX - (mouseMapX * mapScale);
-            mapY = e.clientY - (mouseMapY * mapScale);
-            updateMapTransform();
-        }, { passive: false }); 
+    window.addEventListener('mouseup', () => {
+        if (!activeToken) return;
 
-
-        let activeToken = null;
-        let tokenOffsetX = 0;
-        let tokenOffsetY = 0;
-
-        document.querySelectorAll('.game-token').forEach(token => {
-            token.addEventListener('mousedown', (e) => {
-                if (!isDM && token.getAttribute('data-owner-id') !== currentUserId) {
-                    console.log("To nie jest Twój pionek!");
-                    return; 
-                }
-
-                e.stopPropagation(); 
-                activeToken = token;
-                activeToken.classList.add('dragging');
-
-                const rect = activeToken.getBoundingClientRect();
-                tokenOffsetX = (e.clientX - rect.left) / mapScale;
-                tokenOffsetY = (e.clientY - rect.top) / mapScale;
-            });
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!activeToken) return;
-            const mapRect = mapContainer.getBoundingClientRect();
-            let newX = (e.clientX - mapRect.left) / mapScale - tokenOffsetX;
-            let newY = (e.clientY - mapRect.top) / mapScale - tokenOffsetY;
-            activeToken.style.left = `${newX}px`;
-            activeToken.style.top = `${newY}px`;
-        });
-
-        window.addEventListener('mouseup', () => {
-            if (!activeToken) return;
-
-            let currentX = parseFloat(activeToken.style.left);
-            let currentY = parseFloat(activeToken.style.top);
-            let snappedX = Math.round(currentX / 50) * 50;
-            let snappedY = Math.round(currentY / 50) * 50;
-
-            activeToken.style.left = `${snappedX}px`;
-            activeToken.style.top = `${snappedY}px`;
-            activeToken.classList.remove('dragging');
-
-            const tokenId = parseInt(activeToken.getAttribute('data-token-id'));
-            connection.invoke("UpdateTokenPosition", gameId, tokenId, snappedX, snappedY)
-                .catch(err => console.error("Błąd zapisu ruchu: ", err));
-
-            activeToken = null;
-        });
+        let currentX = parseFloat(activeToken.style.left);
+        let currentY = parseFloat(activeToken.style.top);
+        let snappedX = Math.round(currentX / 50) * 50;
+        let snappedY = Math.round(currentY / 50) * 50;
 
 
-        const sidebar = document.getElementById('right-sidebar');
-        const toggleBtn = document.getElementById('toggle-sidebar-btn');
-        const toggleIcon = toggleBtn.querySelector('i');
+        activeToken.style.transition = "left 0.1s ease-out, top 0.1s ease-out";
+        activeToken.style.left = `${snappedX}px`;
+        activeToken.style.top = `${snappedY}px`;
+        activeToken.classList.remove('dragging');
 
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-            if (sidebar.classList.contains('open')) toggleIcon.classList.replace('bi-chat-left-dots', 'bi-chevron-right');
-            else toggleIcon.classList.replace('bi-chevron-right', 'bi-chat-left-dots');
-        });
+        const tokenId = parseInt(activeToken.getAttribute('data-token-id'));
+        connection.invoke("UpdateTokenPosition", gameId, tokenId, snappedX, snappedY)
+            .catch(err => console.error("Błąd zapisu ruchu: ", err));
 
-        function switchTab(tabName) {
-            document.querySelectorAll('.sidebar-tabs button').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.sidebar-content').forEach(c => c.classList.remove('active'));
-            document.getElementById('tab-' + tabName).classList.add('active');
-            document.getElementById('content-' + tabName).classList.add('active');
+        const currentToken = activeToken;
+        setTimeout(() => {
+            currentToken.style.transition = "transform 0.1s, box-shadow 0.1s";
+        }, 100);
+
+        activeToken = null;
+    });
+
+    const sidebar = document.getElementById('right-sidebar');
+    const toggleBtn = document.getElementById('toggle-sidebar-btn');
+    const toggleIcon = toggleBtn.querySelector('i');
+
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        if (sidebar.classList.contains('open')) toggleIcon.classList.replace('bi-chat-left-dots', 'bi-chevron-right');
+        else toggleIcon.classList.replace('bi-chevron-right', 'bi-chat-left-dots');
+    });
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.sidebar-tabs button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.sidebar-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab-' + tabName).classList.add('active');
+        document.getElementById('content-' + tabName).classList.add('active');
+    }
+
+    const connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build();
+
+    connection.on("UserStatusChanged", (userId, isOnline, username) => {
+        const avatar = document.getElementById("player-" + userId);
+        if (avatar) {
+            if (isOnline) avatar.classList.add("online");
+            else avatar.classList.remove("online");
         }
+    });
 
-        const connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build();
+    connection.on("RequestStatusSync", () => {
+        connection.invoke("ReportStatus", gameId, currentUserId).catch(err => console.error(err));
+    });
 
+    connection.on("TokenMoved", (tokenId, x, y) => {
 
-        connection.on("UserStatusChanged", (userId, isOnline, username) => {
-            const avatar = document.getElementById("player-" + userId);
-            if (avatar) {
-                if (isOnline) avatar.classList.add("online");
-                else avatar.classList.remove("online");
-            }
-        });
+        if (activeToken && activeToken.getAttribute('data-token-id') == tokenId) return;
 
+        const token = document.getElementById(`token-${tokenId}`);
+        if (token) {
 
-        connection.on("RequestStatusSync", () => {
-            connection.invoke("ReportStatus", gameId, currentUserId).catch(err => console.error(err));
-        });
+            token.style.transition = "left 0.2s ease-out, top 0.2s ease-out";
+            token.style.left = `${x}px`;
+            token.style.top = `${y}px`;
+            
+            setTimeout(() => {
+                token.style.transition = "transform 0.1s, box-shadow 0.1s";
+            }, 200);
+        }
+    });
 
-   
-        connection.on("TokenMoved", (tokenId, x, y) => {
-            const token = document.getElementById(`token-${tokenId}`);
-            if (token) {
+    const chatInput = document.querySelector('#content-chat input');
+    const sendBtn = document.querySelector('#content-chat button');
+    const chatBox = document.querySelector('.chat-messages');
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-                token.style.transition = "left 0.2s ease-out, top 0.2s ease-out";
-                token.style.left = `${x}px`;
-                token.style.top = `${y}px`;
-                
+    connection.on("ReceiveGameMessage", (username, message, time) => {
+        const isMe = username === myUsername;
+        const isDice = message.StartsWith ? message.startsWith("[DICE]") : message.indexOf("[DICE]") === 0;
+        const cleanText = isDice ? message.replace("[DICE]", "") : message;
 
-                setTimeout(() => {
-                    token.style.transition = "transform 0.1s, box-shadow 0.1s";
-                }, 200);
-            }
-        });
+        const msgWrapper = document.createElement('div');
+        msgWrapper.className = "d-flex w-100 mb-2";
 
-        const chatInput = document.querySelector('#content-chat input');
-        const sendBtn = document.querySelector('#content-chat button');
-        const chatBox = document.querySelector('.chat-messages');
-        chatBox.scrollTop = chatBox.scrollHeight;
+        if (isDice) {
 
-        connection.on("ReceiveGameMessage", (username, message, time) => {
-            const isMe = username === myUsername;
-            const msgWrapper = document.createElement('div');
-            msgWrapper.className = "d-flex w-100 mb-2";
+            msgWrapper.style.justifyContent = "center";
+            msgWrapper.innerHTML = `
+                <div class="w-100 border border-warning text-center p-2 rounded-3 bg-dark text-warning" style="max-width: 90%; font-size: 0.9rem; box-shadow: 0 0 10px rgba(255,193,7,0.3); animation: pulse 1s ease-out;">
+                    <div class="text-muted" style="font-size: 0.65rem;">${time} - ${isMe ? "You" : username} rolled:</div>
+                    <div class="fw-bold">${cleanText}</div>
+                </div>
+            `;
+        } else {
+
             msgWrapper.style.justifyContent = isMe ? "flex-end" : "flex-start";
             const msgBubble = document.createElement('div');
             msgBubble.style.maxWidth = "80%"; msgBubble.style.padding = "8px 12px"; msgBubble.style.borderRadius = "10px"; msgBubble.style.wordWrap = "break-word";
             if (isMe) {
                 msgBubble.style.backgroundColor = "#0d6efd"; msgBubble.style.color = "white";
-                msgBubble.innerHTML = `<div class="d-flex justify-content-between align-items-baseline mb-1"><strong class="small me-3">Me</strong> <span class="text-light opacity-75" style="font-size: 0.65rem;">${time}</span></div><div>${message}</div>`;
+                msgBubble.innerHTML = `<div class="d-flex justify-content-between align-items-baseline mb-1"><strong class="small me-3">Me</strong> <span class="text-light opacity-75" style="font-size: 0.65rem;">${time}</span></div><div>${cleanText}</div>`;
             } else {
                 msgBubble.style.backgroundColor = "#333333"; msgBubble.style.color = "white";
-                msgBubble.innerHTML = `<div class="d-flex justify-content-between align-items-baseline mb-1"><strong class="text-warning small me-3">${username}</strong> <span class="text-muted" style="font-size: 0.65rem;">${time}</span></div><div>${message}</div>`;
+                msgBubble.innerHTML = `<div class="d-flex justify-content-between align-items-baseline mb-1"><strong class="text-warning small me-3">${username}</strong> <span class="text-muted" style="font-size: 0.65rem;">${time}</span></div><div>${cleanText}</div>`;
             }
-            msgWrapper.appendChild(msgBubble); chatBox.appendChild(msgWrapper); chatBox.scrollTop = chatBox.scrollHeight;
-        });
-
-        function sendMessage() {
-            if (chatInput.value.trim() !== "") {
-                connection.invoke("SendMessageToGame", gameId, myUsername, chatInput.value).catch(err => console.error(err));
-                chatInput.value = "";
-            }
+            msgWrapper.appendChild(msgBubble);
         }
-        sendBtn.addEventListener("click", sendMessage);
-        chatInput.addEventListener("keypress", (e) => { if (e.key === 'Enter') sendMessage(); });
 
-        connection.start().then(() => {
-            connection.invoke("JoinGameSession", gameId, myUsername);
-            const myAvatar = document.getElementById("player-" + currentUserId);
-            if (myAvatar) myAvatar.classList.add("online");
-        }).catch(err => console.error(err));
+        chatBox.appendChild(msgWrapper);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
 
-        document.getElementById("exit-vtt").addEventListener("click", () => {
-            connection.invoke("LeaveGameSession", gameId);
+    function sendMessage() {
+        if (chatInput.value.trim() !== "") {
+            connection.invoke("SendMessageToGame", gameId, myUsername, chatInput.value).catch(err => console.error(err));
+            chatInput.value = "";
+        }
+    }
+    sendBtn.addEventListener("click", sendMessage);
+    chatInput.addEventListener("keypress", (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    connection.start().then(() => {
+        connection.invoke("JoinGameSession", gameId, myUsername);
+        const myAvatar = document.getElementById("player-" + currentUserId);
+        if (myAvatar) myAvatar.classList.add("online");
+    }).catch(err => console.error(err));
+
+    document.getElementById("exit-vtt").addEventListener("click", () => {
+        connection.invoke("LeaveGameSession", gameId);
+    });
+
+
+    
+    function setMapBackground(url) {
+        let newWidth = 5000;
+        let newHeight = 5000;
+
+        const applyBackgroundAndRescueTokens = () => {
+            mapContainer.style.width = newWidth + 'px';
+            mapContainer.style.height = newHeight + 'px';
+
+            mapX = (window.innerWidth - (newWidth * mapScale)) / 2;
+            mapY = (window.innerHeight - (newHeight * mapScale)) / 2;
+            updateMapTransform();
+
+            if (url) {
+                mapContainer.style.backgroundImage = `
+                    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                    url('${url}')
+                `;
+                mapContainer.style.backgroundSize = '50px 50px, 50px 50px, 100% 100%';
+                mapContainer.style.backgroundRepeat = 'repeat, repeat, no-repeat';
+                mapContainer.style.backgroundColor = '#111'; 
+            } else {
+                mapContainer.style.backgroundImage = `
+                    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
+                `;
+                mapContainer.style.backgroundSize = '50px 50px';
+                mapContainer.style.backgroundColor = '#2b2b2b';
+            }
+
+
+            document.querySelectorAll('.game-token').forEach(token => {
+                let currentX = parseFloat(token.style.left);
+                let currentY = parseFloat(token.style.top);
+                let needsRescue = false;
+
+                if (currentX >= newWidth - 100) { currentX = Math.max(0, newWidth - 100); needsRescue = true; }
+                if (currentY >= newHeight - 100) { currentY = Math.max(0, newHeight - 100); needsRescue = true; }
+
+                if (needsRescue) {
+                    currentX = Math.round(currentX / 50) * 50;
+                    currentY = Math.round(currentY / 50) * 50;
+
+                    token.style.transition = "left 0.4s ease-out, top 0.4s ease-out";
+                    token.style.left = currentX + 'px';
+                    token.style.top = currentY + 'px';
+
+                    if (isDM) {
+                        const tokenId = parseInt(token.getAttribute('data-token-id'));
+                        connection.invoke("UpdateTokenPosition", gameId, tokenId, currentX, currentY)
+                            .catch(err => console.error("Błąd ratowania pionka: ", err));
+                    }
+                    
+
+                    setTimeout(() => {
+                        token.style.transition = "transform 0.1s, box-shadow 0.1s";
+                    }, 410);
+                }
+            });
+        };
+
+        if (url) {
+            const img = new Image();
+            img.onload = function() {
+                newWidth = img.width;
+                newHeight = img.height;
+                applyBackgroundAndRescueTokens();
+            };
+            img.src = url;
+        } else {
+            applyBackgroundAndRescueTokens();
+        }
+    }
+
+    const initialMapUrl = "@Model.MapImageUrl";
+    setMapBackground(initialMapUrl);
+
+    const changeMapBtn = document.getElementById('btn-change-map');
+    if (changeMapBtn) {
+        changeMapBtn.addEventListener('click', () => {
+            const mapModal = new bootstrap.Modal(document.getElementById('mapGalleryModal'));
+            mapModal.show();
         });
-    </script>
+    }
+
+    document.querySelectorAll('.map-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            connection.invoke("ChangeMap", gameId, url).catch(err => console.error(err));
+            
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('mapGalleryModal'));
+            if (modalInstance) modalInstance.hide();
+        });
+    });
+
+    connection.on("MapChanged", (mapUrl) => {
+        setMapBackground(mapUrl);
+        
+        const systemMsg = mapUrl ? "The Dungeon Master has changed the battlemap!" : "The battlemap has been cleared.";
+        const msgWrapper = document.createElement('div');
+        msgWrapper.className = "d-flex w-100 mb-2 justify-content-center text-center";
+        msgWrapper.innerHTML = `<span class="badge bg-secondary text-light w-100 p-2 opacity-75">${systemMsg}</span>`;
+        chatBox.appendChild(msgWrapper);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    document.querySelectorAll('.dice-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const sides = parseInt(this.getAttribute('data-sides'));
+            
+
+            const result = Math.floor(Math.random() * sides) + 1;
+            
+
+            let diceText = `[DICE] 🎲 D${sides} result: ${result}`;
+            
+
+            if (sides === 20) {
+                if (result === 20) diceText += "(CRITICAL SUCCESS!)";
+                else if (result === 1) diceText += "(CRITICAL FAILURE!)";
+            }
+
+            connection.invoke("SendMessageToGame", gameId, myUsername, diceText)
+                .catch(err => console.error("Błąd rzutu kością: ", err));
+        });
+    });
+</script>
 </body>
 </html>
