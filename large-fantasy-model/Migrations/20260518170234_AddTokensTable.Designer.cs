@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using large_fantasy_model.Data;
 
@@ -11,9 +12,11 @@ using large_fantasy_model.Data;
 namespace large_fantasy_model.Migrations
 {
     [DbContext(typeof(LargeFantasyModelContext))]
-    partial class UsersContextModelSnapshot : ModelSnapshot
+    [Migration("20260518170234_AddTokensTable")]
+    partial class AddTokensTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -363,35 +366,6 @@ namespace large_fantasy_model.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Games");
-                });
-
-            modelBuilder.Entity("large_fantasy_model.Models.GameChatMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("GameId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SenderName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.ToTable("GameChatMessages");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.Message", b =>
@@ -1984,17 +1958,6 @@ namespace large_fantasy_model.Migrations
                     b.Navigation("Conversation");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("large_fantasy_model.Models.GameChatMessage", b =>
-                {
-                    b.HasOne("large_fantasy_model.Models.Game", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.Message", b =>

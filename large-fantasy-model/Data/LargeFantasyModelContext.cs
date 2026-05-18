@@ -17,9 +17,7 @@ namespace large_fantasy_model.Data
         public DbSet<Message> Messages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
 
-        // Postacie gracza
         public DbSet<Character> Characters { get; set; }
-
         public DbSet<CharacterProficiency> Proficiencies { get; set; }
         public DbSet<CharacterRace> Races { get; set; }
         public DbSet<CharacterClass> Classes { get; set; }
@@ -27,6 +25,8 @@ namespace large_fantasy_model.Data
         public DbSet<CharacterWeapon> Weapons { get; set; }
         public DbSet<CharacterSpell> Spells { get; set; }
         public DbSet<CharacterFeat> Feats { get; set; }
+        public DbSet<Token> Tokens { get; set; }
+        public DbSet<GameChatMessage> GameChatMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
