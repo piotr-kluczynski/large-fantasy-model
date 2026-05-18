@@ -18,5 +18,6 @@
         
         public List<UserViewModel> AvailableFriends { get; set; } = new();
         public List<int> InvitedFriendIds { get; set; } = new();
+        public string? Lore { get; set; }
     }
 }

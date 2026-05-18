@@ -214,7 +214,8 @@ namespace large_fantasy_model.Controllers
                 AvailableFriends = friendsToInvite.Select(f => new UserViewModel { Id = f.Id, Username = f.Username }).ToList(),
                 CurrentPlayers = game.Users.Count + 1,
                 MaxPlayers = game.MaxPlayers > 0 ? game.MaxPlayers : 10,
-                InvitedFriendIds = invitedIds
+                InvitedFriendIds = invitedIds,
+                Lore = game.Lore
             };
 
             return View(viewModel);
@@ -479,6 +480,23 @@ namespace large_fantasy_model.Controllers
         public IActionResult GetNotificationBell()
         {
             return ViewComponent("NotificationBell");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveLore(int gameId, string lore)
+        {
+            int myId = GetCurrentUserId();
+   
+            var game = await _context.Games.FirstOrDefaultAsync(g => g.Id == gameId && g.UserId == myId);
+
+            if (game == null) return Unauthorized();
+
+            game.Lore = lore;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Campaign lore has been updated successfully!";
+            return RedirectToAction(nameof(LobbyDetails), new { id = gameId });
         }
     }
 }

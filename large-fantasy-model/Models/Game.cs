@@ -42,5 +42,6 @@ namespace large_fantasy_model.Models
         public string? Password { get; set; }
         public bool IsActive { get; set; } = true; 
         public int MaxPlayers { get; set; } = 10;
+        public string? Lore { get; set; }
     }
 }
