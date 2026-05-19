@@ -46,7 +46,7 @@ namespace large_fantasy_model.Controllers
 
             if (!existingTokens.Any(t => t.UserId == game.User.Id))
             {
-                var dmToken = new Token { GameId = id, UserId = game.User.Id, Name = game.User.Username, Color = "#ffc107", X = 500, Y = 500 };
+                var dmToken = new Token { GameId = id, UserId = game.User.Id, Name = game.User.Username, Color = "#ffc107", X = 500, Y = 500, CurrentHp = 100, MaxHp = 100 };
                 _context.Tokens.Add(dmToken);
                 existingTokens.Add(dmToken);
             }
@@ -59,7 +59,7 @@ namespace large_fantasy_model.Controllers
                     int offsetX = rand.Next(-2, 3) * 50;
                     int offsetY = rand.Next(-2, 3) * 50;
 
-                    var playerToken = new Token { GameId = id, UserId = player.Id, Name = player.Username, Color = "#0d6efd", X = 500 + offsetX, Y = 500 + offsetY };
+                    var playerToken = new Token { GameId = id, UserId = player.Id, Name = player.Username, Color = "#0d6efd", X = 500 + offsetX, Y = 500 + offsetY, CurrentHp = 100, MaxHp = 100 };
                     _context.Tokens.Add(playerToken);
                     existingTokens.Add(playerToken);
                 }
@@ -87,7 +87,9 @@ namespace large_fantasy_model.Controllers
                     Name = t.Name,
                     X = t.X,
                     Y = t.Y,
-                    Color = t.Color
+                    Color = t.Color,
+                    CurrentHp = t.CurrentHp,
+                    MaxHp = t.MaxHp
                 }).ToList(),
 
                 ChatMessages = chatHistory.Select(m => new ChatMessageViewModel

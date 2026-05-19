@@ -24,5 +24,8 @@ namespace large_fantasy_model.Models
         [Required]
         [MaxLength(7)]
         public string Color { get; set; } = "#0d6efd";
+
+        public int CurrentHp { get; set; } = 100;
+        public int MaxHp { get; set; } = 100;
     }
 }
