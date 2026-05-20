@@ -98,11 +98,11 @@
             border: 1px solid #000;
             border-radius: 3px;
             overflow: hidden;
-            pointer-events: none; /* Żeby nie przeszkadzało w klikaniu pionka */
+            pointer-events: none;
         }
         .token-hp-fill {
             height: 100%;
-            background-color: #28a745; /* Domyślnie zielony */
+            background-color: #28a745;
             transition: width 0.3s ease, background-color 0.3s ease;
         }
         
@@ -112,10 +112,10 @@
         }
 
         .map-option:hover {
-            filter: brightness(1.2); 
+            filter: brightness(1.2);
             transform: translateY(-3px); 
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.6); 
-            border: 1px solid #6c757d; 
+            border: 1px solid #6c757d;
         }
         #viewport {
             position: absolute;
@@ -124,7 +124,7 @@
             width: 100vw;
             height: 100vh;
             cursor: grab;
-            z-index: 1; 
+            z-index: 1;
         }
 
         #viewport:active {
@@ -146,23 +146,28 @@
             will-change: transform;
         }
 
+        /* PERFEKCYJNIE WYCENTROWANY PIONEK */
         .game-token {
-            width: 50px;
-            height: 50px;
             position: absolute;
-            background-color: #333;
-            color: white;
-            border: 3px solid;
-            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             font-size: 16px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.6);
             z-index: 10;
             transition: transform 0.1s, box-shadow 0.1s;
+            
+            box-sizing: border-box !important;
+            width: 40px !important; 
+            height: 40px !important;
+            margin: 5px !important;
+            
+            background-color: #333;
+            color: white;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.8) !important; 
         }
 
         .game-token:hover {
@@ -173,7 +178,7 @@
         .game-token.dragging {
             opacity: 0.8;
             transform: scale(1.1);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8) !important;
             z-index: 100 !important;
             cursor: grabbing;
         }
@@ -242,7 +247,7 @@
     <div id="viewport">
         <div id="map-container">
             @foreach (var token in Model.Tokens)
-
+            {
                 int hpPercent = token.MaxHp > 0 ? (token.CurrentHp * 100) / token.MaxHp : 0;
                 string hpColor = hpPercent > 50 ? "#28a745" : (hpPercent > 20 ? "#ffc107" : "#dc3545");
 
@@ -250,9 +255,10 @@
                      id="token-@token.Id" 
                      data-token-id="@token.Id" 
                      data-owner-id="@token.UserId"
+                     data-token-name="@token.Name"
                      data-current-hp="@token.CurrentHp"
                      data-max-hp="@token.MaxHp"
-                     style="left: @(token.X)px; top: @(token.Y)px; background-color: @token.Color; position: absolute; width: 40px; height: 40px; border-radius: 50%; color: white; border: 2px solid white; cursor: grab; user-select: none; box-shadow: 0 4px 6px rgba(0,0,0,0.5); z-index: 100;">
+                     style="left: @(token.X)px; top: @(token.Y)px; background-color: @token.Color;">
                     
                     <div class="token-hp-container">
                         <div class="token-hp-fill" style="width: @(hpPercent)%; background-color: @hpColor;"></div>
@@ -311,7 +317,7 @@
                         <div class="d-flex w-100 mb-2 justify-content-center">
                             <div class="w-100 border border-warning text-center p-2 rounded-3 bg-dark text-warning" style="max-width: 90%; font-size: 0.9rem; box-shadow: 0 0 10px rgba(255,193,7,0.2);">
                                 <div class="text-muted mb-1" style="font-size: 0.7rem;">
-                                    @msg.Time - <strong style="color: #ffc107; ">@(isMe ? "You" : msg.SenderName)</strong> rolled:
+                                    @msg.Time - <strong style="color: #ffc107;">@(isMe ? "You" : msg.SenderName)</strong> rolled:
                                 </div>
                                 <div class="fw-bold fs-5">@cleanText</div>
                             </div>
@@ -356,7 +362,7 @@
                     </ul>
                 </div>
                 <button class="btn btn-outline-light"><i class="bi bi-person-vcard"></i> Character Sheet</button>
-                <button class="btn btn-outline-light"><i class="bi bi-journal-text"></i> Notes</button>
+                <button id="btn-open-notes" class="btn btn-outline-light"><i class="bi bi-journal-text"></i> Notes</button>
                 
                 @if (Model.IsDungeonMaster)
                 {
@@ -367,6 +373,8 @@
                             <button id="btn-change-map" class="btn btn-outline-warning"><i class="bi bi-map"></i> Change Map</button>
                             <button class="btn btn-outline-warning"><i class="bi bi-robot"></i> AI Assistant (LLM)</button>
                             <button id="btn-long-rest" class="btn btn-outline-warning"><i class="bi bi-moon-stars"></i> Long Rest (Heal All)</button>
+                            <button id="btn-global-hp" class="btn btn-outline-warning"><i class="bi bi-heart"></i> Set Global Max HP</button>
+                            <button id="btn-spawn-monster" class="btn btn-outline-warning fw-bold"><i class="bi bi-bug-fill"></i> Spawn Monster</button>
                         </div>
                     </div>
                 }
@@ -421,6 +429,37 @@
         </div>
     }
 
+    <div class="modal fade" id="spawnMonsterModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content bg-dark text-white border-danger shadow-lg">
+                <div class="modal-header border-danger" style="background: linear-gradient(135deg, #4a0000 0%, #1a1a1a 100%);">
+                    <h5 class="modal-title fw-bold text-danger"><i class="bi bi-bug-fill me-2"></i> Spawn Monster</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">NAME (e.g. Goblin)</label>
+                        <input type="text" id="monster-name" class="form-control bg-dark text-white border-secondary fw-bold" value="Goblin">
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-bold">MAX HP</label>
+                            <input type="number" id="monster-hp" class="form-control bg-dark text-white border-secondary text-center fw-bold" value="15">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-bold">COLOR</label>
+                            <input type="color" id="monster-color" class="form-control form-control-color w-100 bg-dark border-secondary p-1" value="#dc3545">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary p-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="btn-confirm-spawn" class="btn btn-sm btn-danger fw-bold px-4">Spawn on Map</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="token-context-menu" class="card shadow-lg border-secondary" style="display: none; position: absolute; z-index: 2000; width: 250px; border-radius: 12px; overflow: hidden; background-color: #1e1e1e; color: #e0e0e0;">
         <div class="card-header border-secondary py-2 px-3 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #333 0%, #1a1a1a 100%);">
             <div class="d-flex flex-column">
@@ -448,12 +487,13 @@
             
             <hr class="border-secondary my-2">
             
-            <button class="btn btn-warning btn-sm w-100 fw-bold mb-2 shadow-sm" id="btn-save-hp">
-             Set Absolute HP
-            </button>
-            <button class="btn btn-primary btn-sm w-100 fw-bold shadow-sm" id="btn-open-sheet">
-             Open Character Sheet
-            </button>
+            <button class="btn btn-warning btn-sm w-100 fw-bold mb-2 shadow-sm" id="btn-save-hp">Set Absolute HP</button>
+            <button class="btn btn-primary btn-sm w-100 fw-bold mb-2 shadow-sm" id="btn-open-sheet">Open Character Sheet</button>
+            @if (Model.IsDungeonMaster)
+            {
+                <button class="btn btn-outline-danger btn-sm w-100 fw-bold shadow-sm" id="btn-delete-token">Delete Token</button>
+            }
+                
         </div>
     </div>
 
@@ -467,6 +507,30 @@
                 <div class="modal-body text-center py-5">
                     <i class="bi bi-tools fs-1 text-warning mb-3"></i>
                     <h5>Under Construction!</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="notesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark text-white border-secondary" style="width: 100%; max-width: 800px;">
+                <div class="bg-dark text-white border-secondary p-3 d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold" style="color: #e0c968;"><i class="bi bi-journal-text me-2"></i> Personal Notes</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-2"><i class="bi bi-info-circle me-1"></i> These notes are saved locally in your browser for this specific game session.</p>
+                    <textarea id="personal-notes-area" class="form-control bg-dark text-white border-secondary w-100" style="height: 400px; resize: none;" placeholder="Write down your quest objectives, clues, loot, and secrets here..."></textarea>
+                </div>
+                <div class="p-3 border-top border-secondary d-flex justify-content-between align-items-center">
+                    <span id="notes-save-status" class="text-success fw-bold ms-2" style="opacity: 0; transition: opacity 0.3s;">
+                        <i class="bi bi-check-circle-fill me-1"></i> Saved!
+                    </span>
+                    <div>
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="btn-save-notes" class="btn btn-rpg-blue fw-bold px-4">Save Notes</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -493,21 +557,42 @@
     }
     updateMapTransform();
 
-    viewport.addEventListener('mousedown', (e) => {
+   viewport.addEventListener('mousedown', (e) => {
+        if (isPlacingMonster) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            const mapRect = mapContainer.getBoundingClientRect();
+            let clickX = (e.clientX - mapRect.left) / mapScale;
+            let clickY = (e.clientY - mapRect.top) / mapScale;
+            
+            let snappedX = Math.round(clickX / 50) * 50;
+            let snappedY = Math.round(clickY / 50) * 50;
+
+            connection.invoke("SpawnToken", gameId, pendingMonsterData.name, pendingMonsterData.hp, pendingMonsterData.color, snappedX, snappedY)
+                .catch(err => console.error(err));
+
+            isPlacingMonster = false;
+            pendingMonsterData = null;
+            viewport.style.cursor = "grab";
+            
+            return; 
+        }
+
         if (e.target.closest('.game-token') || e.target.closest('#right-sidebar') || e.target.closest('#players-container') || e.target.closest('#exit-vtt') || e.target.closest('#toggle-sidebar-btn')) return; 
         if (e.shiftKey) return; 
         isMapDragging = true;
         mapStartX = e.clientX - mapX;
         mapStartY = e.clientY - mapY;
     });
-
+    
     window.addEventListener('mousemove', (e) => {
         if (!isMapDragging) return;
         mapX = e.clientX - mapStartX;
         mapY = e.clientY - mapStartY;
         updateMapTransform();
     });
-
+    
     window.addEventListener('mouseup', () => { isMapDragging = false; });
 
     viewport.addEventListener('wheel', (e) => {
@@ -521,29 +606,53 @@
         mapX = e.clientX - (mouseMapX * mapScale);
         mapY = e.clientY - (mouseMapY * mapScale);
         updateMapTransform();
-    }, { passive: false }); 
+    }, { passive: false });
 
     let activeToken = null;
     let tokenOffsetX = 0;
     let tokenOffsetY = 0;
 
-    document.querySelectorAll('.game-token').forEach(token => {
-        token.addEventListener('mousedown', (e) => {
-            if (!isDM && token.getAttribute('data-owner-id') !== currentUserId) {
-                return; 
-            }
+    const ctxMenu = document.getElementById('token-context-menu');
+    const ctxClose = document.getElementById('ctx-close');
+    const inputCurrHp = document.getElementById('ctx-current-hp');
+    const inputMaxHp = document.getElementById('ctx-max-hp');
+    const inputMod = document.getElementById('ctx-hp-mod');
+    let contextTokenId = null;
 
+    function bindTokenEvents(token) {
+        token.addEventListener('mousedown', (e) => {
+            if (!isDM && token.getAttribute('data-owner-id') !== currentUserId) return;
             e.stopPropagation(); 
             activeToken = token;
             activeToken.classList.add('dragging');
-
             activeToken.style.transition = "none";
-
             const rect = activeToken.getBoundingClientRect();
             tokenOffsetX = (e.clientX - rect.left) / mapScale;
             tokenOffsetY = (e.clientY - rect.top) / mapScale;
         });
-    });
+
+        token.addEventListener('contextmenu', (e) => {
+            if (!isDM && token.getAttribute('data-owner-id') !== currentUserId) return;
+            e.preventDefault(); 
+            
+            contextTokenId = parseInt(token.getAttribute('data-token-id'));
+            const currentHp = parseInt(token.getAttribute('data-current-hp')) || 0;
+            const maxHp = parseInt(token.getAttribute('data-max-hp')) || 0;
+            
+            const tokenName = token.getAttribute('data-token-name') || "Unknown Token";
+
+            inputCurrHp.value = currentHp;
+            inputMaxHp.value = maxHp;
+            inputMod.value = "";
+            
+            document.getElementById('ctx-token-name').innerText = tokenName;
+            ctxMenu.style.display = 'block';
+            ctxMenu.style.left = `${e.pageX}px`;
+            ctxMenu.style.top = `${e.pageY}px`;
+        });
+    }
+
+    document.querySelectorAll('.game-token').forEach(bindTokenEvents);
 
     window.addEventListener('mousemove', (e) => {
         if (!activeToken) return;
@@ -551,7 +660,6 @@
         let newX = (e.clientX - mapRect.left) / mapScale - tokenOffsetX;
         let newY = (e.clientY - mapRect.top) / mapScale - tokenOffsetY;
         
-
         activeToken.style.transition = "none";
         activeToken.style.left = `${newX}px`;
         activeToken.style.top = `${newY}px`;
@@ -564,7 +672,6 @@
         let currentY = parseFloat(activeToken.style.top);
         let snappedX = Math.round(currentX / 50) * 50;
         let snappedY = Math.round(currentY / 50) * 50;
-
 
         activeToken.style.transition = "left 0.1s ease-out, top 0.1s ease-out";
         activeToken.style.left = `${snappedX}px`;
@@ -592,7 +699,7 @@
         if (sidebar.classList.contains('open')) toggleIcon.classList.replace('bi-chat-left-dots', 'bi-chevron-right');
         else toggleIcon.classList.replace('bi-chevron-right', 'bi-chat-left-dots');
     });
-
+    
     function switchTab(tabName) {
         document.querySelectorAll('.sidebar-tabs button').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.sidebar-content').forEach(c => c.classList.remove('active'));
@@ -601,7 +708,7 @@
     }
 
     const connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build();
-
+    
     connection.on("UserStatusChanged", (userId, isOnline, username) => {
         const avatar = document.getElementById("player-" + userId);
         if (avatar) {
@@ -609,18 +716,16 @@
             else avatar.classList.remove("online");
         }
     });
-
+    
     connection.on("RequestStatusSync", () => {
         connection.invoke("ReportStatus", gameId, currentUserId).catch(err => console.error(err));
     });
-
+    
     connection.on("TokenMoved", (tokenId, x, y) => {
-
         if (activeToken && activeToken.getAttribute('data-token-id') == tokenId) return;
 
         const token = document.getElementById(`token-${tokenId}`);
         if (token) {
-
             token.style.transition = "left 0.2s ease-out, top 0.2s ease-out";
             token.style.left = `${x}px`;
             token.style.top = `${y}px`;
@@ -631,11 +736,38 @@
         }
     });
 
+    connection.on("TokenSpawned", (tokenId, name, maxHp, color, x, y, ownerId) => {
+        const tokenDiv = document.createElement('div');
+        tokenDiv.className = "game-token d-flex justify-content-center align-items-center fw-bold";
+        tokenDiv.id = `token-${tokenId}`;
+        tokenDiv.setAttribute('data-token-id', tokenId);
+        tokenDiv.setAttribute('data-owner-id', ownerId);
+        tokenDiv.setAttribute('data-token-name', name);
+        tokenDiv.setAttribute('data-current-hp', maxHp);
+        tokenDiv.setAttribute('data-max-hp', maxHp);
+        
+        tokenDiv.style.left = `${x}px`;
+        tokenDiv.style.top = `${y}px`;
+        tokenDiv.style.backgroundColor = color;
+        
+        const shortName = name.substring(0, 2).toUpperCase();
+        
+        tokenDiv.innerHTML = `
+            <div class="token-hp-container">
+                <div class="token-hp-fill" style="width: 100%; background-color: #28a745;"></div>
+            </div>
+            ${shortName}
+        `;
+        
+        mapContainer.appendChild(tokenDiv);
+        bindTokenEvents(tokenDiv); 
+    });
+
     const chatInput = document.querySelector('#content-chat input');
     const sendBtn = document.querySelector('#content-chat button');
     const chatBox = document.querySelector('.chat-messages');
     chatBox.scrollTop = chatBox.scrollHeight;
-
+    
     connection.on("ReceiveGameMessage", (username, message, time) => {
         const isMe = username === myUsername;
         const isDice = message.indexOf("[DICE]") === 0;
@@ -651,7 +783,7 @@
                 <div class="w-100 text-center py-2 px-3 rounded shadow-sm" style="background-color: #242424; border: 1px solid #444; max-width: 95%;">
                     <div class="text-muted mb-1" style="font-size: 0.65rem;">${time}</div>
                     <div class="fst-italic text-light opacity-75" style="font-size: 0.85rem;">${cleanText}</div>
-                </div>
+                 </div>
             `;
         } else if (isDice) {
             msgWrapper.style.justifyContent = "center";
@@ -668,10 +800,12 @@
             const msgBubble = document.createElement('div');
             msgBubble.style.maxWidth = "80%"; msgBubble.style.padding = "8px 12px"; msgBubble.style.borderRadius = "10px"; msgBubble.style.wordWrap = "break-word";
             if (isMe) {
-                msgBubble.style.backgroundColor = "#0d6efd"; msgBubble.style.color = "white";
+                msgBubble.style.backgroundColor = "#0d6efd";
+                msgBubble.style.color = "white";
                 msgBubble.innerHTML = `<div class="d-flex justify-content-between align-items-baseline mb-1"><strong class="small me-3">Me</strong> <span class="text-light opacity-75" style="font-size: 0.65rem;">${time}</span></div><div>${cleanText}</div>`;
             } else {
-                msgBubble.style.backgroundColor = "#333333"; msgBubble.style.color = "white";
+                msgBubble.style.backgroundColor = "#333333";
+                msgBubble.style.color = "white";
                 msgBubble.innerHTML = `<div class="d-flex justify-content-between align-items-baseline mb-1"><strong class="text-warning small me-3">${username}</strong> <span class="text-muted" style="font-size: 0.65rem;">${time}</span></div><div>${cleanText}</div>`;
             }
             msgWrapper.appendChild(msgBubble);
@@ -680,7 +814,7 @@
         chatBox.appendChild(msgWrapper);
         chatBox.scrollTop = chatBox.scrollHeight;
     });
-
+    
     function sendMessage() {
         if (chatInput.value.trim() !== "") {
             connection.invoke("SendMessageToGame", gameId, myUsername, chatInput.value).catch(err => console.error(err));
@@ -689,21 +823,20 @@
     }
     sendBtn.addEventListener("click", sendMessage);
     chatInput.addEventListener("keypress", (e) => { if (e.key === 'Enter') sendMessage(); });
-
+    
     connection.start().then(() => {
         connection.invoke("JoinGameSession", gameId, myUsername);
         const myAvatar = document.getElementById("player-" + currentUserId);
         if (myAvatar) myAvatar.classList.add("online");
     }).catch(err => console.error(err));
-
+    
     document.getElementById("exit-vtt").addEventListener("click", () => {
         connection.invoke("LeaveGameSession", gameId);
     });
-
+    
     function setMapBackground(url) {
         let newWidth = 5000;
         let newHeight = 5000;
-
         const applyBackgroundAndRescueTokens = () => {
             mapContainer.style.width = newWidth + 'px';
             mapContainer.style.height = newHeight + 'px';
@@ -711,13 +844,13 @@
             mapX = (window.innerWidth - (newWidth * mapScale)) / 2;
             mapY = (window.innerHeight - (newHeight * mapScale)) / 2;
             updateMapTransform();
-
+            
             if (url) {
                 mapContainer.style.backgroundImage = `
                     linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
                     linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
                     url('${url}')
-                `;
+                 `;
                 mapContainer.style.backgroundSize = '50px 50px, 50px 50px, 100% 100%';
                 mapContainer.style.backgroundRepeat = 'repeat, repeat, no-repeat';
                 mapContainer.style.backgroundColor = '#111'; 
@@ -729,7 +862,6 @@
                 mapContainer.style.backgroundSize = '50px 50px';
                 mapContainer.style.backgroundColor = '#2b2b2b';
             }
-
 
             document.querySelectorAll('.game-token').forEach(token => {
                 let currentX = parseFloat(token.style.left);
@@ -753,14 +885,13 @@
                             .catch(err => console.error("Błąd ratowania pionka: ", err));
                     }
                     
-
                     setTimeout(() => {
                         token.style.transition = "transform 0.1s, box-shadow 0.1s";
                     }, 410);
                 }
             });
         };
-
+        
         if (url) {
             const img = new Image();
             img.onload = function() {
@@ -812,7 +943,7 @@
         chatBox.appendChild(msgWrapper);
         chatBox.scrollTop = chatBox.scrollHeight;
     });
-
+    
     document.querySelectorAll('.dice-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const sides = parseInt(this.getAttribute('data-sides'));
@@ -830,56 +961,16 @@
         });
     });
 
-
-    const ctxMenu = document.getElementById('token-context-menu');
-    const ctxClose = document.getElementById('ctx-close');
-    const inputCurrHp = document.getElementById('ctx-current-hp');
-    const inputMaxHp = document.getElementById('ctx-max-hp');
-    const inputMod = document.getElementById('ctx-hp-mod');
-    let contextTokenId = null;
-
     document.addEventListener('click', (e) => {
         if (!ctxMenu.contains(e.target)) ctxMenu.style.display = 'none';
     });
+    
     ctxClose.addEventListener('click', () => ctxMenu.style.display = 'none');
-
-    document.querySelectorAll('.game-token').forEach(token => {
-        token.addEventListener('contextmenu', (e) => {
-            if (!isDM && token.getAttribute('data-owner-id') !== currentUserId) return;
-
-            e.preventDefault(); 
-            
-            contextTokenId = parseInt(token.getAttribute('data-token-id'));
-            const currentHp = parseInt(token.getAttribute('data-current-hp')) || 0;
-            const maxHp = parseInt(token.getAttribute('data-max-hp')) || 0;
-            const ownerId = token.getAttribute('data-owner-id');
-
-            inputCurrHp.value = currentHp;
-            inputMaxHp.value = maxHp;
-            inputMod.value = "";
-            
-
-            const ownerAvatar = document.getElementById(`player-${ownerId}`);
-            let ownerName = "Unknown";
-            if (ownerAvatar) {
-                ownerName = ownerAvatar.getAttribute('title');
-
-                if (ownerName.startsWith("DM: ")) ownerName = ownerName.substring(4);
-            }
-            
-
-            document.getElementById('ctx-token-name').innerText = ownerName;
-
-            ctxMenu.style.display = 'block';
-            ctxMenu.style.left = `${e.pageX}px`;
-            ctxMenu.style.top = `${e.pageY}px`;
-        });
-    });
 
     function applyHpChange(newCurrentHp, newMaxHp) {
         if (!contextTokenId) return;
 
-        newMaxHp = Math.max(1, newMaxHp); 
+        newMaxHp = Math.max(1, newMaxHp);
         newCurrentHp = Math.max(0, Math.min(newCurrentHp, newMaxHp));
         
         connection.invoke("UpdateTokenHp", gameId, contextTokenId, newCurrentHp, newMaxHp)
@@ -887,7 +978,6 @@
             
         ctxMenu.style.display = 'none'; 
     }
-
 
     document.getElementById('btn-dmg').addEventListener('click', () => {
         let curr = parseInt(inputCurrHp.value);
@@ -900,7 +990,6 @@
         connection.invoke("SendMessageToGame", gameId, "System", `[SYSTEM] ${charName} takes ${mod} damage! (${newHp}/${max} HP)`).catch(e => console.error(e));
     });
 
-
     document.getElementById('btn-heal').addEventListener('click', () => {
         let curr = parseInt(inputCurrHp.value);
         let max = parseInt(inputMaxHp.value);
@@ -912,7 +1001,6 @@
         connection.invoke("SendMessageToGame", gameId, "System", `[SYSTEM] ${charName} is healed for ${mod} HP! (${newHp}/${max} HP)`).catch(e => console.error(e));
     });
 
-
     document.getElementById('btn-save-hp').addEventListener('click', () => {
         let newHp = parseInt(inputCurrHp.value);
         let max = parseInt(inputMaxHp.value);
@@ -921,27 +1009,92 @@
         let charName = document.getElementById('ctx-token-name').innerText;
         connection.invoke("SendMessageToGame", gameId, "System", `[SYSTEM] ${charName}'s HP is set to ${newHp}/${max}.`).catch(e => console.error(e));
     });
-
-
+    
     const btnLongRest = document.getElementById('btn-long-rest');
     if (btnLongRest) {
         btnLongRest.addEventListener('click', () => {
             document.querySelectorAll('.game-token').forEach(token => {
                 let id = parseInt(token.getAttribute('data-token-id'));
                 let max = parseInt(token.getAttribute('data-max-hp')) || 100;
-                
                 connection.invoke("UpdateTokenHp", gameId, id, max, max).catch(e => console.error(e));
             });
             connection.invoke("SendMessageToGame", gameId, "System", "[SYSTEM] The party takes a Long Rest. Everyone is fully healed!").catch(e => console.error(e));
         });
     }
+    
+    const btnGlobalHp = document.getElementById('btn-global-hp');
+    if (btnGlobalHp) {
+        btnGlobalHp.addEventListener('click', () => {
+            let input = prompt("Enter new Max HP for ALL tokens on the board:", "1000");
+            if (input === null || input.trim() === "") return; 
+            let newMaxHp = parseInt(input);
+            if (isNaN(newMaxHp) || newMaxHp <= 0) {
+                alert("Please enter a valid number greater than 0.");
+                return;
+            }
+            document.querySelectorAll('.game-token').forEach(token => {
+                let id = parseInt(token.getAttribute('data-token-id'));
+                connection.invoke("UpdateTokenHp", gameId, id, newMaxHp, newMaxHp).catch(e => console.error(e));
+            });
+            connection.invoke("SendMessageToGame", gameId, "System", `[SYSTEM] ⚙️ The Dungeon Master has shifted reality! Everyone's Max HP is now ${newMaxHp}!`).catch(e => console.error(e));
+        });
+    }
+    
+    const btnSpawnMonster = document.getElementById('btn-spawn-monster');
+    const spawnModalElement = document.getElementById('spawnMonsterModal');
+    let spawnModal;
+    if (spawnModalElement) spawnModal = new bootstrap.Modal(spawnModalElement);
 
+    if (btnSpawnMonster) {
+        btnSpawnMonster.addEventListener('click', () => {
+            spawnModal.show();
+        });
+    }
+    let isPlacingMonster = false;
+    let pendingMonsterData = null;
+
+    document.getElementById('btn-confirm-spawn')?.addEventListener('click', () => {
+        const name = document.getElementById('monster-name').value;
+        const hp = parseInt(document.getElementById('monster-hp').value);
+        const color = document.getElementById('monster-color').value;
+
+        if (isNaN(hp) || hp <= 0) {
+            alert("Please enter a valid HP.");
+            return;
+        }
+
+        pendingMonsterData = { name, hp, color };
+        
+        isPlacingMonster = true;
+        viewport.style.cursor = "crosshair"; 
+        
+        spawnModal.hide();
+
+        const msgWrapper = document.createElement('div');
+        msgWrapper.className = "d-flex w-100 mb-2 justify-content-center";
+        msgWrapper.innerHTML = `
+            <div class="w-100 text-center py-2 px-3 rounded shadow-sm border border-danger" style="background-color: #4a0000; max-width: 95%;">
+                <div class="fst-italic text-light fw-bold" style="font-size: 0.85rem;">🎯 Click anywhere on the map to place the monster! (Press ESC to cancel)</div>
+            </div>
+        `;
+        chatBox.appendChild(msgWrapper);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isPlacingMonster) {
+            isPlacingMonster = false;
+            pendingMonsterData = null;
+            viewport.style.cursor = "grab";
+        }
+    });
+   
     document.getElementById('btn-open-sheet').addEventListener('click', () => {
         ctxMenu.style.display = 'none';
         const sheetModal = new bootstrap.Modal(document.getElementById('characterSheetModal'));
         sheetModal.show();
     });
-
+    
     connection.on("TokenHpUpdated", (tokenId, currentHp, maxHp) => {
         const token = document.getElementById(`token-${tokenId}`);
         if (token) {
@@ -958,8 +1111,7 @@
             }
         }
     });
-
-
+    
     const rulerLayer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     rulerLayer.style.position = "absolute";
     rulerLayer.style.top = "0";
@@ -979,8 +1131,8 @@
     rulerTextBg.setAttribute("fill", "#1a1a1a");
     rulerTextBg.setAttribute("stroke", "#ffc107");
     rulerTextBg.setAttribute("stroke-width", "1");
-    rulerTextBg.setAttribute("rx", "6"); 
-
+    rulerTextBg.setAttribute("rx", "6");
+    
     const rulerText = document.createElementNS("http://www.w3.org/2000/svg", "text");
     rulerText.setAttribute("fill", "white");
     rulerText.setAttribute("font-size", "14");
@@ -997,7 +1149,7 @@
     let isMeasuring = false;
     let measureStartX = 0;
     let measureStartY = 0;
-
+    
     viewport.addEventListener('mousedown', (e) => {
         if (e.shiftKey) {
             isMeasuring = true;
@@ -1005,7 +1157,7 @@
             
             measureStartX = (e.clientX - mapRect.left) / mapScale;
             measureStartY = (e.clientY - mapRect.top) / mapScale;
-            
+          
             rulerLine.setAttribute("x1", measureStartX);
             rulerLine.setAttribute("y1", measureStartY);
             rulerLine.setAttribute("x2", measureStartX);
@@ -1051,6 +1203,63 @@
         if (isMeasuring) {
             isMeasuring = false;
             rulerLayer.style.display = "none";
+        }
+    });
+    
+    const btnOpenNotes = document.getElementById('btn-open-notes');
+    const notesArea = document.getElementById('personal-notes-area');
+    const btnSaveNotes = document.getElementById('btn-save-notes');
+    const notesSaveStatus = document.getElementById('notes-save-status');
+
+    if (btnOpenNotes) {
+        btnOpenNotes.addEventListener('click', () => {
+            const storageKey = `vtt_notes_game_${gameId}_user_${currentUserId}`;
+            const savedNotes = localStorage.getItem(storageKey);
+            if (savedNotes) {
+                notesArea.value = savedNotes;
+            } else {
+                notesArea.value = "";
+            }
+            const notesModal = new bootstrap.Modal(document.getElementById('notesModal'));
+            notesModal.show();
+        });
+    }
+
+    if (btnSaveNotes) {
+        btnSaveNotes.addEventListener('click', () => {
+            const storageKey = `vtt_notes_game_${gameId}_user_${currentUserId}`;
+            localStorage.setItem(storageKey, notesArea.value);
+            notesSaveStatus.style.opacity = "1";
+            setTimeout(() => {
+                notesSaveStatus.style.opacity = "0";
+            }, 2000);
+        });
+    }
+    document.getElementById('btn-delete-token').addEventListener('click', () => {
+        if (!contextTokenId) return;
+        
+        if (confirm("Are you sure you want to permanently delete this token?")) {
+            connection.invoke("DeleteToken", gameId, contextTokenId)
+                .catch(err => console.error("Błąd usuwania tokena: ", err));
+                
+            ctxMenu.style.display = 'none';
+        }
+    });
+
+    connection.on("TokenDeleted", (tokenId) => {
+        const tokenElement = document.getElementById(`token-${tokenId}`);
+        if (tokenElement) {
+            tokenElement.style.transition = "transform 0.3s, opacity 0.3s";
+            tokenElement.style.transform = "scale(0)";
+            tokenElement.style.opacity = "0";
+            
+            setTimeout(() => {
+                tokenElement.remove();
+            }, 300); 
+        }
+        
+        if (activeToken && activeToken.getAttribute('data-token-id') == tokenId) {
+            activeToken = null;
         }
     });
 </script>

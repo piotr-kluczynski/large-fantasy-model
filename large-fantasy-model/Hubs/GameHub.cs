@@ -1,4 +1,5 @@
 ﻿using large_fantasy_model.Data;
+using large_fantasy_model.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -102,6 +103,80 @@ namespace large_fantasy_model.Hubs
 
             string groupName = $"Game_{gameId}";
             await Clients.Group(groupName).SendAsync("MapChanged", mapUrl);
+        }
+        public async Task SpawnToken(int gameId, string name, int maxHp, string color, int x, int y)
+        {
+            try
+            {
+
+                var userIdString = Context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userIdString))
+                {
+                    await Clients.Caller.SendAsync("ReceiveGameMessage", "System", "[ERROR] SignalR lost user authentication context!", DateTime.Now.ToString("HH:mm"));
+                    return;
+                }
+
+                int userId = int.Parse(userIdString);
+                string groupName = $"Game_{gameId}";
+
+
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    name = "Unknown Monster";
+                }
+
+
+                var token = new Token
+                {
+                    GameId = gameId,
+                    Name = name,
+                    MaxHp = maxHp,
+                    CurrentHp = maxHp,
+                    Color = color,
+                    X = x,
+                    Y = y,
+                    UserId = userId
+                };
+
+                _context.Tokens.Add(token);
+                await _context.SaveChangesAsync();
+
+                await Clients.Group(groupName).SendAsync("TokenSpawned", token.Id, token.Name, maxHp, color, x, y, userId);
+                await Clients.Group(groupName).SendAsync("ReceiveGameMessage", "System", $"[SYSTEM] {token.Name} has appeared on the battlefield!", DateTime.Now.ToString("HH:mm"));
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("ReceiveGameMessage", "System", $"[ERROR] Failed to spawn: {ex.Message}", DateTime.Now.ToString("HH:mm"));
+            }
+        }
+        public async Task DeleteToken(int gameId, int tokenId)
+        {
+            var userIdString = Context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString)) return;
+
+            int userId = int.Parse(userIdString);
+
+            var token = await _context.Tokens.FindAsync(tokenId);
+            if (token != null)
+            {
+                var game = await _context.Games.FindAsync(gameId);
+                bool isDM = game != null && game.UserId == userId;
+
+                if (isDM || token.UserId == userId)
+                {
+                    string tokenName = token.Name; 
+
+                    _context.Tokens.Remove(token);
+                    await _context.SaveChangesAsync();
+
+                    string groupName = $"Game_{gameId}";
+
+                    await Clients.Group(groupName).SendAsync("TokenDeleted", tokenId);
+
+                    await Clients.Group(groupName).SendAsync("ReceiveGameMessage", "System", $"[SYSTEM] 💀 {tokenName} was removed from the map.", DateTime.Now.ToString("HH:mm"));
+                }
+            }
         }
     }
 }
