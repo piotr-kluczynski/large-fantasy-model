@@ -10,7 +10,7 @@ using System.Security.Claims;
 
 namespace large_fantasy_model.Controllers
 {
-    [Authorize(Roles = "Admin,HeadAdmin")] // Dostęp dla obu rang
+    [Authorize(Roles = "Admin,HeadAdmin")] 
     public class AdminController : Controller
     {
         private readonly LargeFantasyModelContext _context;
@@ -20,12 +20,9 @@ namespace large_fantasy_model.Controllers
             _context = context;
         }
 
-        // Pomocnicza metoda sprawdzająca hierarchię
         private bool CanManage(int myPermissions, int targetPermissions)
         {
-            // HeadAdmin (2) zarządza wszystkimi prócz siebie
             if (myPermissions == 2) return true;
-            // Admin (1) zarządza tylko zwykłymi Userami (0)
             if (myPermissions == 1 && targetPermissions == 0) return true;
 
             return false;
@@ -37,7 +34,6 @@ namespace large_fantasy_model.Controllers
             return int.TryParse(claim, out int res) ? res : 0;
         }
 
-        // LISTA UŻYTKOWNIKÓW
         public async Task<IActionResult> Users()
         {
             var users = await _context.Users
@@ -57,7 +53,6 @@ namespace large_fantasy_model.Controllers
             return View(users);
         }
 
-        // EDYCJA UŻYTKOWNIKA (GET)
         [HttpGet]
         public async Task<IActionResult> EditUser(int id)
         {
@@ -73,7 +68,6 @@ namespace large_fantasy_model.Controllers
             return View(user);
         }
 
-        // EDYCJA UŻYTKOWNIKA (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditUser(User model)
@@ -83,17 +77,15 @@ namespace large_fantasy_model.Controllers
 
             var myPerms = GetMyPermissions();
 
-            // Walidacja hierarchii
             if (!CanManage(myPerms, userInDb.AdminPermissions))
             {
                 TempData["Error"] = "You do not have permission to modify this account.";
                 return RedirectToAction(nameof(Users));
             }
 
-            // Blokada nadawania rangi HeadAdmin (2)
             if (model.AdminPermissions == 2 && myPerms < 2)
             {
-                model.AdminPermissions = userInDb.AdminPermissions; // Cofnij zmianę jeśli nie jesteś HeadAdminem
+                model.AdminPermissions = userInDb.AdminPermissions; 
             }
 
             userInDb.Username = model.Username;
@@ -109,7 +101,6 @@ namespace large_fantasy_model.Controllers
             return RedirectToAction(nameof(Users));
         }
 
-        // USUWANIE UŻYTKOWNIKA
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(int id)
@@ -130,7 +121,6 @@ namespace large_fantasy_model.Controllers
             return RedirectToAction(nameof(Users));
         }
 
-        // DODAWANIE UŻYTKOWNIKA
         [HttpGet]
         public IActionResult CreateUser() => View(new User());
 
@@ -147,7 +137,6 @@ namespace large_fantasy_model.Controllers
                     return View(user);
                 }
 
-                // Blokada tworzenia HeadAdmina
                 if (user.AdminPermissions == 2 && GetMyPermissions() < 2)
                 {
                     user.AdminPermissions = 1;
@@ -165,7 +154,6 @@ namespace large_fantasy_model.Controllers
             return View(user);
         }
 
-        // BLOKOWANIE
         [HttpGet]
         public async Task<IActionResult> LockUser(int id)
         {
@@ -210,7 +198,6 @@ namespace large_fantasy_model.Controllers
             return RedirectToAction(nameof(Users));
         }
 
-        // PODSZYWANIE SIĘ
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Impersonate(int id)
@@ -260,7 +247,6 @@ namespace large_fantasy_model.Controllers
             var adminUser = await _context.Users.FindAsync(int.Parse(originalAdminId));
             if (adminUser == null) return RedirectToAction("Logout", "Auth");
 
-            // Czyścimy sesję podszywania
             HttpContext.Session.Remove("OriginalAdminId");
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
@@ -272,11 +258,10 @@ namespace large_fantasy_model.Controllers
         new Claim("AdminPermissions", adminUser.AdminPermissions.ToString())
     };
 
-            // KLUCZOWE: Musimy dodać OBIE role, jeśli to HeadAdmin
             if (adminUser.AdminPermissions == 2)
             {
                 claims.Add(new Claim(ClaimTypes.Role, "HeadAdmin"));
-                claims.Add(new Claim(ClaimTypes.Role, "Admin")); // HeadAdmin MUSI mieć też rolę Admin
+                claims.Add(new Claim(ClaimTypes.Role, "Admin")); 
             }
             else if (adminUser.AdminPermissions == 1)
             {
@@ -285,13 +270,12 @@ namespace large_fantasy_model.Controllers
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            // Ważne: SignInAsync musi być wywołane z nową tożsamością
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(identity),
-                new AuthenticationProperties { IsPersistent = true }); // IsPersistent pomaga utrzymać sesję
+                new AuthenticationProperties { IsPersistent = true }); 
 
-            // Przekierowanie do panelu użytkowników, co wymusi przeładowanie uprawnień
+
             return RedirectToAction("Users", "Admin");
         }
     }

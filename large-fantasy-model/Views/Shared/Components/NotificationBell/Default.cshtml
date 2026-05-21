@@ -1,16 +1,5 @@
 ﻿@model IEnumerable<large_fantasy_model.Models.Notification>
-<style>
-    .notification-item-card {
-        background-color: #f8f9fa; 
-        transition: background-color 0.2s ease-in-out !important; 
-        transform: none !important; 
-    }
-    
-        .notification-item-card:hover {
-            background-color: #e9ecef !important; 
-            transform: none !important; 
-        }
-</style>
+
 <li class="nav-item dropdown me-3">
     <a class="nav-link text-dark position-relative p-2" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="bi bi-bell-fill fs-5"></i>
@@ -84,4 +73,19 @@
         }
     </ul>
 </li>
+@section Styles {
+    <style>
+        .notification-item-card {
+            background-color: #f8f9fa;
+            transition: background-color 0.2s ease-in-out !important;
+            transform: none !important;
+        }
+    
+            .notification-item-card:hover {
+                background-color: #e9ecef !important;
+                transform: none !important;
+            }
+    </style>
+
+}
 

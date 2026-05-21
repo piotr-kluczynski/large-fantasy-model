@@ -111,21 +111,22 @@
         </div>
     }
 </div>
-
-<style>
+@section Styles {
+    <style>
  
-    .rounded-4 {
-        border-radius: 1rem !important;
-    }
+        .rounded-4 {
+            border-radius: 1rem !important;
+        }
 
     
-    .transition-hover {
-        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
-        cursor: pointer;
-    }
-
-        .transition-hover:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
+        .transition-hover {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+            cursor: pointer;
         }
-</style>
+
+            .transition-hover:hover {
+                transform: translateY(-10px) scale(1.02);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
+            }
+    </style>
+}

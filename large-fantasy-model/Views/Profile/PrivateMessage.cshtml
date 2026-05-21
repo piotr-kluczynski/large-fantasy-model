@@ -14,27 +14,7 @@
         return colors[hash % colors.Length];
     }
 }
-<style>
-    .hover-bg:hover {
-        background-color: #f8f9fa !important;
-        transition: 0.2s;
-    }
 
-    .unread-pop {
-        transform: scale(1.02) translateX(5px);
-        box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.08) !important;
-        border-radius: 8px !important;
-        z-index: 10;
-        position: relative;
-        transition: all 0.3s ease-in-out;
-    }
-
-    .chat-btn {
-        cursor: pointer;
-        border: none;
-        outline: none;
-    }
-</style>
 <div class="container mt-4">
     <div class="row" style="height: 75vh;">
         
@@ -143,141 +123,44 @@
 
     </div>
 </div>
-<style>
+@section Styles {
+    <style>
+    .hover-bg:hover {
+        background-color: #f8f9fa !important;
+        transition: 0.2s;
+    }
+
+    .unread-pop {
+        transform: scale(1.02) translateX(5px);
+        box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.08) !important;
+        border-radius: 8px !important;
+        z-index: 10;
+        position: relative;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .chat-btn {
+        cursor: pointer;
+        border: none;
+        outline: none;
+    }
     .btn-kick { color: #000; transition: color 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; }
     .btn-kick i { font-size: 2rem; line-height: 1; }
     .btn-kick:hover { color: #dc3545; }
     .btn-invited { cursor: default !important; opacity: 0.7; }
 </style>
+}
+
+
+
+
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-
     <script>
-        const myUserId = @myId;
-        const activeConversationId = "@(activeChat?.Id.ToString() ?? "")";
-
-        document.getElementById('friend-search').addEventListener('input', function () {
-        const searchTerm = this.value.toLowerCase();
-        const items = document.querySelectorAll('.friend-item');
-            
-        items.forEach(item => {
-        const name = item.getAttribute('data-name');
-        if (name.includes(searchTerm)) {
-        item.style.display = 'block';
-        } else {
-        item.style.display = 'none';
-        }
-        });
-        });
-
-        const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/privateMessageHub")
-        .build();
-            
-        connection.on("ReceiveMessage", function (convId, content, time, senderId) {
-        const isMine = (senderId === myUserId);
-                
-        if (convId.toString() === activeConversationId) {
-        const chatBox = document.getElementById("chat-messages-box");
-        if (chatBox) {
-        const messageHtml = `
-        <div class="mb-3 d-flex ${isMine ? 'justify-content-end' : 'justify-content-start'}">
-        <div class="px-3 py-2 rounded-4 shadow-sm ${isMine ? 'bg-primary text-white' : 'bg-white text-dark'}" style="max-width: 75%;">
-        <div>${content}</div>
-        <small class="${isMine ? 'text-light' : 'text-muted'}" style="font-size: 0.7rem;">${time}</small>
-        </div>
-        </div>
-        `;
-        chatBox.innerHTML += messageHtml;
-        chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-
-        if (!isMine) {
-        fetch(`/PrivateMessage/MarkConversationAsRead?conversationId=${convId}`, { method: 'POST' })
-        .then(() => {
-        if (typeof updateAllCounts === 'function') updateAllCounts();
-        })
-        .catch(err => console.error("Błąd auto-odczytu:", err));
-        }
-        }
-        else if (!isMine) {
-        const friendBtn = document.getElementById("friend-btn-" + senderId);
-        const badge = document.getElementById("unread-badge-friend-" + senderId);
-
-        if (friendBtn && badge) {
-        friendBtn.classList.add("border-warning", "fw-bold", "unread-pop");
-        friendBtn.classList.remove("border-primary");
-        badge.classList.remove("d-none");
-        let currentCount = parseInt(badge.innerText) || 0;
-        badge.innerText = currentCount + 1;
-        }
-        }
-        });
-        
-        connection.start().then(function () {
-        connection.invoke("JoinMyUserGroup", myUserId.toString());
-        const chatBox = document.getElementById("chat-messages-box");
-        if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
-        }).catch(function (err) {
-        console.error(err.toString());
-        });
-        
-
-        const chatForm = document.getElementById("chat-form");
-        if(chatForm) {
-        chatForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-        const input = document.getElementById("chat-input");
-        const content = input.value;
-        if(!content.trim()) return;
-
-        const formData = new FormData(chatForm);
-        fetch(chatForm.action, {
-        method: 'POST',
-        body: formData
-        }).then(response => {
-        if(response.ok) {
-        input.value = "";
-        }
-        }).catch(error => console.error('Error:', error));
-        });
-        }
-
-
-        document.addEventListener('DOMContentLoaded', function () {
-        const chatInput = document.getElementById("chat-input");
-            
-        if (chatInput) {
-        chatInput.addEventListener('focus', function () {
-        const convIdInput = document.querySelector('input[name="conversationId"]');
-        if (convIdInput) {
-        const convId = convIdInput.value;
-                        
-        fetch(`/PrivateMessage/MarkConversationAsRead?conversationId=${convId}`, {
-        method: 'POST'
-        })
-        .then(response => {
-        if (response.ok) {
-
-        if (typeof updateAllCounts === 'function') {
-        updateAllCounts();
-        }
-
-
-        const activeBtns = document.querySelectorAll('.friend-item button');
-        activeBtns.forEach(btn => {
-        if(btn.classList.contains('border-primary')) {
-        const badge = btn.querySelector('.badge');
-        if (badge) badge.classList.add('d-none');
-        }
-        });
-        }
-        })
-        .catch(err => console.error("Błąd oznaczania jako przeczytane:", err));
-        }
-        });
-        }
-        });
+        window.myUserId = @myId;
+        window.activeConversationId = "@(activeChat?.Id.ToString() ?? "")";
     </script>
+    
+    <script src="~/js/Profile/PrivateMessage.js"></script>
+    
 }

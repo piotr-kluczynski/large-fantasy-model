@@ -24,7 +24,6 @@ namespace large_fantasy_model.ViewModels
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        // NOWE POLE: Potwierdzenie hasła (nie idzie do bazy danych, służy tylko walidacji)
         [Required(ErrorMessage = "Please confirm your password.")]
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]

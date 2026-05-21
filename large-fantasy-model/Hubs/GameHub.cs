@@ -178,5 +178,16 @@ namespace large_fantasy_model.Hubs
                 }
             }
         }
+        public async Task UpdateInitiative(int gameId, string initiativeJson)
+        {
+            string groupName = $"Game_{gameId}";
+            await Clients.Group(groupName).SendAsync("InitiativeUpdated", initiativeJson);
+        }
+
+        public async Task SetActiveTurn(int gameId, int? tokenId)
+        {
+            string groupName = $"Game_{gameId}";
+            await Clients.Group(groupName).SendAsync("ActiveTurnChanged", tokenId);
+        }
     }
 }

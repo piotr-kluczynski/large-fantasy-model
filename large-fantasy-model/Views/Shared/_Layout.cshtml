@@ -1,5 +1,5 @@
 ﻿@{
-    @using System.Security.Claims
+@using System.Security.Claims
 @using large_fantasy_model.Data
     @inject LargeFantasyModelContext _context
 
@@ -199,115 +199,17 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
-
-    <script>
-            function getUserColor(username) {
-                if (!username) return "0d6efd";
-                const colors = ["0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0"];
-                let hash = 0;
-                for (let i = 0; i < username.length; i++) hash += username.charCodeAt(i);
-                return colors[hash % colors.length];
-            }
-    </script>
-    
-    @if (User.Identity.IsAuthenticated)
+    @if (User.Identity?.IsAuthenticated == true)
     {
-        @section Scripts {
-
         <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+        
         <script>
-            const globalUserId = "@User.FindFirstValue(ClaimTypes.NameIdentifier)";
-            const globalHubConnection = new signalR.HubConnectionBuilder()
-            .withUrl("/privateMessageHub")
-            .build();
-            
-          
-            function updateAllCounts() {
-            fetch('/Profile/GetNotificationCounts')
-            .then(response => response.json())
-            .then(data => {
-            const friendBadge = document.getElementById('friend-requests-badge');
-            if (friendBadge) {
-            if (data.friendRequestsCount > 0) {
-            friendBadge.innerText = data.friendRequestsCount;
-            friendBadge.style.display = 'inline-block';
-            } else {
-            friendBadge.style.display = 'none';
-            }
-            }
-
-            const msgBadge = document.getElementById('unread-messages-badge');
-            if (msgBadge) {
-            if (data.unreadMessagesCount > 0) {
-            msgBadge.innerText = data.unreadMessagesCount;
-            msgBadge.style.display = 'inline-block';
-            } else {
-            msgBadge.style.display = 'none';
-            }
-            }
-            })
-            .catch(err => console.error("Błąd aktualizacji liczników:", err));
-            }
-
-
-            globalHubConnection.on("UpdateNotifications", function () {
-            fetch('/Game/GetNotificationBell')
-            .then(response => response.text())
-            .then(html => {
-            document.getElementById('notification-bell-container').innerHTML = html;
-            })
-            .catch(err => console.error("Błąd ładowania dzwoneczka:", err));
-
-            updateAllCounts();
-            });
-
-            globalHubConnection.on("ReceiveMessage", function (conversationId, content, timeString, senderId) {
-            updateAllCounts();
-            });
-
-            globalHubConnection.on("FriendRequestDeclined", function (declinerId) {
-            console.log("🔥 SignalR: Odrzucono zaproszenie od ID:", declinerId);
-            const sentRequestRow = document.getElementById(`sent-request-${declinerId}`);
-                
-            if (sentRequestRow) {
-            const parentList = document.getElementById("sent-requests-list");
-            sentRequestRow.remove();
-            console.log("✅ Usunięto wiersz zaproszenia z listy.");
-                    
-            if (parentList) {
-            const remaining = parentList.querySelectorAll('li').length;
-            console.log("Pozostało na liście:", remaining);
-            if (remaining === 0) {
-            const section = document.getElementById("sent-requests-section");
-            if (section) {
-            section.classList.add("d-none");
-            console.log("✅ Ukryto całą sekcję Sent Requests.");
-            }
-            }
-            }
-            } else {
-            console.warn(`❌ Nie znaleziono wiersza o ID: sent-request-${declinerId}`);
-            }
-            });
-
-            globalHubConnection.start().then(() => {
-            globalHubConnection.invoke("JoinMyUserGroup", globalUserId);
-            }).catch(err => console.error(err));
-
-            document.addEventListener('click', function (e) {
-         
-            const bellToggle = e.target.closest('#notificationsDropdown') || e.target.closest('#notification-bell-container');
-            if (bellToggle) {
-            const badge = bellToggle.querySelector('.badge');
-            if (badge) badge.style.display = 'none';
-
-            fetch('/Profile/MarkNotificationsAsRead', {
-            method: 'POST'
-            }).catch(err => console.error("Błąd oznaczania powiadomień:", err));
-            }
-            });
+            window.globalUserId = "@User.FindFirstValue(ClaimTypes.NameIdentifier)";
         </script>
-        }
-        }
+        
+        <script src="~/js/NotificationBell.js" asp-append-version="true"></script>
+    }
+   
+    
     </body>
 </html>

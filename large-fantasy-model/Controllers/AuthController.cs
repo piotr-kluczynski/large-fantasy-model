@@ -12,18 +12,15 @@ namespace large_fantasy_model.Controllers
     {
         private readonly LargeFantasyModelContext _context;
 
-        // Konstruktor wstrzykujący bazę danych
         public AuthController(LargeFantasyModelContext context)
         {
             _context = context;
         }
 
-        // REJESTRACJA
 
         [HttpGet]
         public IActionResult Register()
         {
-            // Przekazujemy pusty ViewModel do widoku
             return View(new ViewModels.RegisterViewModel());
         }
 
@@ -33,7 +30,6 @@ namespace large_fantasy_model.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Sprawdzenie, czy email lub nazwa użytkownika są już zajęte
                 var existingUser = await _context.Users
                     .FirstOrDefaultAsync(u => u.Email == model.Email || u.Username == model.Username);
 
@@ -43,7 +39,6 @@ namespace large_fantasy_model.Controllers
                     return View(model);
                 }
 
-                // Przepisujemy dane z ViewModelu do obiektu bazy danych (User)
                 var user = new User
                 {
                     Username = model.Username,
@@ -67,13 +62,11 @@ namespace large_fantasy_model.Controllers
         }
 
 
-        // LOGOWANIE
 
 
         [HttpGet]
         public IActionResult Login()
         {
-            // Po zalogowaniu wrcamy do strony Home
             if (User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
@@ -85,7 +78,6 @@ namespace large_fantasy_model.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password)
         {
-            // Szukamy użytkownika pasującego do maila i hasła
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
 
@@ -96,7 +88,6 @@ namespace large_fantasy_model.Controllers
                     ViewBag.ErrorMessage = $"Twój dostęp został zablokowany do {user.LockoutEnd:dd.MM.yyyy}. Powód: {user.LockoutReason}";
                     return View();
                 }
-                // Tworzymy listę "Dowodów tożsamości" (Claims)
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), 
@@ -110,33 +101,26 @@ namespace large_fantasy_model.Controllers
                 if (user.AdminPermissions >= 1) claims.Add(new Claim(ClaimTypes.Role, "Admin"));
                 if (user.AdminPermissions == 0) claims.Add(new Claim(ClaimTypes.Role, "User"));
 
-                // Pakujemy to w "tożsamość" opartą na ciasteczkach
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-                // Fizyczne zalogowanie (zapisanie ciasteczka w przeglądarce)
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity));
 
-                // Po sukcesie wrzucamy gracza na stronę główną
                 return RedirectToAction("Index", "Home");
             }
 
-            // Jeśli podano złe dane
             ViewBag.ErrorMessage = "Nieprawidłowy adres e-mail lub hasło.";
             return View();
         }
 
         
-        // WYLOGOWYWANIE
         
 
         public async Task<IActionResult> Logout()
         {
-            // Usuwamy ciasteczko logowania
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            // Wracamy na stronę główną
             return RedirectToAction("Index", "Home");
         }
     }

@@ -177,34 +177,20 @@
         }
     </div>
 </div>
+@section Styles {
+    <style>
+        .transition-hover {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .transition-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+        }
+    </style>
+}
 
-<style>
-    .transition-hover {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-    .transition-hover:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
-    }
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
-<script>
-    // Ujednolicamy nazwę zmiennej na lobbyConnection
-    const lobbyConnection = new signalR.HubConnectionBuilder()
-        .withUrl("/lobbyHub")
-        .build();
-
-    // Zmieniono z lobbyConn na lobbyConnection
-    lobbyConnection.on("RefreshLobbyList", function () {
-    const container = $("#games-list-container");
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     
-    // Zamiast fadeOut, używamy animacji przezroczystości
-    container.animate({ opacity: 0.5 }, 200, function() {
-        $.get("/FindGame/GetGamesList", function (data) {
-            container.html(data).animate({ opacity: 1 }, 200);
-        });
-    });
-});
-
-    lobbyConnection.start().catch(err => console.error(err.toString()));
-</script>
+    <script src="~/js/Find.js"></script>
+}
