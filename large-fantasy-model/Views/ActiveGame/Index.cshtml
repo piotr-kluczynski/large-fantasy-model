@@ -105,7 +105,7 @@
                         <li><button class="dropdown-item dice-btn" data-sides="100">D100 (Percentile)</button></li>
                     </ul>
                 </div>
-                <button class="btn btn-outline-light"><i class="bi bi-person-vcard"></i> Character Sheet</button>
+                <button id="btn-open-sheet" class="btn btn-outline-light"><i class="bi bi-person-vcard"></i> Character Sheet</button>
                 <button id="btn-open-notes" class="btn btn-outline-light"><i class="bi bi-journal-text"></i> Notes</button>
                 
                 @if (Model.IsDungeonMaster)
@@ -114,7 +114,7 @@
                         <h5 class="text-center text-warning mb-3"> DM Tools</h5>
                         <div class="d-grid gap-2">
                             <button id="btn-change-map" class="btn btn-outline-warning"><i class="bi bi-map"></i> Change Map</button>
-                            <button class="btn btn-outline-warning"><i class="bi bi-robot"></i> AI Assistant (LLM)</button>
+                            <button id="btn-open-ai" class="btn btn-outline-warning"><i class="bi bi-robot"></i> AI Assistant (LLM)</button>
                             <button id="btn-long-rest" class="btn btn-outline-warning"><i class="bi bi-moon-stars"></i> Long Rest (Heal All)</button>
                             <button id="btn-global-hp" class="btn btn-outline-warning"><i class="bi bi-heart"></i> Set Global Max HP</button>
                             <button id="btn-spawn-monster" class="btn btn-outline-warning fw-bold"><i class="bi bi-bug-fill"></i> Spawn Monster</button>
@@ -221,9 +221,76 @@
         </div>
     </div>
 
-    <div class="modal fade" id="characterSheetModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content bg-dark text-white border-secondary"><div class="modal-header border-secondary"><h5 class="modal-title"><i class="bi bi-person-vcard me-2"></i> Character Sheet</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-center py-5"><i class="bi bi-tools fs-1 text-warning mb-3"></i><h5>Under Construction!</h5></div></div></div></div>
+    <div class="modal fade" id="characterSheetModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title"><i class="bi bi-person-vcard me-2"></i> Character Sheet</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-5"><i class="bi bi-tools fs-1 text-warning mb-3"></i><h5>Under Construction!</h5></div>
+            </div>
+        </div>
+    </div>
     
-    <div class="modal fade" id="notesModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content bg-dark text-white border-secondary" style="width: 100%; max-width: 800px;"><div class="bg-dark text-white border-secondary p-3 d-flex justify-content-between align-items-center"><h4 class="mb-0 fw-bold" style="color: #e0c968;"><i class="bi bi-journal-text me-2"></i> Personal Notes</h4><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><p class="text-muted small mb-2"><i class="bi bi-info-circle me-1"></i> These notes are saved locally in your browser.</p><textarea id="personal-notes-area" class="form-control bg-dark text-white border-secondary w-100" style="height: 400px; resize: none;" placeholder="Write down your quest objectives..."></textarea></div><div class="p-3 border-top border-secondary d-flex justify-content-between align-items-center"><span id="notes-save-status" class="text-success fw-bold ms-2" style="opacity: 0; transition: opacity 0.3s;"><i class="bi bi-check-circle-fill me-1"></i> Saved!</span><div><button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Close</button><button type="button" id="btn-save-notes" class="btn btn-rpg-blue fw-bold px-4">Save Notes</button></div></div></div></div></div>
+    <div class="modal fade" id="notesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark text-white border-secondary" style="width: 100%; max-width: 800px;">
+                <div class="bg-dark text-white border-secondary p-3 d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold" style="color: #e0c968;"><i class="bi bi-journal-text me-2"></i> Personal Notes</h4>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-2"><i class="bi bi-info-circle me-1"></i> These notes are saved locally in your browser.</p>
+                    <textarea id="personal-notes-area" class="form-control bg-dark text-white border-secondary w-100" style="height: 400px; resize: none;" placeholder="Write down your quest objectives..."></textarea>
+                </div>
+                <div class="p-3 border-top border-secondary d-flex justify-content-between align-items-center">
+                    <span id="notes-save-status" class="text-success fw-bold ms-2" style="opacity: 0; transition: opacity 0.3s;"><i class="bi bi-check-circle-fill me-1"></i> Saved!</span>
+                    <div>
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="btn-save-notes" class="btn btn-rpg-blue fw-bold px-4">Save Notes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="aiModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark text-white border-warning shadow-lg">
+            
+                <div class="modal-header border-warning" style="background: linear-gradient(135deg, #332b00 0%, #1a1a1a 100%);">
+                    <h5 class="modal-title fw-bold text-warning"><i class="bi bi-robot me-2"></i> AI Dungeon Master Assistant</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+            
+                <div class="modal-body p-0 d-flex flex-column" style="height: 60vh;">
+                    <div id="ai-chat-history" class="flex-grow-1 p-3 overflow-auto" style="background-color: #151515;">
+                        <div class="text-center text-muted small mb-4">--- Connected to the Gemini model ---</div>
+                    
+                        <div class="d-flex w-100 mb-3 justify-content-start">
+                            <div class="p-2 rounded shadow-sm" style="background-color: #2b2b2b; border: 1px solid #444; max-width: 85%;">
+                                <div class="text-warning small fw-bold mb-1"><i class="bi bi-robot"></i> Gemini</div>
+                                <div>
+                                    Hello, Game Master. What do you want to ask? Do you need an NPC name, a trap description, or monster stats?
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="p-3 border-top border-warning" style="background-color: #1e1e1e;">
+                        <div class="input-group shadow-sm">
+                            <textarea id="ai-prompt" class="form-control bg-dark text-white border-secondary custom-scrollbar" rows="2" placeholder="Write here... (Enter to send, Shift+Enter new line)" style="resize: none;"></textarea>
+                            <button class="btn btn-warning fw-bold px-4" type="button" id="btn-generate-ai" title="Wyślij">
+                                <i class="bi bi-send-fill fs-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
@@ -239,6 +306,7 @@
     <script src="~/js/vtt/Vtt-map.js"></script>
     <script src="~/js/vtt/Vtt-tokens.js"></script>
     <script src="~/js/vtt/Vtt-combat.js"></script>
+    <script src="~/js/vtt/Vtt-ai.js"></script>
 
 </body>
 </html>

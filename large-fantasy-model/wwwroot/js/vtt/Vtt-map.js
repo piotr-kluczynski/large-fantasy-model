@@ -120,7 +120,6 @@ window.addEventListener('mousemove', (e) => {
 });
 window.addEventListener('mouseup', () => { if (isMeasuring) { isMeasuring = false; rulerLayer.style.display = "none"; } });
 
-// --- LOGIKA PANELI BOCZNYCH ---
 const sidebar = document.getElementById('right-sidebar');
 const toggleBtn = document.getElementById('toggle-sidebar-btn');
 const toggleIcon = toggleBtn?.querySelector('i');

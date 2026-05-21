@@ -126,3 +126,87 @@ function getUserColor(username) {
     for (let i = 0; i < username.length; i++) hash += username.charCodeAt(i);
     return colors[hash % colors.length];
 }
+document.addEventListener('DOMContentLoaded', function () {
+    const btnToggleAi = document.getElementById('btn-toggle-ai-lore');
+    const aiPanel = document.getElementById('ai-lore-panel');
+    const btnGenerateLore = document.getElementById('btn-generate-ai-lore');
+
+    if (btnToggleAi && aiPanel) {
+        btnToggleAi.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            if (aiPanel.style.display === 'none' || aiPanel.style.display === '') {
+                aiPanel.style.display = 'block';
+                btnToggleAi.classList.replace('btn-outline-success', 'btn-success');
+                btnToggleAi.classList.add('text-white');
+            } else {
+                aiPanel.style.display = 'none';
+                btnToggleAi.classList.replace('btn-success', 'btn-outline-success');
+                btnToggleAi.classList.remove('text-white');
+            }
+        });
+    }
+
+    if (btnGenerateLore) {
+        btnGenerateLore.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const promptInput = document.getElementById('ai-lore-prompt');
+            const includeCurrent = document.getElementById('ai-include-current').checked;
+            const loreTextarea = document.getElementById('lore-textarea');
+            const statusDiv = document.getElementById('ai-lore-status');
+
+            let promptText = promptInput.value.trim();
+            let currentLore = loreTextarea.value.trim();
+
+            if (!promptText && (!includeCurrent || !currentLore)) {
+                alert("Please write a prompt for the AI or ensure you have text in the main editor!");
+                return;
+            }
+
+            if (includeCurrent && currentLore) {
+                promptText += "\n\n--- CURRENT TEXT TO MODIFY/INCLUDE ---\n" + currentLore;
+            }
+
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Scribing lore...';
+            btnGenerateLore.disabled = true;
+
+            try {
+                const res = await fetch('/api/Ai/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(promptText)
+                });
+
+                if (!res.ok) {
+                    const errText = await res.text();
+                    statusDiv.innerHTML = `<span class="text-danger">❌ Error: ${errText}</span>`;
+                    return;
+                }
+
+                const data = await res.json();
+
+                if (includeCurrent && currentLore) {
+                    loreTextarea.value = data.response;
+                } else {
+                    if (currentLore !== "") {
+                        loreTextarea.value += "\n\n" + data.response;
+                    } else {
+                        loreTextarea.value = data.response;
+                    }
+                }
+
+                statusDiv.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Done!</span>';
+                setTimeout(() => { statusDiv.style.display = 'none'; }, 2000);
+                promptInput.value = '';
+
+            } catch (error) {
+                console.error(error);
+                statusDiv.innerHTML = `<span class="text-danger">❌ Connection error: ${error.message}</span>`;
+            } finally {
+                btnGenerateLore.disabled = false;
+            }
+        });
+    }
+});

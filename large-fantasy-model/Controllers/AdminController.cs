@@ -251,12 +251,12 @@ namespace large_fantasy_model.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.NameIdentifier, adminUser.Id.ToString()),
-        new Claim(ClaimTypes.Name, adminUser.Username),
-        new Claim(ClaimTypes.Email, adminUser.Email),
-        new Claim("AdminPermissions", adminUser.AdminPermissions.ToString())
-    };
+            {
+                new Claim(ClaimTypes.NameIdentifier, adminUser.Id.ToString()),
+                new Claim(ClaimTypes.Name, adminUser.Username),
+                new Claim(ClaimTypes.Email, adminUser.Email),
+                new Claim("AdminPermissions", adminUser.AdminPermissions.ToString())
+            };
 
             if (adminUser.AdminPermissions == 2)
             {
