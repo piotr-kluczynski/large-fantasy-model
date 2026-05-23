@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>large_fantasy_model</RootNamespace>
+    <UserSecretsId>979f6e4c-bc75-43ca-a53f-4f27fad14333</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
