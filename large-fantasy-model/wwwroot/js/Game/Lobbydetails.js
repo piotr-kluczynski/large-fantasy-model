@@ -1,4 +1,9 @@
-﻿const lobbyConnection = new signalR.HubConnectionBuilder()
+const lobbyConfigEl = document.getElementById('lobby-config');
+const gameId = parseInt(lobbyConfigEl.getAttribute('data-game-id'));
+const isDM = lobbyConfigEl.getAttribute('data-is-dm') === 'true';
+const currentUserId = lobbyConfigEl.getAttribute('data-current-user-id');
+
+const lobbyConnection = new signalR.HubConnectionBuilder()
     .withUrl("/lobbyHub")
     .build();
 
@@ -30,10 +35,12 @@ lobbyConnection.on("PlayerJoinedLobby", function (playerId, username) {
                 </button>
             </form>` : "";
 
+        let avatarSrc = profilePicturePath ? profilePicturePath : `https://ui-avatars.com/api/?name=${username}&size=45&background=${getUserColor(username)}&color=fff&length=2`;
+
         const html = `
             <li id="player-row-${playerId}" class="list-group-item p-3 border-top d-flex align-items-center justify-content-between border-0">
                 <div class="d-flex align-items-center">
-                    <img src="https://ui-avatars.com/api/?name=${username}&size=45&background=${getUserColor(username)}&color=fff&length=2" class="rounded-circle me-3 border border-success border-2" />
+                    <img src="${avatarSrc}" class="rounded-circle me-3 border border-success border-2" style="width: 45px; height: 45px; object-fit: cover;" />
                     <div>
                         <div class="fw-bold text-dark">${username}</div>
                         <small class="text-success fw-bold">Player</small>
@@ -45,7 +52,7 @@ lobbyConnection.on("PlayerJoinedLobby", function (playerId, username) {
     }
 });
 
-lobbyConnection.on("PlayerLeftLobby", function (playerId, username) {
+lobbyConnection.on("PlayerLeftLobby", function (playerId, username, profilePicturePath) {
     if (playerId.toString() === currentUserId) {
         window.location.href = '/Game/Campaigns'; 
         return;
@@ -57,7 +64,7 @@ lobbyConnection.on("PlayerLeftLobby", function (playerId, username) {
         if (countElem) countElem.innerText = parseInt(countElem.innerText) - 1;
 
         const playersList = document.getElementById("players-list");
-        if (playersList && playersList.querySelectorAll('li').length === 1) {
+        if (playersList && playersList.querySelectorAll('li').length === 0) {
             playersList.insertAdjacentHTML('beforeend', '<li id="empty-players-msg" class="list-group-item text-center py-4 text-muted small italic">No travelers have joined yet.</li>');
         }
     }
@@ -68,14 +75,15 @@ lobbyConnection.on("PlayerLeftLobby", function (playerId, username) {
         const inviteList = document.getElementById("friends-invite-list");
 
         if (inviteList && !document.getElementById(`friend-row-${playerId}`)) {
+            let avatarSrc = profilePicturePath ? profilePicturePath : `https://ui-avatars.com/api/?name=${username}&size=32&background=${getUserColor(username)}&color=fff&length=2`;
             const friendHtml = `
                 <li id="friend-row-${playerId}" class="list-group-item d-flex justify-content-between align-items-center py-3">
                     <div class="d-flex align-items-center">
-                        <img src="https://ui-avatars.com/api/?name=${username}&size=32&background=${getUserColor(username)}&color=fff&length=2" class="rounded-circle me-2" />
+                        <img src="${avatarSrc}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;" />
                         <span class="fw-semibold">${username}</span>
                     </div>
                     <form action="/Game/InviteFriend" method="post" class="invite-form m-0">
-                        <input type="hidden" name="__RequestVerificationToken" value="${getAfToken()}" />
+                        <input type="hidden" name="__RequestVerificationToken" value="${window.getAntiForgeryToken()}" />
                         <input type="hidden" name="gameId" value="${gameId}" />
                         <input type="hidden" name="friendId" value="${playerId}" />
                         <button type="submit" class="btn btn-outline-success btn-sm rounded-pill fw-bold">Invite</button>
@@ -125,7 +133,13 @@ function getUserColor(username) {
     let hash = 0;
     for (let i = 0; i < username.length; i++) hash += username.charCodeAt(i);
     return colors[hash % colors.length];
-}
+};
+
+lobbyConnection.on("UserAvatarChanged", function (username, newAvatarPath) {
+    if (window.updateUserAvatars) {
+        window.updateUserAvatars(username, newAvatarPath);
+    }
+});
 document.addEventListener('DOMContentLoaded', function () {
     const btnToggleAi = document.getElementById('btn-toggle-ai-lore');
     const aiPanel = document.getElementById('ai-lore-panel');

@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Data;
+using large_fantasy_model.Data;
 using large_fantasy_model.Hubs;
 using large_fantasy_model.Migrations;
 using large_fantasy_model.Models;
@@ -209,9 +209,9 @@ namespace large_fantasy_model.Controllers
                 IsPublic = game.IsPublic,
                 IsDungeonMaster = game.UserId == myId,
                 IsActive = game.IsActive,
-                DungeonMaster = new UserViewModel { Id = game.User.Id, Username = game.User.Username },
-                Players = game.Users.Select(u => new UserViewModel { Id = u.Id, Username = u.Username }).ToList(),
-                AvailableFriends = friendsToInvite.Select(f => new UserViewModel { Id = f.Id, Username = f.Username }).ToList(),
+                DungeonMaster = new UserViewModel { Id = game.User.Id, Username = game.User.Username, ProfilePicturePath = game.User.ProfilePicturePath },
+                Players = game.Users.Select(u => new UserViewModel { Id = u.Id, Username = u.Username, ProfilePicturePath = u.ProfilePicturePath }).ToList(),
+                AvailableFriends = friendsToInvite.Select(f => new UserViewModel { Id = f.Id, Username = f.Username, ProfilePicturePath = f.ProfilePicturePath }).ToList(),
                 CurrentPlayers = game.Users.Count + 1,
                 MaxPlayers = game.MaxPlayers > 0 ? game.MaxPlayers : 10,
                 InvitedFriendIds = invitedIds,

@@ -1,4 +1,6 @@
-﻿
+const friendsConfigEl = document.getElementById('friends-config');
+window.myUserId = parseInt(friendsConfigEl.getAttribute('data-my-user-id'));
+
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("/privateMessageHub")
     .build();
@@ -12,29 +14,36 @@ window.getUserColor = function (username) {
     return colors[hash % colors.length];
 };
 
-connection.on("ReceiveFriendRequest", function (senderId, senderName) {
-    const requestsList = document.getElementById("friend-requests-list");
-    const requestsCard = document.getElementById("received-requests-card");
+connection.on("UserAvatarChanged", function (username, newAvatarPath) {
+    if (window.updateUserAvatars) {
+        window.updateUserAvatars(username, newAvatarPath);
+    }
+});
 
-    if (requestsCard) requestsCard.style.display = "block";
+connection.on("ReceiveFriendRequest", function (senderId, senderName, senderAvatar) {
+    let list = document.getElementById("friend-requests-list");
+    let card = document.getElementById("received-requests-card");
+    let color = getUserColor(senderName);
 
-    if (requestsList) {
-        const color = getUserColor(senderName);
-        const newRequestHtml = `
-            <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-light unread-pop border-bottom border-primary border-3">
-                <div class="d-flex align-items-center">
-                    <img src="https://ui-avatars.com/api/?name=${senderName}&size=40&background=${color}&color=fff&length=2" class="rounded-circle me-3" />
-                    <span class="fw-bold">${senderName}</span>
-                </div>
+    let avatarSrc = senderAvatar ? senderAvatar : `https://ui-avatars.com/api/?name=${senderName}&size=40&background=${color}&color=fff&length=2`;
+
+    if (list) {
+        let li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center py-3 bg-light";
+        li.innerHTML = `
+            <div class="d-flex align-items-center">
+                <img src="${avatarSrc}" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;" />
+                <span class="fw-semibold">${senderName}</span>
+            </div>
                 <div class="d-flex gap-2">
                     <form action="/Profile/AddFriend" method="post">
                         <input type="hidden" name="friendId" value="${senderId}" />
-                        <input type="hidden" name="__RequestVerificationToken" value="${window.antiForgeryToken}" />
+                        <input type="hidden" name="__RequestVerificationToken" value="${window.getAntiForgeryToken()}" />
                         <button type="submit" class="btn btn-success btn-sm rounded-pill fw-bold">Accept</button>
                     </form>
                     <form action="/Profile/RemoveFriend" method="post">
                         <input type="hidden" name="friendId" value="${senderId}" />
-                        <input type="hidden" name="__RequestVerificationToken" value="${window.antiForgeryToken}" />
+                        <input type="hidden" name="__RequestVerificationToken" value="${window.getAntiForgeryToken()}" />
                         <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill fw-bold">Decline</button>
                     </form>
                 </div>
@@ -68,12 +77,12 @@ connection.on("ReceiveFriendAccept", function (senderId, senderName) {
                     <div class="d-flex gap-2">
                         <form action="/PrivateMessage/StartPrivateChat" method="post">
                             <input type="hidden" name="friendId" value="${senderId}" />
-                            <input type="hidden" name="__RequestVerificationToken" value="${window.antiForgeryToken}" />
+                            <input type="hidden" name="__RequestVerificationToken" value="${window.getAntiForgeryToken()}" />
                             <button type="submit" class="btn btn-primary btn-sm rounded-pill fw-bold px-3">Message</button>
                         </form>
                         <form action="/Profile/RemoveFriend" method="post">
                             <input type="hidden" name="friendId" value="${senderId}" />
-                            <input type="hidden" name="__RequestVerificationToken" value="${window.antiForgeryToken}" />
+                            <input type="hidden" name="__RequestVerificationToken" value="${window.getAntiForgeryToken()}" />
                             <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill fw-bold">Remove</button>
                         </form>
                     </div>

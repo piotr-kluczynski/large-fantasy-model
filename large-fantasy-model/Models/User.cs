@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Models.CharacterModels;
+using large_fantasy_model.Models.CharacterModels;
 using System.ComponentModel.DataAnnotations;
 
 namespace large_fantasy_model.Models
@@ -63,5 +63,8 @@ namespace large_fantasy_model.Models
 
         // Kolekcja przechowująca listę postaci należących do gracza - relacja wiele-do-wielu (wielu użytkowników może posiadać wiele postaci)
         public ICollection<Character> Characters { get; set; } = new List<Character>();
+
+        // Zapisana ścieżka do awatara użytkownika
+        public string? ProfilePicturePath { get; set; }
     }
 }

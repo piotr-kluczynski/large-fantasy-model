@@ -1,11 +1,4 @@
-﻿
-window.getUserColor = function (username) {
-    if (!username) return "0d6efd";
-    const colors = ["0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0"];
-    let hash = 0;
-    for (let i = 0; i < username.length; i++) hash += username.charCodeAt(i);
-    return colors[hash % colors.length];
-};
+window.globalUserId = document.body.getAttribute('data-global-user-id');
 
 const globalHubConnection = new signalR.HubConnectionBuilder()
     .withUrl("/privateMessageHub")
@@ -52,6 +45,16 @@ globalHubConnection.on("UpdateNotifications", function () {
 
 globalHubConnection.on("ReceiveMessage", function (conversationId, content, timeString, senderId) {
     window.updateAllCounts();
+});
+
+globalHubConnection.on("UserAvatarChanged", function (username, newAvatarPath) {
+    if (window.updateUserAvatars) {
+        window.updateUserAvatars(username, newAvatarPath);
+    }
+    let removeBtn = document.getElementById('removeAvatarBtnContainer');
+    if (removeBtn && document.getElementById('Username') && document.getElementById('Username').value === username) {
+        removeBtn.style.display = 'none';
+    }
 });
 
 globalHubConnection.on("FriendRequestDeclined", function (declinerId) {

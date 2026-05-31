@@ -1,21 +1,18 @@
-﻿@model large_fantasy_model.ViewModels.GameLobbyViewModel
+@model large_fantasy_model.ViewModels.GameLobbyViewModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env
 @using System.Security.Claims
 
 @{
     ViewData["Title"] = Model.Name + " - Lobby";
 
-    string GetUserColor(string username) {
-        if (string.IsNullOrEmpty(username)) return "0d6efd";
-        var colors = new[] { "0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0" };
-        int hash = 0;
-        foreach(char c in username) { hash += c; }
-        return colors[hash % colors.Length];
-    }
 }
 
 @Html.AntiForgeryToken()
 
-<div class="container mt-4">
+<div class="container mt-4" id="lobby-config" 
+     data-game-id="@Model.GameId" 
+     data-is-dm="@(Model.IsDungeonMaster ? "true" : "false")" 
+     data-current-user-id="@User.FindFirstValue(ClaimTypes.NameIdentifier)">
     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
         <div class="d-flex align-items-center gap-3">
             <h1 class="fw-bold text-success mb-0">@Model.Name</h1>
@@ -183,7 +180,7 @@
                         <div class="card-body p-0">
                             <ul class="list-group list-group-flush rounded-bottom-4" id="players-list">
                                 <li class="list-group-item d-flex align-items-center py-3 bg-light">
-                                    <img src="https://ui-avatars.com/api/?name=@Model.DungeonMaster.Username&size=40&background=@GetUserColor(Model.DungeonMaster.Username)&color=fff&length=2" class="rounded-circle me-3 border border-danger border-2" alt="DM Avatar" />
+                                    <img src="@AvatarHelper.GetUserAvatar(Model.DungeonMaster.Username, Model.DungeonMaster.ProfilePicturePath, _env.WebRootPath, 40)" class="rounded-circle me-3 border border-danger border-2" alt="DM Avatar" style="width: 40px; height: 40px; object-fit: cover;" />
                                     <div>
                                         <span class="fw-bold d-block">@Model.DungeonMaster.Username</span>
                                         <small class="text-danger fw-bold">Dungeon Master</small>
@@ -201,7 +198,7 @@
                                 {
                                     <li id="player-row-@player.Id" class="list-group-item p-3 border-top d-flex align-items-center justify-content-between border-0">
                                         <div class="d-flex align-items-center">
-                                            <img src="https://ui-avatars.com/api/?name=@player.Username&size=45&background=@GetUserColor(player.Username)&color=fff&length=2" class="rounded-circle me-3 border border-success border-2" alt="Avatar" />
+                                            <img src="@AvatarHelper.GetUserAvatar(player.Username, player.ProfilePicturePath, _env.WebRootPath, 45)" class="rounded-circle me-3 border border-success border-2" alt="Avatar" style="width: 45px; height: 45px; object-fit: cover;" />
                                             <div>
                                                 <div class="fw-bold text-dark">@player.Username</div>
                                                 <small class="text-success fw-bold">Player</small>
@@ -236,7 +233,7 @@
                                         bool isInvited = Model.InvitedFriendIds != null && Model.InvitedFriendIds.Contains(friend.Id);
                                         <li id="friend-row-@friend.Id" class="list-group-item d-flex justify-content-between align-items-center py-3">
                                             <div class="d-flex align-items-center">
-                                                <img src="https://ui-avatars.com/api/?name=@friend.Username&size=32&background=@GetUserColor(friend.Username)&color=fff&length=2" class="rounded-circle me-2" alt="Friend Avatar" />
+                                                <img src="@AvatarHelper.GetUserAvatar(friend.Username, friend.ProfilePicturePath, _env.WebRootPath, 32)" class="rounded-circle me-2" alt="Friend Avatar" style="width: 32px; height: 32px; object-fit: cover;" />
                                                 <span class="fw-semibold">@friend.Username</span>
                                             </div>
                                             <form asp-action="InviteFriend" method="post" class="invite-form m-0">
@@ -341,12 +338,6 @@
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     
-    <script>
-        const gameId = @Model.GameId;
-        const isDM = @(Model.IsDungeonMaster ? "true" : "false");
-        const currentUserId = "@User.FindFirstValue(ClaimTypes.NameIdentifier)";
-        const getAfToken = () => document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
-    </script>
 
-    <script src="~/js/Game/Lobbydetails.js"></script>
+    <script src="~/js/Game/Lobbydetails.js" asp-append-version="true"></script>
 }

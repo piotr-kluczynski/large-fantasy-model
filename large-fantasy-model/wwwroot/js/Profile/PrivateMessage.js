@@ -1,4 +1,8 @@
-﻿const connection = new signalR.HubConnectionBuilder()
+const pmConfigEl = document.getElementById('pm-config');
+window.myUserId = parseInt(pmConfigEl.getAttribute('data-my-user-id'));
+window.activeConversationId = pmConfigEl.getAttribute('data-active-conversation-id');
+
+const connection = new signalR.HubConnectionBuilder()
     .withUrl("/privateMessageHub")
     .build();
 
@@ -36,6 +40,12 @@ connection.on("ReceiveMessage", function (convId, content, time, senderId) {
             let currentCount = parseInt(badge.innerText) || 0;
             badge.innerText = currentCount + 1;
         }
+    }
+});
+
+connection.on("UserAvatarChanged", function (username, newAvatarPath) {
+    if (window.updateUserAvatars) {
+        window.updateUserAvatars(username, newAvatarPath);
     }
 });
 

@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Data;
+using large_fantasy_model.Data;
 using large_fantasy_model.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -93,9 +93,13 @@ namespace large_fantasy_model.Controllers
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), 
                     new Claim(ClaimTypes.Name, user.Username),               
                     new Claim(ClaimTypes.Email, user.Email),                
-                    new Claim("AdminPermissions", user.AdminPermissions.ToString()),
-                    
+                    new Claim("AdminPermissions", user.AdminPermissions.ToString())
                 };
+
+                if (!string.IsNullOrEmpty(user.ProfilePicturePath))
+                {
+                    claims.Add(new Claim("ProfilePicturePath", user.ProfilePicturePath));
+                }
 
                 if (user.AdminPermissions == 2) claims.Add(new Claim(ClaimTypes.Role, "HeadAdmin"));
                 if (user.AdminPermissions >= 1) claims.Add(new Claim(ClaimTypes.Role, "Admin"));

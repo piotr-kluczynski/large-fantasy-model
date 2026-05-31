@@ -1,6 +1,8 @@
-﻿@model large_fantasy_model.ViewModels.ActiveGameViewModel
+@model large_fantasy_model.ViewModels.ActiveGameViewModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env
 @{
     Layout = null;
+
 }
 
 <!DOCTYPE html>
@@ -14,7 +16,11 @@
     <link rel="stylesheet" href="~/css/vtt.css" />
    
 </head>
-<body>
+<body data-game-id="@Model.GameId" 
+      data-current-user-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" 
+      data-my-username="@User.Identity.Name" 
+      data-is-dm="@(Model.IsDungeonMaster ? "true" : "false")" 
+      data-initial-map-url="@Model.MapImageUrl">
 
     <a id="exit-vtt" class="btn btn-danger d-flex align-items-center shadow" asp-controller="Game" asp-action="LobbyDetails" asp-route-id="@Model.GameId">
         <div class="d-flex justify-content-center flex-shrink-0 me-2" style="width: 24px;"><i class="bi bi-box-arrow-left fs-5 mt-0"></i></div>
@@ -42,14 +48,12 @@
     </div>
 
     <div id="players-container">
-        <div class="player-avatar dm-avatar" id="player-@Model.DungeonMaster.Id" title="DM: @Model.DungeonMaster.Username">
-            @Model.DungeonMaster.Username.Substring(0, Math.Min(3, Model.DungeonMaster.Username.Length)).ToUpper()
+        <div class="player-avatar dm-avatar" id="player-@Model.DungeonMaster.Id" title="DM: @Model.DungeonMaster.Username" style="background-image: url('@AvatarHelper.GetUserAvatar(Model.DungeonMaster.Username, Model.DungeonMaster.ProfilePicturePath, _env.WebRootPath, 50)'); background-size: cover; background-position: center;">
             <div class="status-indicator"></div>
         </div>
         @foreach (var player in Model.Players)
         {
-            <div class="player-avatar" id="player-@player.Id" title="@player.Username">
-                @player.Username.Substring(0, Math.Min(3, player.Username.Length)).ToUpper()
+            <div class="player-avatar" id="player-@player.Id" title="@player.Username" style="background-image: url('@AvatarHelper.GetUserAvatar(player.Username, player.ProfilePicturePath, _env.WebRootPath, 50)'); background-size: cover; background-position: center;">
                 <div class="status-indicator"></div>
             </div>
         }
@@ -294,14 +298,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const gameId = @Model.GameId;
-        const currentUserId = "@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value";
-        const myUsername = "@User.Identity.Name";
-        const isDM = @(Model.IsDungeonMaster ? "true" : "false");
-        const initialMapUrl = "@Model.MapImageUrl";
-    </script>
-
+    <script src="~/js/vtt/Vtt-config.js"></script>
     <script src="~/js/vtt/Vtt-signalr.js"></script>
     <script src="~/js/vtt/Vtt-map.js"></script>
     <script src="~/js/vtt/Vtt-tokens.js"></script>

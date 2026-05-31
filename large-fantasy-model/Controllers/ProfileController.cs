@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Data;
+using large_fantasy_model.Data;
 using large_fantasy_model.Hubs;
 using large_fantasy_model.Models;
 using large_fantasy_model.ViewModels;
@@ -16,11 +16,17 @@ namespace large_fantasy_model.Controllers
     {
         private readonly LargeFantasyModelContext _context;
         private readonly IHubContext<PrivateMessageHub> _hubContext;
+        private readonly IHubContext<GameHub> _gameHubContext;
+        private readonly IHubContext<LobbyHub> _lobbyHubContext;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProfileController(LargeFantasyModelContext context, IHubContext<PrivateMessageHub> hubContext)
+        public ProfileController(LargeFantasyModelContext context, IHubContext<PrivateMessageHub> hubContext, IHubContext<GameHub> gameHubContext, IHubContext<LobbyHub> lobbyHubContext, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _hubContext = hubContext;
+            _gameHubContext = gameHubContext;
+            _lobbyHubContext = lobbyHubContext;
+            _webHostEnvironment = webHostEnvironment;
         }
         private int GetCurrentUserId()
         {
@@ -62,16 +68,16 @@ namespace large_fantasy_model.Controllers
             var viewModel = new FriendsViewModel
             {
                 SearchQuery = searchQuery,
-                MutualFriends = mutualFriends.Select(f => new UserViewModel { Id = f.Id, Username = f.Username }).ToList(),
-                SentRequests = sentRequests.Select(f => new UserViewModel { Id = f.Id, Username = f.Username }).ToList(),
-                ReceivedRequests = receivedRequests.Select(fo => new UserViewModel { Id = fo.Id, Username = fo.Username }).ToList()
+                MutualFriends = mutualFriends.Select(f => new UserViewModel { Id = f.Id, Username = f.Username, ProfilePicturePath = f.ProfilePicturePath }).ToList(),
+                SentRequests = sentRequests.Select(f => new UserViewModel { Id = f.Id, Username = f.Username, ProfilePicturePath = f.ProfilePicturePath }).ToList(),
+                ReceivedRequests = receivedRequests.Select(fo => new UserViewModel { Id = fo.Id, Username = fo.Username, ProfilePicturePath = fo.ProfilePicturePath }).ToList()
             };
 
             if (!string.IsNullOrWhiteSpace(searchQuery))
             {
                 viewModel.SearchResults = await _context.Users
                     .Where(u => u.Username.Contains(searchQuery) && u.Id != userId)
-                    .Select(u => new UserViewModel { Id = u.Id, Username = u.Username })
+                    .Select(u => new UserViewModel { Id = u.Id, Username = u.Username, ProfilePicturePath = u.ProfilePicturePath })
                     .ToListAsync();
             }
 
@@ -102,7 +108,7 @@ namespace large_fantasy_model.Controllers
                     TempData["SuccessMessage"] = $"You and {newFriend.Username} are now friends!";
 
                     await _hubContext.Clients.Group($"User_{friendId}")
-                         .SendAsync("ReceiveFriendAccept", user.Id, user.Username);
+                         .SendAsync("ReceiveFriendAccept", user.Id, user.Username, user.ProfilePicturePath);
                 }
                 else
                 {
@@ -119,7 +125,7 @@ namespace large_fantasy_model.Controllers
                     await _context.SaveChangesAsync();
 
                     await _hubContext.Clients.Group($"User_{friendId}")
-                        .SendAsync("ReceiveFriendRequest", user.Id, user.Username);
+                        .SendAsync("ReceiveFriendRequest", user.Id, user.Username, user.ProfilePicturePath);
 
                     await _hubContext.Clients.Group($"User_{friendId}").SendAsync("UpdateNotifications");
                 }
@@ -198,7 +204,8 @@ namespace large_fantasy_model.Controllers
                 Username = user.Username,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Bio = user.Bio
+                Bio = user.Bio,
+                CurrentProfilePicturePath = user.ProfilePicturePath
             };
 
             return View(viewModel);
@@ -234,9 +241,39 @@ namespace large_fantasy_model.Controllers
             userInDb.LastName = model.LastName ?? "";
             userInDb.Bio = model.Bio ?? "";
 
+            if (model.ProfilePicture != null)
+            {
+                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "imgs", "avatars");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ProfilePicture.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ProfilePicture.CopyToAsync(fileStream);
+                }
+
+                // Usuń stary avatar jeśli istnieje
+                if (!string.IsNullOrEmpty(userInDb.ProfilePicturePath))
+                {
+                    string oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath, userInDb.ProfilePicturePath.TrimStart('/'));
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        System.IO.File.Delete(oldFilePath);
+                    }
+                }
+
+                userInDb.ProfilePicturePath = "/imgs/avatars/" + uniqueFileName;
+            }
+
             _context.Update(userInDb);
             await _context.SaveChangesAsync();
 
+            // Aktualizacja cookies
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userInDb.Id.ToString()),
@@ -245,10 +282,64 @@ namespace large_fantasy_model.Controllers
                 new Claim("AdminPermissions", userInDb.AdminPermissions.ToString())
             };
 
+            if (!string.IsNullOrEmpty(userInDb.ProfilePicturePath))
+            {
+                claims.Add(new Claim("ProfilePicturePath", userInDb.ProfilePicturePath));
+
+                // Broadcast the change to all hubs
+                await _hubContext.Clients.All.SendAsync("UserAvatarChanged", userInDb.Username, userInDb.ProfilePicturePath);
+                await _gameHubContext.Clients.All.SendAsync("UserAvatarChanged", userInDb.Username, userInDb.ProfilePicturePath);
+                await _lobbyHubContext.Clients.All.SendAsync("UserAvatarChanged", userInDb.Username, userInDb.ProfilePicturePath);
+            }
+
             var claimsIdentity = new ClaimsIdentity(claims, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+
             await HttpContext.SignInAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
-            return RedirectToAction(nameof(ProfilePage));
+            return RedirectToAction("ProfilePage");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveAvatar()
+        {
+            var userId = GetCurrentUserId();
+            var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (userInDb == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            if (!string.IsNullOrEmpty(userInDb.ProfilePicturePath))
+            {
+                var fullPath = Path.Combine(_webHostEnvironment.WebRootPath, userInDb.ProfilePicturePath.TrimStart('/'));
+                if (System.IO.File.Exists(fullPath))
+                {
+                    System.IO.File.Delete(fullPath);
+                }
+
+                userInDb.ProfilePicturePath = null;
+                _context.Update(userInDb);
+                await _context.SaveChangesAsync();
+
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, userInDb.Id.ToString()),
+                    new Claim(ClaimTypes.Name, userInDb.Username),
+                    new Claim(ClaimTypes.Email, userInDb.Email),
+                    new Claim("AdminPermissions", userInDb.AdminPermissions.ToString())
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+                await _hubContext.Clients.All.SendAsync("UserAvatarChanged", userInDb.Username, "");
+                await _gameHubContext.Clients.All.SendAsync("UserAvatarChanged", userInDb.Username, "");
+                await _lobbyHubContext.Clients.All.SendAsync("UserAvatarChanged", userInDb.Username, "");
+            }
+
+            return RedirectToAction("Edit");
         }
 
         [HttpGet]
@@ -337,7 +428,7 @@ namespace large_fantasy_model.Controllers
                     TempData["SuccessMessage"] = $"You and {newFriend.Username} are now friends!";
 
                     await _hubContext.Clients.Group($"User_{friendId}")
-                         .SendAsync("ReceiveFriendAccept", user.Id, user.Username);
+                         .SendAsync("ReceiveFriendAccept", user.Id, user.Username, user.ProfilePicturePath);
                 }
 
                 _context.Notifications.Remove(notification);

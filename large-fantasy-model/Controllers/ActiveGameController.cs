@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Data;
+using large_fantasy_model.Data;
 using large_fantasy_model.ViewModels;
 using large_fantasy_model.Models; 
 using Microsoft.AspNetCore.Authorization;
@@ -76,8 +76,8 @@ namespace large_fantasy_model.Controllers
                 GameId = game.Id,
                 Name = game.Name,
                 IsDungeonMaster = game.UserId == myId,
-                DungeonMaster = new UserViewModel { Id = game.User.Id, Username = game.User.Username },
-                Players = game.Users.Select(u => new UserViewModel { Id = u.Id, Username = u.Username }).ToList(),
+                DungeonMaster = new UserViewModel { Id = game.User.Id, Username = game.User.Username, ProfilePicturePath = game.User.ProfilePicturePath },
+                Players = game.Users.Select(u => new UserViewModel { Id = u.Id, Username = u.Username, ProfilePicturePath = u.ProfilePicturePath }).ToList(),
                 MapImageUrl = game.MapImageUrl, 
 
                 Tokens = existingTokens.Select(t => new TokenViewModel

@@ -17,6 +17,7 @@ namespace large_fantasy_model
 
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddHostedService<large_fantasy_model.Services.AvatarWatcherService>();
 
             builder.Services.AddSignalR();
 

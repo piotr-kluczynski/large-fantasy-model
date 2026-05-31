@@ -1,14 +1,7 @@
-﻿@model large_fantasy_model.Models.User
-
+@model large_fantasy_model.Models.User
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env
 @{
-    string GetUserColor(string username)
-    {
-        if (string.IsNullOrEmpty(username)) return "0d6efd";
-        var colors = new[] { "0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0" };
-        int hash = 0;
-        foreach (char c in username) { hash += c; }
-        return colors[hash % colors.Length];
-    }
+    string avatarUrl = AvatarHelper.GetUserAvatar(Model.Username, Model.ProfilePicturePath, _env.WebRootPath, 120);
 }
 
 <div class="container mt-5 mb-5">
@@ -16,7 +9,7 @@
         <div class="col-md-9">
             <div class="card shadow-lg border-0 overflow-hidden">
                 <div class="bg-dark text-white text-center pt-5 pb-4">
-                    <img src="https://ui-avatars.com/api/?name=@Model.Username&size=120&background=@GetUserColor(Model.Username)&color=fff&length=2" class="rounded-circle img-thumbnail shadow" alt="Avatar">
+                    <img data-username="@Model.Username" src="@avatarUrl" class="rounded-circle img-thumbnail shadow" alt="Avatar" style="width: 120px; height: 120px; object-fit: cover;">
                     <h2 class="fw-bold mt-3 mb-2">@@@Model.Username</h2>
                     <span class="badge bg-primary fs-6 shadow-sm">Member since: @Model.CreatedDate.ToString("MMMM yyyy")</span>
                 </div>

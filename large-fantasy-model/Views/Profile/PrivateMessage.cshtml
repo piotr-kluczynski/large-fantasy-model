@@ -1,21 +1,14 @@
-﻿@model IEnumerable<large_fantasy_model.Models.Conversation>
+@model IEnumerable<large_fantasy_model.Models.Conversation>
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env
 @{
     ViewData["Title"] = "My Messages";
     var myId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
     var activeChat = ViewBag.ActiveChat as large_fantasy_model.Models.Conversation;
     var friends = ViewBag.Friends as List<large_fantasy_model.Models.User> ?? new List<large_fantasy_model.Models.User>();
 
-    string GetUserColor(string username)
-    {
-        if (string.IsNullOrEmpty(username)) return "0d6efd";
-        var colors = new[] { "0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0" };
-        int hash = 0;
-        foreach (char c in username) { hash += c; }
-        return colors[hash % colors.Length];
-    }
 }
 
-<div class="container mt-4">
+<div class="container mt-4" id="pm-config" data-my-user-id="@myId" data-active-conversation-id="@(activeChat?.Id.ToString() ?? "")">
     <div class="row" style="height: 75vh;">
         
         <div class="col-md-4 h-100">
@@ -47,7 +40,7 @@
                                 <input type="hidden" name="friendId" value="@friend.Id" />
                                 <button type="submit" id="friend-btn-@friend.Id" class="list-group-item w-100 text-start d-flex justify-content-between align-items-center py-3 @itemClass hover-bg chat-btn">
                                     <div class="d-flex align-items-center">
-                                        <img src="https://ui-avatars.com/api/?name=@friend.Username&size=40&background=@GetUserColor(friend.Username)&color=fff&length=2" class="rounded-circle me-3 shadow-sm" />
+                                        <img src="@AvatarHelper.GetUserAvatar(friend.Username, friend.ProfilePicturePath, _env.WebRootPath, 40)" class="rounded-circle me-3 shadow-sm" style="width: 40px; height: 40px; object-fit: cover;" />
                                         <div class="text-dark">@friend.Username</div>
                                     </div>
                                     <span id="unread-badge-friend-@friend.Id" class="badge bg-danger rounded-pill @(hasUnread && !isActive ? "" : "d-none")">@unreadCount</span>
@@ -71,7 +64,7 @@
                     
                     <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center">
-                            <img src="https://ui-avatars.com/api/?name=@otherUser?.Username&size=40&background=@GetUserColor(otherUser?.Username)&color=fff&length=2" class="rounded-circle me-3 shadow-sm" />
+                            <img src="@AvatarHelper.GetUserAvatar(otherUser?.Username, otherUser?.ProfilePicturePath, _env.WebRootPath, 40)" class="rounded-circle me-3 shadow-sm" style="width: 40px; height: 40px; object-fit: cover;" />
                             <h5 class="fw-bold mb-0">@otherUser?.Username</h5>
                         </div>
                         <a asp-action="PrivateMessage" class="btn btn-sm border-0 bg-transparent shadow-none p-0 ms-2 btn-kick" title="Close Chat">
@@ -156,11 +149,8 @@
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-    <script>
-        window.myUserId = @myId;
-        window.activeConversationId = "@(activeChat?.Id.ToString() ?? "")";
-    </script>
+
     
-    <script src="~/js/Profile/PrivateMessage.js"></script>
+    <script src="~/js/Profile/PrivateMessage.js" asp-append-version="true"></script>
     
 }

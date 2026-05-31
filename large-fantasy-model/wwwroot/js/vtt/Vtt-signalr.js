@@ -1,8 +1,14 @@
-﻿window.connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build();
+window.connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build();
 
 window.connection.on("UserStatusChanged", (userId, isOnline, username) => {
     const avatar = document.getElementById("player-" + userId);
     if (avatar) { if (isOnline) avatar.classList.add("online"); else avatar.classList.remove("online"); }
+});
+
+window.connection.on("UserAvatarChanged", function (username, newAvatarPath) {
+    if (window.updateUserAvatars) {
+        window.updateUserAvatars(username, newAvatarPath);
+    }
 });
 
 window.connection.on("RequestStatusSync", () => { window.connection.invoke("ReportStatus", gameId, currentUserId).catch(console.error); });

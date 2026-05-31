@@ -1,21 +1,14 @@
-﻿@model large_fantasy_model.ViewModels.FriendsViewModel
+@model large_fantasy_model.ViewModels.FriendsViewModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env
 
 @{
     ViewData["Title"] = "My Friends";
 
-    string GetUserColor(string username)
-    {
-        if (string.IsNullOrEmpty(username)) return "0d6efd";
-        var colors = new[] { "0d6efd", "198754", "dc3545", "fd7e14", "e83e8c", "6f42c1", "20c997", "0dcaf0" };
-        int hash = 0;
-        foreach (char c in username) { hash += c; }
-        return colors[hash % colors.Length];
-    }
 }
 
 @Html.AntiForgeryToken()
 
-<div class="container mt-5">
+<div class="container mt-5" id="friends-config" data-my-user-id="@int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0")">
     <div class="row">
 
         <div class="col-md-6 mb-4">
@@ -30,7 +23,7 @@
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-light">
                                 <div class="d-flex align-items-center">
-                                    <img src="https://ui-avatars.com/api/?name=@request.Username&size=40&background=@GetUserColor(request.Username)&color=fff&length=2" class="rounded-circle me-3" alt="Avatar" />
+                                    <img src="@AvatarHelper.GetUserAvatar(request.Username, request.ProfilePicturePath, _env.WebRootPath, 40)" class="rounded-circle me-3" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover;" />
                                     <span class="fw-semibold">@request.Username</span>
                                 </div>
                                 <div class="d-flex gap-2">
@@ -75,7 +68,7 @@
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                                 <div class="d-flex align-items-center">
-                                    <img src="https://ui-avatars.com/api/?name=@friend.Username&size=40&background=@GetUserColor(friend.Username)&color=fff&length=2" class="rounded-circle me-3" alt="Avatar" />
+                                    <img src="@AvatarHelper.GetUserAvatar(friend.Username, friend.ProfilePicturePath, _env.WebRootPath, 40)" class="rounded-circle me-3" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover;" />
                                     <span class="fw-semibold fs-5">@friend.Username</span>
                                 </div>
                                 <div class="d-flex gap-2">
@@ -123,7 +116,7 @@
                                     bool isReceived = Model.ReceivedRequests.Any(f => f.Id == result.Id);
                                     <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                                         <div class="d-flex align-items-center">
-                                            <img src="https://ui-avatars.com/api/?name=@result.Username&size=40&background=@GetUserColor(result.Username)&color=fff&length=2" class="rounded-circle me-3" alt="Avatar" />
+                                            <img src="@AvatarHelper.GetUserAvatar(result.Username, result.ProfilePicturePath, _env.WebRootPath, 40)" class="rounded-circle me-3" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover;" />
                                             <span class="fw-semibold">@result.Username</span>
                                         </div>
                                         
@@ -187,10 +180,6 @@
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     
-    <script>
-        window.myUserId = @int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
-        window.antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
-    </script>
-    
+
     <script src="~/js/Profile/Friends.js" asp-append-version="true"></script>
 }

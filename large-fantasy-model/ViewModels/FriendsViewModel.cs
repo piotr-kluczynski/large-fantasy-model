@@ -1,4 +1,4 @@
-﻿namespace large_fantasy_model.ViewModels
+namespace large_fantasy_model.ViewModels
 {
     public class FriendsViewModel
     {
@@ -14,5 +14,6 @@
     {
         public int Id { get; set; }
         public string Username { get; set; }
+        public string? ProfilePicturePath { get; set; }
     }
 }
