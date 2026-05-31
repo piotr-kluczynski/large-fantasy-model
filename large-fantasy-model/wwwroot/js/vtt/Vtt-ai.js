@@ -1,4 +1,4 @@
-﻿
+
 const aiModalElement = document.getElementById('aiModal');
 const aiModal = new bootstrap.Modal(aiModalElement);
 
@@ -64,10 +64,17 @@ btnGenerate.addEventListener('click', async () => {
     scrollToBottom();
 
     try {
+        const gameId = parseInt(document.body.getAttribute('data-game-id'));
+        const payload = {
+            prompt: prompt,
+            gameId: gameId,
+            isInGameAssistant: true
+        };
+
         const res = await fetch('/api/Ai/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(prompt)
+            body: JSON.stringify(payload)
         });
 
         document.getElementById(loadingId).remove();

@@ -187,10 +187,16 @@ document.addEventListener('DOMContentLoaded', function () {
             btnGenerateLore.disabled = true;
 
             try {
+                const payload = {
+                    prompt: promptText,
+                    gameId: gameId,
+                    isInGameAssistant: false
+                };
+
                 const res = await fetch('/api/Ai/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(promptText)
+                    body: JSON.stringify(payload)
                 });
 
                 if (!res.ok) {
