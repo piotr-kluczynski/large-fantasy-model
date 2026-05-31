@@ -175,7 +175,7 @@ namespace large_fantasy_model.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> LobbyDetails(int id)
+        public async Task<IActionResult> LobbyDetails(int id, string tab = "main")
         {
             int myId = GetCurrentUserId();
 
@@ -218,6 +218,7 @@ namespace large_fantasy_model.Controllers
                 Lore = game.Lore
             };
 
+            ViewBag.ActiveTab = tab;
             return View(viewModel);
         }
 
@@ -496,7 +497,25 @@ namespace large_fantasy_model.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Campaign lore has been updated successfully!";
-            return RedirectToAction(nameof(LobbyDetails), new { id = gameId });
+            return RedirectToAction(nameof(LobbyDetails), new { id = gameId, tab = "lore" });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DownloadLore(int gameId)
+        {
+            int myId = GetCurrentUserId();
+            var game = await _context.Games.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == gameId);
+
+            if (game == null || (game.UserId != myId && !game.Users.Any(u => u.Id == myId)))
+            {
+                return Unauthorized();
+            }
+
+            string loreText = game.Lore ?? "The chronicles are currently empty.";
+            byte[] fileBytes = System.Text.Encoding.UTF8.GetBytes(loreText);
+            string fileName = $"{game.Name.Replace(" ", "_")}_Lore.txt";
+
+            return File(fileBytes, "text/plain", fileName);
         }
     }
 }

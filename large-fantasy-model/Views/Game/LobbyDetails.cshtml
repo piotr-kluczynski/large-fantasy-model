@@ -42,12 +42,12 @@
 
     <ul class="nav nav-pills mb-4 bg-light p-2 rounded-pill d-inline-flex border shadow-sm" id="lobbyTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="custom-tab-btn active rounded-pill fw-bold px-4 py-2 me-2" id="main-tab" data-bs-toggle="pill" data-bs-target="#main-pane" type="button" role="tab" aria-controls="main-pane" aria-selected="true">
+            <button class="custom-tab-btn @(ViewBag.ActiveTab == "lore" ? "" : "active") rounded-pill fw-bold px-4 py-2 me-2" id="main-tab" data-bs-toggle="pill" data-bs-target="#main-pane" type="button" role="tab" aria-controls="main-pane" aria-selected="true">
             <i class="bi bi-shield-shaded me-2"></i>Main Lobby
         </button>
         </li>
         <li class="nav-item" role="presentation">
-        <button class="custom-tab-btn rounded-pill fw-bold px-4 py-2" id="lore-tab" data-bs-toggle="pill" data-bs-target="#lore-pane" type="button" role="tab" aria-controls="lore-pane" aria-selected="false">
+        <button class="custom-tab-btn @(ViewBag.ActiveTab == "lore" ? "active" : "") rounded-pill fw-bold px-4 py-2" id="lore-tab" data-bs-toggle="pill" data-bs-target="#lore-pane" type="button" role="tab" aria-controls="lore-pane" aria-selected="false">
             <i class="bi bi-book-half me-2"></i>Campaign Lore
         </button>
         </li>
@@ -55,7 +55,7 @@
 
     <div class="tab-content" id="lobbyTabsContent">
         
-        <div class="tab-pane fade show active" id="main-pane" role="tabpanel" aria-labelledby="main-tab">
+        <div class="tab-pane fade @(ViewBag.ActiveTab == "lore" ? "" : "show active")" id="main-pane" role="tabpanel" aria-labelledby="main-tab">
             <div class="row">
                 <div class="col-lg-8 mb-4">
                     
@@ -254,7 +254,7 @@
             </div>
         </div>
 
-        <div class="tab-pane fade" id="lore-pane" role="tabpanel" aria-labelledby="lore-tab">
+        <div class="tab-pane fade @(ViewBag.ActiveTab == "lore" ? "show active" : "")" id="lore-pane" role="tabpanel" aria-labelledby="lore-tab">
             <div class="row">
                 <div class="col-12 mb-4">
                     <div class="card shadow-sm border-0 rounded-4">
@@ -265,7 +265,34 @@
                         <div class="card-body p-4">
                             @if (Model.IsDungeonMaster)
                             {
-                                <form asp-action="SaveLore" asp-controller="Game" method="post">
+                                <div id="dm-view-mode">
+                                    @if (!string.IsNullOrWhiteSpace(Model.Lore))
+                                    {
+                                        <textarea id="dm-raw-lore" style="display:none;">@Model.Lore</textarea>
+                                        <div id="dm-rendered-lore" class="p-2 text-dark fs-5 mb-3" style="line-height: 1.8;"></div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center text-muted py-5 mb-3">
+                                            <i class="bi bi-book fs-1 d-block mb-3 opacity-25 text-success"></i>
+                                            <h5>The chronicles are currently empty</h5>
+                                            <p class="small">Click "Edit Lore" to start writing the campaign's history.</p>
+                                        </div>
+                                    }
+                                    <div class="text-end d-flex justify-content-end gap-2">
+                                        @if (!string.IsNullOrWhiteSpace(Model.Lore))
+                                        {
+                                            <a asp-action="DownloadLore" asp-controller="Game" asp-route-gameId="@Model.GameId" class="btn btn-outline-secondary btn-lg rounded-pill fw-bold px-4 shadow-sm">
+                                                <i class="bi bi-download me-2"></i> Download (.txt)
+                                            </a>
+                                        }
+                                        <button type="button" id="btn-edit-lore" class="btn btn-success btn-lg rounded-pill fw-bold px-5 shadow-sm">
+                                            <i class="bi bi-pencil-square me-2"></i> Edit Lore
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <form asp-action="SaveLore" asp-controller="Game" method="post" id="lore-form" style="display: none;">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="gameId" value="@Model.GameId" />
                                     <div class="mb-3">
@@ -298,7 +325,10 @@
 
                                         <textarea id="lore-textarea" name="lore" class="form-control rounded-4 p-4 font-monospace bg-white" rows="15" placeholder="A long time ago, in a world ruled by ancient dragons..." style="font-size: 1.05rem; line-height: 1.6;">@Model.Lore</textarea>
                                     </div>
-                                    <div class="text-end">
+                                    <div class="text-end d-flex justify-content-end gap-2">
+                                        <button type="button" id="btn-cancel-edit" class="btn btn-outline-secondary btn-lg rounded-pill fw-bold px-4 shadow-sm">
+                                            Cancel
+                                        </button>
                                         <button type="submit" class="btn btn-success btn-lg rounded-pill fw-bold px-5 shadow-sm">
                                             <i class="bi bi-journal-check me-2"></i> Save Chronicles
                                         </button>
@@ -309,8 +339,13 @@
                             {
                                 if (!string.IsNullOrWhiteSpace(Model.Lore))
                                 {
-                                    <div class="p-2 text-dark fs-5" style="white-space: pre-line; line-height: 1.8; font-family: Georgia, serif;">
-                                        @Model.Lore
+                                    <textarea id="raw-lore" style="display:none;">@Model.Lore</textarea>
+                                    <div id="rendered-lore" class="p-2 text-dark fs-5" style="line-height: 1.8;">
+                                    </div>
+                                    <div class="text-end mt-3">
+                                        <a asp-action="DownloadLore" asp-controller="Game" asp-route-gameId="@Model.GameId" class="btn btn-outline-secondary rounded-pill fw-bold px-4 shadow-sm">
+                                            <i class="bi bi-download me-2"></i> Download (.txt)
+                                        </a>
                                     </div>
                                 }
                                 else
@@ -337,7 +372,42 @@
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script src="~/js/Game/Lobbydetails.js" asp-append-version="true"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const rawLore = document.getElementById('raw-lore');
+            const renderedLore = document.getElementById('rendered-lore');
+            if (rawLore && renderedLore) {
+                renderedLore.innerHTML = marked.parse(rawLore.value);
+            }
+
+            const dmRawLore = document.getElementById('dm-raw-lore');
+            const dmRenderedLore = document.getElementById('dm-rendered-lore');
+            if (dmRawLore && dmRenderedLore) {
+                dmRenderedLore.innerHTML = marked.parse(dmRawLore.value);
+            }
+
+            const btnEditLore = document.getElementById('btn-edit-lore');
+            const btnCancelEdit = document.getElementById('btn-cancel-edit');
+            const dmViewMode = document.getElementById('dm-view-mode');
+            const loreForm = document.getElementById('lore-form');
+
+            if (btnEditLore && dmViewMode && loreForm) {
+                btnEditLore.addEventListener('click', function() {
+                    dmViewMode.style.display = 'none';
+                    loreForm.style.display = 'block';
+                });
+            }
+
+            if (btnCancelEdit && dmViewMode && loreForm) {
+                btnCancelEdit.addEventListener('click', function() {
+                    dmViewMode.style.display = 'block';
+                    loreForm.style.display = 'none';
+                });
+            }
+        });
+    </script>
 }
