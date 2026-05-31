@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Data;
+using large_fantasy_model.Data;
 using large_fantasy_model.Models;
 using large_fantasy_model.ViewModels;
 using Microsoft.AspNetCore.Authentication;
@@ -105,7 +105,12 @@ namespace large_fantasy_model.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users
+                .Include(u => u.Friends)
+                .Include(u => u.FriendOf)
+                .Include(u => u.Games)
+                .Include(u => u.Conversations)
+                .FirstOrDefaultAsync(u => u.Id == id);
             if (user == null) return NotFound();
 
             if (!CanManage(GetMyPermissions(), user.AdminPermissions) || id == int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
@@ -114,6 +119,15 @@ namespace large_fantasy_model.Controllers
                 return RedirectToAction(nameof(Users));
             }
 
+            // Usuwamy ręcznie powiązane wiadomości (ponieważ EF Core ma ustawione DeleteBehavior.Restrict)
+            var userMessages = await _context.Messages.Where(m => m.UserId == id).ToListAsync();
+            _context.Messages.RemoveRange(userMessages);
+
+            // Usuwamy gry założone przez użytkownika (DeleteBehavior.Restrict)
+            var ownedGames = await _context.Games.Where(g => g.UserId == id).ToListAsync();
+            _context.Games.RemoveRange(ownedGames);
+
+            // Teraz możemy bezpiecznie usunąć samego użytkownika
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
@@ -230,6 +244,11 @@ namespace large_fantasy_model.Controllers
                 new Claim("IsImpersonating", "true")
             };
 
+            if (!string.IsNullOrEmpty(user.ProfilePicturePath))
+            {
+                claims.Add(new Claim("ProfilePicturePath", user.ProfilePicturePath));
+            }
+
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
 
@@ -257,6 +276,11 @@ namespace large_fantasy_model.Controllers
                 new Claim(ClaimTypes.Email, adminUser.Email),
                 new Claim("AdminPermissions", adminUser.AdminPermissions.ToString())
             };
+
+            if (!string.IsNullOrEmpty(adminUser.ProfilePicturePath))
+            {
+                claims.Add(new Claim("ProfilePicturePath", adminUser.ProfilePicturePath));
+            }
 
             if (adminUser.AdminPermissions == 2)
             {

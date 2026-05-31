@@ -11,7 +11,6 @@ namespace large_fantasy_model
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
             builder.Services.AddScoped<JsonRepository<Spell>>(sp =>
                 new JsonRepository<Spell>("Data/JsonFiles"));
 

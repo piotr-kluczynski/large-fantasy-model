@@ -45,7 +45,7 @@ namespace large_fantasy_model.Controllers
                     FirstName = model.FirstName,
                     LastName = model.LastName ?? "",
                     Email = model.Email,
-                    Password = model.Password, 
+                    Password = BCrypt.Net.BCrypt.HashPassword(model.Password), 
                     Bio = "",
                     CreatedDate = DateTime.Now,
                     AdminPermissions = 0
@@ -79,10 +79,22 @@ namespace large_fantasy_model.Controllers
         public async Task<IActionResult> Login(string email, string password)
         {
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
+                .FirstOrDefaultAsync(u => u.Email == email);
 
             if (user != null)
             {
+                bool isPasswordValid = false;
+
+                try 
+                {
+                    isPasswordValid = BCrypt.Net.BCrypt.Verify(password, user.Password);
+                }
+                catch (BCrypt.Net.SaltParseException)
+                {
+                }
+
+                if (isPasswordValid)
+                {
                 if (user.IsLockedOut)
                 {
                     ViewBag.ErrorMessage = $"Twój dostęp został zablokowany do {user.LockoutEnd:dd.MM.yyyy}. Powód: {user.LockoutReason}";
@@ -112,8 +124,8 @@ namespace large_fantasy_model.Controllers
                     new ClaimsPrincipal(claimsIdentity));
 
                 return RedirectToAction("Index", "Home");
+                }
             }
-
             ViewBag.ErrorMessage = "Nieprawidłowy adres e-mail lub hasło.";
             return View();
         }
