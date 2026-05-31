@@ -1,0 +1,185 @@
+@model large_fantasy_model.ViewModels.FriendsViewModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env
+
+@{
+    ViewData["Title"] = "My Friends";
+
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container mt-5" id="friends-config" data-my-user-id="@int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0")">
+    <div class="row">
+
+        <div class="col-md-6 mb-4">
+            
+            <div class="card shadow-sm border-primary rounded-4 mb-4" id="received-requests-card" style="@(Model.ReceivedRequests.Any() ? "" : "display: none;")">
+                <div class="card-header bg-primary text-white border-0 pt-3 pb-2 rounded-top-4">
+                    <h5 class="fw-bold mb-0">Pending Requests</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush rounded-bottom-4" id="friend-requests-list">
+                        @foreach (var request in Model.ReceivedRequests)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-light">
+                                <div class="d-flex align-items-center">
+                                    <img src="@AvatarHelper.GetUserAvatar(request.Username, request.ProfilePicturePath, _env.WebRootPath, 40)" class="rounded-circle me-3" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover;" />
+                                    <span class="fw-semibold">@request.Username</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <form asp-action="AddFriend" method="post">
+                                        <input type="hidden" name="friendId" value="@request.Id" />
+                                        <button type="submit" class="btn btn-success btn-sm rounded-pill fw-bold">Accept</button>
+                                    </form>
+                                    <form asp-action="RemoveFriend" method="post">
+                                        <input type="hidden" name="friendId" value="@request.Id" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill fw-bold">Decline</button>
+                                    </form>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+    
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                    <strong>Success!</strong> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["DangerMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                    <strong>Removed.</strong> @TempData["DangerMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h3 class="fw-bold text-primary">My Friends</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush" id="mutual-friends-list" style="@(Model.MutualFriends.Any() ? "" : "display: none;")">
+                        @foreach (var friend in Model.MutualFriends)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div class="d-flex align-items-center">
+                                    <img src="@AvatarHelper.GetUserAvatar(friend.Username, friend.ProfilePicturePath, _env.WebRootPath, 40)" class="rounded-circle me-3" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover;" />
+                                    <span class="fw-semibold fs-5">@friend.Username</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <form asp-controller="PrivateMessage" asp-action="StartPrivateChat" method="post">
+                                        <input type="hidden" name="friendId" value="@friend.Id" />
+                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill fw-bold px-3">Message</button>
+                                    </form>
+                                    <form asp-action="RemoveFriend" method="post" onsubmit="return confirm('Are you sure you want to remove this friend?');">
+                                        <input type="hidden" name="friendId" value="@friend.Id" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill fw-bold">Remove</button>
+                                    </form>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                    
+                    <div class="text-center text-muted py-4" id="no-friends-msg" style="@(Model.MutualFriends.Any() ? "display: none;" : "")">
+                        <p>You don't have any friends added yet. Send some requests!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h3 class="fw-bold text-dark">Find Travelers</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Friends" method="get" class="d-flex mb-4">
+                        <input type="text" name="searchQuery" class="form-control me-2 rounded-pill" placeholder="Search by username..." value="@Model.SearchQuery" />
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Search</button>
+                    </form>
+
+                    @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                    {
+                        <h5 class="fw-bold text-muted mb-3">Search Results</h5>
+                        if (Model.SearchResults.Any())
+                        {
+                            <ul class="list-group list-group-flush">
+                                @foreach (var result in Model.SearchResults)
+                                {
+                                    bool isFriend = Model.MutualFriends.Any(f => f.Id == result.Id);
+                                    bool isSent = Model.SentRequests.Any(f => f.Id == result.Id);
+                                    bool isReceived = Model.ReceivedRequests.Any(f => f.Id == result.Id);
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="@AvatarHelper.GetUserAvatar(result.Username, result.ProfilePicturePath, _env.WebRootPath, 40)" class="rounded-circle me-3" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover;" />
+                                            <span class="fw-semibold">@result.Username</span>
+                                        </div>
+                                        
+                                        @if (isFriend)
+                                        {
+                                            <span class="badge border border-success text-success bg-white rounded-pill py-2 px-3 shadow-sm">Friend</span>
+                                        }
+                                        else if (isSent)
+                                        {
+                                            <span class="badge bg-success text-white rounded-pill py-2 px-3">Request Sent</span>
+                                        }
+                                        else if (isReceived)
+                                        {
+                                            <span class="badge bg-warning text-black rounded-pill py-2 px-3">Pending</span>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="AddFriend" method="post">
+                                                <input type="hidden" name="friendId" value="@result.Id" />
+                                                <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill fw-bold">Send Request</button>
+                                            </form>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p class="text-muted text-center py-3">No travelers found with the name "@Model.SearchQuery".</p>
+                        }
+                    }
+                </div>
+            </div>
+            
+            @if (Model.SentRequests.Any())
+            {
+                <div class="card shadow-sm border-0 rounded-4" id="sent-requests-section">
+                    <div class="card-header bg-light border-0 pt-3 pb-2 rounded-top-4">
+                        <h6 class="fw-bold text-muted mb-0">Sent Requests</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush rounded-bottom-4" id="sent-requests-list">
+                            @foreach (var request in Model.SentRequests)
+                            {
+                                <li id="sent-request-@request.Id" class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                    <span><small class="fw-semibold">@request.Username</small></span>
+                                    <form asp-action="RemoveFriend" method="post">
+                                        <input type="hidden" name="friendId" value="@request.Id" />
+                                        <button type="submit" class="btn btn-link text-danger btn-sm p-0 text-decoration-none"><small>Cancel</small></button>
+                                    </form>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    
+
+    <script src="~/js/Profile/Friends.js" asp-append-version="true"></script>
+}

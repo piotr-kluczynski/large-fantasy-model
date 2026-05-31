@@ -1,0 +1,56 @@
+﻿@model large_fantasy_model.ViewModels.CreateGameViewModel
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-success text-white p-4 rounded-top-4">
+                    <h3 class="fw-bold mb-0">Edit Campaign Settings</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" name="id" value="@ViewBag.GameId" />
+                        
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-bold">Campaign Name</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-bold">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="MaxPlayers" class="form-label fw-bold">Max Players</label>
+                            <input asp-for="MaxPlayers" type="number" class="form-control" min="2" max="50" />
+                            <span asp-validation-for="MaxPlayers" class="text-danger small"></span>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input asp-for="IsPublic" class="form-check-input" type="checkbox" id="isPublicSwitch">
+                                <label class="form-check-label fw-bold" for="isPublicSwitch">Public Campaign</label>
+                            </div>
+
+                            <div id="passwordField" class="mb-4 @(Model.IsPublic ? "d-none" : "")">
+                                <label asp-for="Password" class="form-label fw-bold">Lobby Password</label>
+                                <input asp-for="Password" class="form-control" type="password" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">Save Changes</button>
+                                <a asp-action="LobbyDetails" asp-route-id="@ViewBag.GameId" class="btn btn-light rounded-pill px-4">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @section Scripts {
+        <script src="~/js/Game/Edit.js"></script>
+    
+    }
+
+    

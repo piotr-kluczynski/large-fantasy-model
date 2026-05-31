@@ -1,0 +1,64 @@
+﻿@using large_fantasy_model.ViewModels.Compendium
+@model EntityEditorViewModel
+
+<div class="container mt-4">
+    <h2>@Model.Title</h2>
+
+    <form asp-controller="Compendium" asp-action="@(Model.IsEdit ? "Edit" : "Create")" method="post">
+        <input type="hidden" asp-for="Rulebook" />
+        <input type="hidden" asp-for="Category" />
+
+        @foreach (var field in Model.Fields)
+        {
+            <div class="mb-3">
+                <label>@field.Label</label>
+
+                @switch (field.Type)
+                {
+                    case "text":
+                        <input class="form-control" 
+                               name="Values[@field.Key]"
+                               value="@(Model.Values.ContainsKey(field.Key) ? Model.Values[field.Key] : "")" />
+                        break;
+                    
+                    case "number":
+                        <input type="number" 
+                               class="form-control"
+                               name="Values[@field.Key]"
+                               value="@(Model.Values.ContainsKey(field.Key) ? Model.Values[field.Key] : "")" />
+                        break;
+                
+                    case "textarea":
+                        <textarea class="form-control" 
+                                  name="Values[@field.Key]">
+                            @(Model.Values.ContainsKey(field.Key) ? Model.Values[field.Key] : "")    
+                        </textarea>
+                        break;
+
+                    case "checkbox":
+                        <input type="checkbox" 
+                               name="Values[@field.Key]" 
+                               value="true"
+                               @(Model.Values.ContainsKey(field.Key) && Model.Values[field.Key] == "Yes" ? "checked" : "") />
+                        break;
+                }
+            </div>
+        }
+
+        <div class="d-flex justify-content-between mt-4">
+            <a asp-action="@(Model.IsEdit ? "Entity" : "Details")"
+                   asp-route-rulebook="@Model.Rulebook"
+                   asp-route-category="@Model.Category"
+                   asp-route-id="@(Model.IsEdit ? null : "1")"
+                   asp-route-name="@(Model.Values.ContainsKey("Name") ? Model.Values["Name"].ToLower().Replace(" ", "-") : "")"
+                   class="btn btn-secondary">
+                Cancel
+            </a>
+
+            <button type="submit" class="btn btn-primary">
+                Save
+            </button>
+
+        </div>
+    </form>
+</div>

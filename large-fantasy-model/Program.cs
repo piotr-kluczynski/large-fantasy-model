@@ -1,6 +1,8 @@
 using large_fantasy_model.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using large_fantasy_model.Models.CharacterModels.Json;
+using large_fantasy_model.Hubs; 
 
 namespace large_fantasy_model
 {
@@ -9,29 +11,40 @@ namespace large_fantasy_model
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddScoped<JsonRepository<Spell>>(sp =>
+                new JsonRepository<Spell>("Data/JsonFiles"));
 
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddHostedService<large_fantasy_model.Services.AvatarWatcherService>();
+
+            builder.Services.AddSignalR();
+
+
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); 
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
 
             builder.Services.AddDbContext<LargeFantasyModelContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("LargeFantasyModelDB"))
             );
 
-            // Konfiguracja autoryzacji opartej na ciasteczkach
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = "/Auth/Login"; // Tu przekieruje, jak ktoś wejdzie tam, gdzie nie ma dostępu
+                    options.LoginPath = "/Auth/Login";
                 });
-
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -40,10 +53,16 @@ namespace large_fantasy_model
 
             app.UseRouting();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            app.UseSession();
 
-            app.UseAuthorization();
+
+            app.UseAuthentication();
+            app.UseAuthorization(); 
+
+     
+            app.MapHub<PrivateMessageHub>("/privateMessageHub");
+            app.MapHub<large_fantasy_model.Hubs.GameHub>("/gameHub");
+            app.MapHub<large_fantasy_model.Hubs.LobbyHub>("/lobbyHub");
 
             app.MapControllerRoute(
                 name: "default",

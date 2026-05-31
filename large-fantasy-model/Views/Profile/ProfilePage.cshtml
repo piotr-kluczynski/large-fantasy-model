@@ -1,15 +1,16 @@
-﻿@model large_fantasy_model.Models.User
+@model large_fantasy_model.Models.User
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env
+@{
+    string avatarUrl = AvatarHelper.GetUserAvatar(Model.Username, Model.ProfilePicturePath, _env.WebRootPath, 120);
+}
 
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-9">
             <div class="card shadow-lg border-0 overflow-hidden">
-                
                 <div class="bg-dark text-white text-center pt-5 pb-4">
-                    <img src="https://ui-avatars.com/api/?name=@Model.Username&size=120&background=random" class="rounded-circle img-thumbnail shadow" alt="Avatar">
-                    
+                    <img data-username="@Model.Username" src="@avatarUrl" class="rounded-circle img-thumbnail shadow" alt="Avatar" style="width: 120px; height: 120px; object-fit: cover;">
                     <h2 class="fw-bold mt-3 mb-2">@@@Model.Username</h2>
-                    
                     <span class="badge bg-primary fs-6 shadow-sm">Member since: @Model.CreatedDate.ToString("MMMM yyyy")</span>
                 </div>
 
@@ -17,21 +18,17 @@
                     <div class="row">
                         <div class="col-md-5 border-end pe-4 mb-4 mb-md-0">
                             <h4 class="fw-bold mb-4 border-bottom pb-2 text-dark">Identity</h4>
-                            
                             <p class="mb-3">
                                 <strong class="text-muted d-block ">Full Name:</strong>
                                 <span class="fs-5 text-dark small">@Model.FirstName @Model.LastName</span>
                             </p>
-                            
                             <p class="mb-0">
                                 <strong class="text-muted d-block ">Email Address:</strong>
                                 <span class="fs-5 text-dark small">@Model.Email</span>
                             </p>
                         </div>
-
                         <div class="col-md-7 ps-md-4">
                             <h4 class="fw-bold mb-4 border-bottom pb-2 text-dark">Biography</h4>
-                            
                             <div class="fst-italic text-dark" style="line-height: 1.7;">
                                 @if (string.IsNullOrEmpty(Model.Bio))
                                 {

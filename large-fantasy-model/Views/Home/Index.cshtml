@@ -17,46 +17,93 @@
             {
                 <h1 class="display-5 fw-bold">Welcome to the Large Fantasy Model</h1>
                 <p class="fs-4">Step into the tavern, traveler. Your journey starts here.</p>
-                <a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-lg px-4 me-md-2">Login</a>
-                <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-secondary btn-lg px-4">Register</a>
+                <div class="mt-4">
+                    <a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-lg px-4 me-md-2">Login</a>
+                    <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-secondary btn-lg px-4">Register</a>
+                </div>
             }
         </div>
     </div>
 
     @if (isAuthenticated)
     {
-        <div class="row g-4 mt-2">
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm border-0">
+        <div class="row g-4 mt-2 justify-content-center">
+          
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 border-top border-primary border-4 rounded-4 transition-hover overflow-hidden">
                     <div class="card-body text-center p-4">
-                        <div class="display-4 mb-3"></div>
-                        <h4 class="card-title fw-bold">My Profile</h4>
-                        <p class="card-text text-muted">Manage your identity, change your tale, or update your security.</p>
-                        <a asp-controller="Profile" asp-action="ProfilePage" class="btn btn-outline-primary stretched-link">Open Profile</a>
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-primary bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
+                            <i class="bi bi-search fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">Find Lobby</h5>
+                        <p class="small text-muted">Join new adventures.</p>
+                        <a asp-controller="FindGame" asp-action="Find" class="btn btn-sm btn-outline-primary rounded-pill stretched-link">Search</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 border-top border-success border-4 rounded-4 transition-hover overflow-hidden">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-success bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
+                            <i class="bi bi-journal-bookmark-fill fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">My Campaigns</h5>
+                        <p class="small text-muted">Manage your active games.</p>
+                        <a asp-controller="Game" asp-action="Campaigns" class="btn btn-sm btn-outline-success rounded-pill stretched-link">Open</a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm border-0 border-primary border-top border-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 border-top border-danger border-4 rounded-4 transition-hover overflow-hidden">
                     <div class="card-body text-center p-4">
-                        <div class="display-4 mb-3"></div>
-                        <h4 class="card-title fw-bold text-primary">My Characters</h4>
-                        <p class="card-text text-muted">Your heroes awaiting orders. View stats or create a new legend.</p>
-                        <a href="#" class="btn btn-primary stretched-link disabled">Coming Soon</a>
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-danger bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
+                            <i class="bi bi-book-half fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">Compendium</h5>
+                        <p class="small text-muted">Rules and world lore.</p>
+                        <a asp-controller="Compendium" asp-action="Index" class="btn btn-sm btn-outline-danger rounded-pill stretched-link">Explore</a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm border-0">
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 border-top border-secondary border-4 rounded-4 opacity-75 overflow-hidden">
                     <div class="card-body text-center p-4">
-                        <div class="display-4 mb-3"></div>
-                        <h4 class="card-title fw-bold">Settings</h4>
-                        <p class="card-text text-muted">Quick access to password and email changes.</p>
-                        <div class="d-grid gap-2">
-                            <a asp-controller="Profile" asp-action="ChangePassword" class="btn btn-sm btn-light border text-danger">Change Password</a>
-                            <a asp-controller="Profile" asp-action="ChangeEmail" class="btn btn-sm btn-light border">Change Email</a>
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-secondary bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
+                            <i class="bi bi-person-vcard fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold text-muted">Characters</h5>
+                        <p class="small text-muted">Coming soon!</p>
+                        <button class="btn btn-sm btn-light border rounded-pill disabled w-100">Locked</button>
+                    </div>
+                </div>
+            </div>
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 border-top border-dark border-4 rounded-4 transition-hover overflow-hidden">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-dark bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
+                                <i class="bi bi-incognito fs-4"></i>
+                            </div>
+                            <h5 class="fw-bold">Admin Panel</h5>
+                            <p class="small text-muted">Manage users in game.</p>
+                            <a asp-controller="Admin" asp-action="Users" class="btn btn-sm btn-outline-dark rounded-pill stretched-link">Management</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 border-top border-dark border-4 rounded-4 transition-hover overflow-hidden">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-dark bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
+                            <i class="bi bi-gear-fill fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">Settings</h5>
+                        <p class="small text-muted">Account & Security.</p>
+                        <div class="d-grid mt-2">
+                            <a asp-controller="Profile" asp-action="Edit" class="btn btn-sm btn-outline-dark rounded-pill stretched-link">Manage Account</a>
                         </div>
                     </div>
                 </div>
@@ -64,3 +111,22 @@
         </div>
     }
 </div>
+@section Styles {
+    <style>
+ 
+        .rounded-4 {
+            border-radius: 1rem !important;
+        }
+
+    
+        .transition-hover {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+            .transition-hover:hover {
+                transform: translateY(-10px) scale(1.02);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
+            }
+    </style>
+}

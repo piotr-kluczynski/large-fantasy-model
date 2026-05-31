@@ -1,6 +1,12 @@
-﻿@model large_fantasy_model.ViewModels.EditProfileViewModel
+@model large_fantasy_model.ViewModels.EditProfileViewModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env
+@{
+    string currentAvatar = AvatarHelper.GetUserAvatar(Model.Username, Model.CurrentProfilePicturePath, _env.WebRootPath, 120);
+}
 
-<div class="container mt-5">
+
+
+<div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow border-0">
@@ -8,8 +14,28 @@
                     <h4 class="mb-0">Update Your Profile</h4>
                 </div>
                 <div class="card-body">
-                    <form asp-action="Edit" method="post">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
                    
+                        <div class="text-center mb-4">
+                            <label class="avatar-wrapper" for="ProfilePicture" title="Click to change your avatar">
+                                <img id="avatarPreview" data-username="@Model.Username" src="@currentAvatar" alt="Current Avatar" />
+                                <div class="avatar-overlay">
+                                    Change<br>Avatar
+                                </div>
+                            </label>
+                            <input type="file" asp-for="ProfilePicture" accept="image/*" />
+                            @if (!string.IsNullOrEmpty(Model.CurrentProfilePicturePath))
+                            {
+                                var fullPath = System.IO.Path.Combine(_env.WebRootPath, Model.CurrentProfilePicturePath.TrimStart('/'));
+                                if (System.IO.File.Exists(fullPath))
+                                {
+                                    <div class="mt-2" id="removeAvatarBtnContainer">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="document.getElementById('removeAvatarForm').dispatchEvent(new Event('submit'));">Delete the photo</button>
+                                    </div>
+                                }
+                            }
+                        </div>
+
                         <div class="mb-3">
                             <label asp-for="Username" class="form-label fw-bold">Username</label>
                             <input asp-for="Username" class="form-control" />
@@ -44,3 +70,13 @@
         </div>
     </div>
 </div>
+
+<form id="removeAvatarForm" asp-action="RemoveAvatar" method="post" class="d-none"></form>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/edit.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/Profile/Edit.js" asp-append-version="true"></script>
+}

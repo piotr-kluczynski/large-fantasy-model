@@ -1,0 +1,156 @@
+@model IEnumerable<large_fantasy_model.Models.Conversation>
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env
+@{
+    ViewData["Title"] = "My Messages";
+    var myId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+    var activeChat = ViewBag.ActiveChat as large_fantasy_model.Models.Conversation;
+    var friends = ViewBag.Friends as List<large_fantasy_model.Models.User> ?? new List<large_fantasy_model.Models.User>();
+
+}
+
+<div class="container mt-4" id="pm-config" data-my-user-id="@myId" data-active-conversation-id="@(activeChat?.Id.ToString() ?? "")">
+    <div class="row" style="height: 75vh;">
+        
+        <div class="col-md-4 h-100">
+            <div class="card h-100 shadow-sm border-0 rounded-4 d-flex flex-column">
+                <div class="card-header bg-white border-bottom pt-4 pb-3">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-people text-primary me-2"></i> Friends</h5>
+                    <input type="text" id="friend-search" class="form-control rounded-pill shadow-sm px-4" placeholder="Search friends by username..." autocomplete="off">
+                </div>
+                <div class="card-body p-0 overflow-auto" id="friends-list-container">
+                    <ul class="list-group list-group-flush">
+                        @foreach (var friend in friends)
+                        {
+
+                            var conv = Model.FirstOrDefault(c => c.Users.Any(u => u.Id == friend.Id));
+                            
+                            int unreadCount = 0;
+                            bool isActive = false;
+                            
+                            if (conv != null)
+                            {
+                                unreadCount = ViewBag.UnreadCounts != null && ViewBag.UnreadCounts.ContainsKey(conv.Id) ? ViewBag.UnreadCounts[conv.Id] : 0;
+                                isActive = ViewBag.ActiveConversationId != null && (int)ViewBag.ActiveConversationId == conv.Id;
+                            }
+                            
+                            bool hasUnread = unreadCount > 0;
+                            string itemClass = isActive ? "bg-light border-bottom border-3 border-primary" : (hasUnread ? "bg-white border-bottom border-3 border-warning fw-bold unread-pop" : "bg-white border-bottom");
+
+                            <form asp-controller="PrivateMessage" asp-action="StartPrivateChat" method="post" class="m-0 friend-item" data-name="@friend.Username.ToLower()">
+                                <input type="hidden" name="friendId" value="@friend.Id" />
+                                <button type="submit" id="friend-btn-@friend.Id" class="list-group-item w-100 text-start d-flex justify-content-between align-items-center py-3 @itemClass hover-bg chat-btn">
+                                    <div class="d-flex align-items-center">
+                                        <img src="@AvatarHelper.GetUserAvatar(friend.Username, friend.ProfilePicturePath, _env.WebRootPath, 40)" class="rounded-circle me-3 shadow-sm" style="width: 40px; height: 40px; object-fit: cover;" />
+                                        <div class="text-dark">@friend.Username</div>
+                                    </div>
+                                    <span id="unread-badge-friend-@friend.Id" class="badge bg-danger rounded-pill @(hasUnread && !isActive ? "" : "d-none")">@unreadCount</span>
+                                </button>
+                            </form>
+                        }
+                    </ul>
+                    @if (!friends.Any())
+                    {
+                        <p class="text-muted text-center py-4">You have no friends yet. Add some to start chatting!</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8 h-100">
+            @if (activeChat != null)
+            {
+                var otherUser = activeChat.Users.FirstOrDefault(u => u.Id != myId);
+                <div class="card h-100 shadow-sm border-0 rounded-4 d-flex flex-column">
+                    
+                    <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <img src="@AvatarHelper.GetUserAvatar(otherUser?.Username, otherUser?.ProfilePicturePath, _env.WebRootPath, 40)" class="rounded-circle me-3 shadow-sm" style="width: 40px; height: 40px; object-fit: cover;" />
+                            <h5 class="fw-bold mb-0">@otherUser?.Username</h5>
+                        </div>
+                        <a asp-action="PrivateMessage" class="btn btn-sm border-0 bg-transparent shadow-none p-0 ms-2 btn-kick" title="Close Chat">
+                            <i class="bi bi-x"></i>
+                        </a>
+
+                        
+                    </div>
+
+                    <div class="card-body overflow-auto bg-light p-4" id="chat-messages-box" style="flex-grow: 1;">
+                        @if (activeChat.Messages != null && activeChat.Messages.Any())
+                        {
+                            foreach (var msg in activeChat.Messages.OrderBy(m => m.SendingTime))
+                            {
+                                bool isMine = msg.UserId == myId;
+                                <div class="mb-3 d-flex @(isMine ? "justify-content-end" : "justify-content-start")">
+                                    <div class="px-3 py-2 rounded-4 shadow-sm @(isMine ? "bg-primary text-white" : "bg-white text-dark")" style="max-width: 75%;">
+                                        <div>@msg.Content</div>
+                                        <small class="@(isMine ? "text-light" : "text-muted")" style="font-size: 0.7rem;">@msg.SendingTime.ToString("HH:mm")</small>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted mt-5">Say hello to @otherUser?.Username!</div>
+                        }
+                    </div>
+
+                    <div class="card-footer bg-white border-top p-3">
+                        <form asp-action="SendMessage" method="post" class="d-flex" id="chat-form">
+                            <input type="hidden" name="conversationId" value="@activeChat.Id" />
+                            <input type="text" name="content" class="form-control rounded-pill me-2 px-4" id="chat-input" placeholder="Type a message..." required autocomplete="off" />
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Send</button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card h-100 shadow-sm border-0 rounded-4 d-flex justify-content-center align-items-center bg-light">
+                    <div class="text-center text-muted">
+                        <i class="bi bi-chat-square-text fs-1 mb-3 d-block"></i>
+                        <h5>Select a friend to start chatting</h5>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+@section Styles {
+    <style>
+    .hover-bg:hover {
+        background-color: #f8f9fa !important;
+        transition: 0.2s;
+    }
+
+    .unread-pop {
+        transform: scale(1.02) translateX(5px);
+        box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.08) !important;
+        border-radius: 8px !important;
+        z-index: 10;
+        position: relative;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .chat-btn {
+        cursor: pointer;
+        border: none;
+        outline: none;
+    }
+    .btn-kick { color: #000; transition: color 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; }
+    .btn-kick i { font-size: 2rem; line-height: 1; }
+    .btn-kick:hover { color: #dc3545; }
+    .btn-invited { cursor: default !important; opacity: 0.7; }
+</style>
+}
+
+
+
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    
+    <script src="~/js/Profile/PrivateMessage.js" asp-append-version="true"></script>
+    
+}

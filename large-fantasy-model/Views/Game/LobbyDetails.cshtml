@@ -1,0 +1,343 @@
+@model large_fantasy_model.ViewModels.GameLobbyViewModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = Model.Name + " - Lobby";
+
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container mt-4" id="lobby-config" 
+     data-game-id="@Model.GameId" 
+     data-is-dm="@(Model.IsDungeonMaster ? "true" : "false")" 
+     data-current-user-id="@User.FindFirstValue(ClaimTypes.NameIdentifier)">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="fw-bold text-success mb-0">@Model.Name</h1>
+            @if (Model.IsDungeonMaster)
+            {
+                <a asp-action="Edit" asp-controller="Game" asp-route-id="@Model.GameId" 
+                   class="text-success opacity-75 d-inline-block" 
+                   style="text-decoration: none; line-height: 1;">
+                    <i class="bi bi-pencil-square" style="font-size: 1.2rem; vertical-align: baseline;"></i>
+                </a>
+            }
+            <div>
+                 <span class="badge bg-white @(Model.IsPublic ? "text-success border-success" : "text-danger border-danger") border rounded-pill px-3 py-2 align-middle" style="font-size: 0.75rem; margin-top:10px;">
+                    @(Model.IsPublic ? "Public" : "Private")
+                </span>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 align-items-center">
+            <form asp-controller="ActiveGame" asp-action="Index" asp-route-id="@Model.GameId" method="get">
+                <button class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm px-5">
+                    Enter VTT
+                </button>
+             </form>
+        </div>
+    </div>
+
+    <ul class="nav nav-pills mb-4 bg-light p-2 rounded-pill d-inline-flex border shadow-sm" id="lobbyTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="custom-tab-btn active rounded-pill fw-bold px-4 py-2 me-2" id="main-tab" data-bs-toggle="pill" data-bs-target="#main-pane" type="button" role="tab" aria-controls="main-pane" aria-selected="true">
+            <i class="bi bi-shield-shaded me-2"></i>Main Lobby
+        </button>
+        </li>
+        <li class="nav-item" role="presentation">
+        <button class="custom-tab-btn rounded-pill fw-bold px-4 py-2" id="lore-tab" data-bs-toggle="pill" data-bs-target="#lore-pane" type="button" role="tab" aria-controls="lore-pane" aria-selected="false">
+            <i class="bi bi-book-half me-2"></i>Campaign Lore
+        </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="lobbyTabsContent">
+        
+        <div class="tab-pane fade show active" id="main-pane" role="tabpanel" aria-labelledby="main-tab">
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    
+                    @if (!Model.IsActive)
+                    {
+                        <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center">
+                            <i class="bi bi-pause-circle-fill fs-4 me-3"></i>
+                            <div>
+                                <strong>Campaign Hidden!</strong> The Dungeon Master has temporarily hidden this lobby.
+                                New players cannot find it in search.
+                            </div>
+                        </div>
+                    }
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                            <strong>Success!</strong> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @if (Model.IsDungeonMaster)
+                    {
+                        <div class="card border-success border-2 shadow-sm rounded-4 bg-light mb-4 text-center p-3">
+                            <h5 class="fw-bold text-success mb-2">Invite Code</h5>
+                            <p class="text-muted small mb-2">Share this code to let players join directly.</p>
+                            <div class="d-inline-block bg-white border border-success border-2 rounded-3 px-4 py-1">
+                                <span class="fs-2 fw-bold font-monospace text-dark">@Model.JoinCode</span>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="card shadow-sm border-0 rounded-4 mb-4">
+                        <div class="card-header bg-white border-0 pt-4 pb-0">
+                            <h4 class="fw-bold">Campaign Description</h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted fs-5" style="white-space: pre-line;">@Model.Description</p>
+                        </div>
+                    </div>
+
+                    @if (Model.IsDungeonMaster)
+                    {
+                        <div class="card shadow-sm border-0 rounded-4 bg-white mb-4">
+                            <div class="card-body d-flex justify-content-between align-items-center p-4">
+                                <div>
+                                    <h5 class="fw-bold mb-1">Session Visibility</h5>
+                                    <p class="text-muted small mb-0">
+                                        @if (Model.IsActive)
+                                        {
+                                            <span>Currently <strong>Visible</strong> in search results.</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Currently <strong>Hidden</strong> from search.</span>
+                                        }
+                                    </p>
+                                </div>
+                                <form asp-action="ToggleStatus" asp-controller="Game" method="post" class="m-0">
+                                    <input type="hidden" name="id" value="@Model.GameId" />
+                                    @if (Model.IsActive)
+                                    {
+                                        <button type="submit" class="btn btn-outline-danger rounded-pill fw-bold px-4 shadow-sm">
+                                            <i class="bi bi-eye-slash-fill me-2"></i> Hide Lobby
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-success rounded-pill fw-bold px-4 shadow-sm">
+                                            <i class="bi bi-eye-fill me-2"></i> Show Lobby
+                                        </button>
+                                    }
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm border-danger border-1 rounded-4 bg-white mb-4">
+                            <div class="card-body d-flex justify-content-between align-items-center p-4">
+                                <div>
+                                    <h5 class="fw-bold text-danger mb-1">Danger Zone</h5>
+                                    <p class="text-muted small mb-0">Permanently delete this campaign and all its data.</p>
+                                </div>
+                                <form asp-action="Delete" asp-controller="Game" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this campaign? This action cannot be undone.');" class="m-0">
+                                    <input type="hidden" name="id" value="@Model.GameId" />
+                                    <button type="submit" class="btn btn-outline-danger rounded-pill fw-bold px-4 shadow-sm">
+                                        <i class="bi bi-trash3-fill me-2"></i> Delete Campaign
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card shadow-sm border-danger border-1 rounded-4 bg-white mb-4">
+                            <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center p-4 gap-3">
+                                <div>
+                                    <h5 class="fw-bold text-danger mb-1">Leave Campaign</h5>
+                                    <p class="text-muted small mb-0">You will be removed from the party and lose access to this lobby.</p>
+                                </div>
+                                <form asp-action="LeaveCampaign" asp-controller="Game" method="post" onsubmit="return confirm('Are you sure you want to leave this campaign?');" class="m-0 flex-shrink-0">
+                                    <input type="hidden" name="gameId" value="@Model.GameId" />
+                                    <button type="submit" class="btn btn-outline-danger text-danger rounded-pill fw-bold px-4 shadow-sm text-nowrap">
+                                        <i class="bi bi-box-arrow-right me-2 text-danger"></i> Leave Campaign
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow-sm border-0 rounded-4 mb-4">
+                        <div class="card-header bg-success text-white border-0 pt-3 pb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold mb-0">Adventuring Party</h5>
+                                <span class="badge rounded-pill bg-white text-success fw-bold px-3">
+                                    <span id="player-count">@Model.CurrentPlayers</span> / @Model.MaxPlayers
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush rounded-bottom-4" id="players-list">
+                                <li class="list-group-item d-flex align-items-center py-3 bg-light">
+                                    <img src="@AvatarHelper.GetUserAvatar(Model.DungeonMaster.Username, Model.DungeonMaster.ProfilePicturePath, _env.WebRootPath, 40)" class="rounded-circle me-3 border border-danger border-2" alt="DM Avatar" style="width: 40px; height: 40px; object-fit: cover;" />
+                                    <div>
+                                        <span class="fw-bold d-block">@Model.DungeonMaster.Username</span>
+                                        <small class="text-danger fw-bold">Dungeon Master</small>
+                                    </div>
+                                </li>
+
+                                @if (!Model.Players.Any())
+                                {
+                                    <li id="empty-players-msg" class="list-group-item text-center py-4 text-muted small italic">
+                                        No travelers have joined yet.
+                                    </li>
+                                }
+                                
+                                @foreach (var player in Model.Players)
+                                {
+                                    <li id="player-row-@player.Id" class="list-group-item p-3 border-top d-flex align-items-center justify-content-between border-0">
+                                        <div class="d-flex align-items-center">
+                                            <img src="@AvatarHelper.GetUserAvatar(player.Username, player.ProfilePicturePath, _env.WebRootPath, 45)" class="rounded-circle me-3 border border-success border-2" alt="Avatar" style="width: 45px; height: 45px; object-fit: cover;" />
+                                            <div>
+                                                <div class="fw-bold text-dark">@player.Username</div>
+                                                <small class="text-success fw-bold">Player</small>
+                                            </div>
+                                        </div>
+                                        @if (Model.IsDungeonMaster)
+                                        {
+                                            <form asp-action="RemovePlayer" method="post" class="kick-form m-0">
+                                                <input type="hidden" name="gameId" value="@Model.GameId" />
+                                                <input type="hidden" name="playerId" value="@player.Id" />
+                                                <button type="submit" class="btn btn-sm border-0 bg-transparent shadow-none p-0 ms-2 btn-kick">
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+
+                    @if (Model.AvailableFriends.Any())
+                    {
+                        <div class="card shadow-sm border-0 rounded-4" id="invite-friends-card">
+                            <div class="card-header bg-white border-0 pt-4 pb-0">
+                                <h5 class="fw-bold text-dark">Invite Friends</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <ul id="friends-invite-list" class="list-group list-group-flush">
+                                    @foreach (var friend in Model.AvailableFriends)
+                                    {
+                                        bool isInvited = Model.InvitedFriendIds != null && Model.InvitedFriendIds.Contains(friend.Id);
+                                        <li id="friend-row-@friend.Id" class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                            <div class="d-flex align-items-center">
+                                                <img src="@AvatarHelper.GetUserAvatar(friend.Username, friend.ProfilePicturePath, _env.WebRootPath, 32)" class="rounded-circle me-2" alt="Friend Avatar" style="width: 32px; height: 32px; object-fit: cover;" />
+                                                <span class="fw-semibold">@friend.Username</span>
+                                            </div>
+                                            <form asp-action="InviteFriend" method="post" class="invite-form m-0">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="gameId" value="@Model.GameId" />
+                                                <input type="hidden" name="friendId" value="@friend.Id" />
+                                                <button type="submit" class="btn @(isInvited ? "btn-secondary btn-invited" : "btn-outline-success") btn-sm rounded-pill fw-bold" @(isInvited ? "disabled" : "")>
+                                                    @(isInvited ? "Invited" : "Invite")
+                                                </button>
+                                            </form>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="lore-pane" role="tabpanel" aria-labelledby="lore-tab">
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-header bg-white border-0 pt-4 pb-0">
+                            <h3 class="fw-bold text-success"><i class="bi bi-book me-2"></i>World Chronicles & Lore</h3>
+                            <p class="text-muted small">The history, laws, myths, and legends of this adventure.</p>
+                        </div>
+                        <div class="card-body p-4">
+                            @if (Model.IsDungeonMaster)
+                            {
+                                <form asp-action="SaveLore" asp-controller="Game" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="gameId" value="@Model.GameId" />
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-end mb-2">
+                                            <button type="button" class="btn btn-sm btn-outline-success fw-bold shadow-sm" id="btn-toggle-ai-lore">
+                                                <i class="bi bi-magic me-1"></i> AI Lore Assistant
+                                            </button>
+                                        </div>
+
+                                        <div id="ai-lore-panel" class="card bg-white text-dark border-success mb-3 shadow-sm rounded-4" style="display: none;">
+                                            <div class="card-body p-3">
+                                                <label class="form-label small text-success fw-bold"><i class="bi bi-robot me-1"></i> PROMPT FOR AI</label>
+                                                <textarea id="ai-lore-prompt" class="form-control bg-light text-dark border-secondary mb-3 custom-scrollbar" rows="2" placeholder="E.g., 'Organize this text and add paragraphs' or 'Write a short legend about...'"></textarea>
+            
+                                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input border-secondary" type="checkbox" id="ai-include-current" checked>
+                                                        <label class="form-check-label text-dark small" for="ai-include-current">
+                                                            Include current editor text (for AI to modify/expand)
+                                                        </label>
+                                                    </div>
+                                                    <button type="button" id="btn-generate-ai-lore" class="btn btn-success btn-sm fw-bold px-4">Generate Text</button>
+                                                </div>
+
+                                                <div id="ai-lore-status" class="text-success small fw-bold mt-3" style="display:none;">
+                                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>Scribing lore...
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <textarea id="lore-textarea" name="lore" class="form-control rounded-4 p-4 font-monospace bg-white" rows="15" placeholder="A long time ago, in a world ruled by ancient dragons..." style="font-size: 1.05rem; line-height: 1.6;">@Model.Lore</textarea>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-success btn-lg rounded-pill fw-bold px-5 shadow-sm">
+                                            <i class="bi bi-journal-check me-2"></i> Save Chronicles
+                                        </button>
+                                    </div>
+                                </form>
+                            }
+                            else
+                            {
+                                if (!string.IsNullOrWhiteSpace(Model.Lore))
+                                {
+                                    <div class="p-2 text-dark fs-5" style="white-space: pre-line; line-height: 1.8; font-family: Georgia, serif;">
+                                        @Model.Lore
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-center text-muted py-5">
+                                        <i class="bi bi-book fs-1 d-block mb-3 opacity-25 text-success"></i>
+                                        <h5>The chronicles are currently empty</h5>
+                                        <p class="small">The Dungeon Master hasn't written the lore for this campaign yet.</p>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/lobbydetails.css" />
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    
+
+    <script src="~/js/Game/Lobbydetails.js" asp-append-version="true"></script>
+}

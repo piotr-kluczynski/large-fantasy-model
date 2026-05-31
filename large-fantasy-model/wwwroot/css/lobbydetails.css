@@ -1,0 +1,45 @@
+﻿.btn-kick {
+    color: #000;
+    transition: color 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .btn-kick i {
+        font-size: 2rem;
+        line-height: 1;
+    }
+
+    .btn-kick:hover {
+        color: #dc3545;
+    }
+
+.btn-invited {
+    cursor: default !important;
+    opacity: 0.7;
+}
+
+
+.custom-tab-btn {
+    background: transparent;
+    border: none;
+    color: #6c757d;
+    transition: all 0.2s ease;
+    text-decoration: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+    .custom-tab-btn:hover {
+        color: #198754;
+        background-color: #e9ecef;
+    }
+
+
+    .custom-tab-btn.active {
+        background-color: #198754 !important;
+        color: #fff !important;
+        cursor: default;
+    }

@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Models.CharacterModels;
+using large_fantasy_model.Models.CharacterModels;
 using System.ComponentModel.DataAnnotations;
 
 namespace large_fantasy_model.Models
@@ -37,7 +37,9 @@ namespace large_fantasy_model.Models
 
         [Required(ErrorMessage = "It has to be stated whether the user has admin permissions.")]
         public int AdminPermissions { get; set; }
-
+        public DateTime? LockoutEnd { get; set; } // Do kiedy blokada (null = brak blokady)
+        public string? LockoutReason { get; set; } // Powód wyświetlany użytkownikowi
+        public bool IsLockedOut => LockoutEnd.HasValue && LockoutEnd > DateTime.Now; // Pomocnicza właściwość
 
         // Kolekcja przechowująca gry w których uczestniczy użytkownik - relacja wiele-do-wielu (wielu użytkowników może brać udział w wielu grach)
         public ICollection<Game> Games { get; set; } = new List<Game>();
@@ -61,5 +63,8 @@ namespace large_fantasy_model.Models
 
         // Kolekcja przechowująca listę postaci należących do gracza - relacja wiele-do-wielu (wielu użytkowników może posiadać wiele postaci)
         public ICollection<Character> Characters { get; set; } = new List<Character>();
+
+        // Zapisana ścieżka do awatara użytkownika
+        public string? ProfilePicturePath { get; set; }
     }
 }

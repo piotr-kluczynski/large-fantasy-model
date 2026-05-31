@@ -1,0 +1,135 @@
+﻿@model IEnumerable<large_fantasy_model.ViewModels.AdminUserViewModel>
+@using System.Security.Claims
+
+@{
+
+    var myPermissionsClaim = User.FindFirst("AdminPermissions")?.Value;
+    int myPermissions = int.TryParse(myPermissionsClaim, out var perms) ? perms : 0;
+    
+
+    var myIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    int myId = int.TryParse(myIdClaim, out var id) ? id : 0;
+}
+
+<div class="container mt-4">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"><i class="bi bi-shield-lock"></i> User Management</h2>
+        <a asp-action="CreateUser" class="btn btn-success">
+            <i class="bi bi-person-plus-fill me-1"></i> Add New User
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Joined</th>
+                        <th style="width: 320px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td><strong>@user.Username</strong></td>
+                            <td>@user.FirstName @user.LastName</td>
+                            <td>@user.Email</td>
+                            <td>
+                                @if (user.AdminPermissions == 2)
+                                {
+                                    <span class="badge bg-danger">Head Admin</span>
+                                }
+                                else if (user.AdminPermissions == 1)
+                                {
+                                    <span class="badge bg-primary">Administrator</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">User</span>
+                                }
+                            </td>
+                            <td>@user.CreatedDate.ToShortDateString()</td>
+
+                            <td style="width: 320px;">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    @if ((myPermissions == 2 && user.Id != myId) || (myPermissions == 1 && user.AdminPermissions == 0))
+                                    {
+
+                                        <form asp-action="Impersonate" asp-route-id="@user.Id" method="post" class="m-0 p-0">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-dark d-inline-flex align-items-center" title="Login as @user.Username">
+                                                <i class="bi bi-incognito me-1"></i> Login as
+                                            </button>
+                                        </form>
+
+
+                                        <a asp-action="EditUser" asp-route-id="@user.Id"
+                                               class="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
+                                            Edit
+                                        </a>
+
+                                        @if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTime.Now)
+                                        {
+                                            <form asp-action="UnlockUser" asp-route-id="@user.Id" method="post" class="m-0 p-0">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-warning d-inline-flex align-items-center">
+                                                    Unblock
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="LockUser" asp-route-id="@user.Id"
+                                                   class="btn btn-sm btn-outline-warning d-inline-flex align-items-center">
+                                                Block
+                                            </a>
+                                        }
+
+                                        <form asp-action="DeleteUser" asp-route-id="@user.Id" method="post"
+                                              class="m-0 p-0"
+                                              onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (user.Id == myId)
+                                    {
+                                        <span class="text-muted small"><i class="bi bi-person-check text-success"></i> It's you</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small"><i class="bi bi-lock-fill"></i> Protected</span>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

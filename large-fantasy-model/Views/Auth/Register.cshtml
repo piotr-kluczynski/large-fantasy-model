@@ -1,8 +1,14 @@
-﻿@model large_fantasy_model.Models.User
+﻿@model large_fantasy_model.ViewModels.RegisterViewModel
 
 @{
     ViewData["Title"] = "Register";
 }
+
+<style>
+    .transition-all {
+        transition: all 0.2s ease-in-out;
+    }
+</style>
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -17,6 +23,7 @@
             }
 
             <div asp-validation-summary="All" class="text-danger fw-bold mb-3"></div>
+            
             <form asp-action="Register" method="post">
                 <div class="mb-3">
                     <label asp-for="Username" class="form-label">Username<span class="text-danger">*</span></label>
@@ -57,68 +64,34 @@
                     </div>
                 </div>
 
+                <div class="mb-3">
+                    <label asp-for="ConfirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirm your strong password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+
                 <button type="submit" class="btn btn-primary w-100">Register now</button>
             </form>
 
-            @section Scripts {
-                <partial name="_ValidationScriptsPartial" />
-
-                <script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    const passwordInput = document.getElementById('passwordInput');
-                                    const checklistContainer = document.getElementById('passwordChecklist');
-                                    const requirements = {
-                                        length: document.getElementById('check-length'),
-                                        upper: document.getElementById('check-upper'),
-                                        lower: document.getElementById('check-lower'),
-                                        number: document.getElementById('check-number')
-                                    };
-
-                                    
-                                    function updateRequirement(element, isValid) {
-                                        if (isValid) {
-                                            // Usuwamy czerwony, dodajemy zielony (text-success z Bootstrapa)
-                                            element.classList.remove('text-danger');
-                                            element.classList.add('text-success');
-                                        } else {
-                                            // Wracamy do czerwonego
-                                            element.classList.remove('text-success');
-                                            element.classList.add('text-danger');
-                                        }
-                                    }
-                                   
-
-                                    function checkPasswordStrength() {
-                                        const val = passwordInput.value;
-
-                                        if (val.length > 0) {
-                                            checklistContainer.classList.remove('d-none');
-                                        } else {
-                                            checklistContainer.classList.add('d-none');
-                                        }
-
-                                        updateRequirement(requirements.length, val.length >= 8);
-                                        updateRequirement(requirements.upper, /[A-Z]/.test(val));
-                                        updateRequirement(requirements.lower, /[a-z]/.test(val));
-                                        updateRequirement(requirements.number, /\d/.test(val));
-                                    }
-
-                                    passwordInput.addEventListener('input', checkPasswordStrength);
-                                });
-                </script>
-    
-                <style>
-                                .transition-all {
-                                    transition: all 0.2s ease-in-out;
-                                }
-                </style>
-            }
             <div class="text-center mt-3">
                 <p>
-                    Already have an account?
-                    <a asp-controller="Auth" asp-action="Login">Sing in</a>
+                    Already have an account? <a asp-controller="Auth" asp-action="Login">Sign in</a>
                 </p>
             </div>
-        </div>
-    </div>
-</div>
+
+        </div> 
+    </div> 
+</div> 
+@section Styles {
+    <style>
+        .transition-all {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/Register.js"></script>
+    
+}
