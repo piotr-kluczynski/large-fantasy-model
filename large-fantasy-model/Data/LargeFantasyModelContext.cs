@@ -1,7 +1,5 @@
 ﻿using large_fantasy_model.Models;
 using large_fantasy_model.Models.CharacterModels;
-using large_fantasy_model.Models.CharacterModels.Additional;
-using large_fantasy_model.Models.CharacterModels.Additional.Creature;
 using large_fantasy_model.Models.CharacterModels.References;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,13 +17,12 @@ namespace large_fantasy_model.Data
         // Postacie gracza
         public DbSet<Character> Characters { get; set; }
 
-        public DbSet<CharacterProficiency> Proficiencies { get; set; }
         public DbSet<CharacterRace> Races { get; set; }
         public DbSet<CharacterClass> Classes { get; set; }
         public DbSet<CharacterEquipment> Equipment { get; set; }
         public DbSet<CharacterWeapon> Weapons { get; set; }
         public DbSet<CharacterSpell> Spells { get; set; }
-        public DbSet<CharacterFeat> Feats { get; set; }
+        public DbSet<CharacterFeatures> Features { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -77,47 +74,70 @@ namespace large_fantasy_model.Data
             var entity = modelBuilder.Entity<Character>();
 
             // Pomocnicze tabele (istnieją niezależnie od tabeli Character)
-            entity.HasOne(c => c.Race)
+            entity.HasOne(c => c.Race) // CharacterRace
                  .WithOne(cr => cr.Character)
                  .HasForeignKey<CharacterRace>(cr => cr.CharacterId)
                  .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(c => c.Classes)
+            entity.HasOne(c => c.Classes) // CharacterClass
                 .WithOne()
-                .HasForeignKey(cc => cc.CharacterId)
+                .HasForeignKey<CharacterClass>(cc => cc.CharacterId)
                 .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(c => c.Equipment)
+            entity.HasMany(c => c.Equipment) // Character Equipment
                 .WithOne()
                 .HasForeignKey(ce => ce.CharacterId)
                 .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(c => c.Weapons)
+            entity.HasMany(c => c.Weapons) // Character Weapon
                 .WithOne()
                 .HasForeignKey(cw => cw.CharacterId)
                 .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(c => c.Spells)
+            entity.HasMany(c => c.Spells) // CharacterSpells
                 .WithOne()
                 .HasForeignKey(s => s.CharacterId)
                 .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(c => c.Feats)
+            entity.HasMany(c => c.Features) // Character Features
                 .WithOne()
                 .HasForeignKey(f => f.CharacterId)
                 .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(c => c.Proficiencies)
-                .WithOne(p => p.Character)
-                .HasForeignKey(p => p.CharacterId)
-                .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(c => c.DamageTypes)
-                .WithOne(d => d.Character)
-                .HasForeignKey(d => d.CharacterId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             // Owned Entity - uwzględniane w tabeli Character
-            entity.OwnsOne(c => c.Currency, cc =>
+            entity.OwnsOne(c => c.Skills, sk =>
             {
-                cc.Property(c => c.Copper).HasColumnName("Currency_Copper");
-                cc.Property(c => c.Silver).HasColumnName("Currency_Silver");
-                cc.Property(c => c.Electrum).HasColumnName("Currency_Electrum");
-                cc.Property(c => c.Gold).HasColumnName("Currency_Gold");
-                cc.Property(c => c.Platinum).HasColumnName("Currency_Platinum");
+                sk.Property(s => s.Athletics).HasColumnName("Skill_Athletics");
+                sk.Property(s => s.Acrobatics).HasColumnName("Skill_Acrobatics");
+                sk.Property(s => s.SleightOfHand).HasColumnName("Skill_SleightOfHand");
+                sk.Property(s => s.Stealth).HasColumnName("Skill_Stealth");
+                sk.Property(s => s.Arcana).HasColumnName("Skill_Arcana");
+                sk.Property(s => s.History).HasColumnName("Skill_History");
+                sk.Property(s => s.Investigation).HasColumnName("Skill_Investigation");
+                sk.Property(s => s.Nature).HasColumnName("Skill_Nature");
+                sk.Property(s => s.Religion).HasColumnName("Skill_Religion");
+                sk.Property(s => s.AnimalHandling).HasColumnName("Skill_AnimalHandling");
+                sk.Property(s => s.Insight).HasColumnName("Skill_Insight");
+                sk.Property(s => s.Medicine).HasColumnName("Skill_Medicine");
+                sk.Property(s => s.Perception).HasColumnName("Skill_Perception");
+                sk.Property(s => s.Survival).HasColumnName("Skill_Survival");
+                sk.Property(s => s.Deception).HasColumnName("Skill_Deception");
+                sk.Property(s => s.Intimidation).HasColumnName("Skill_Intimidation");
+                sk.Property(s => s.Performance).HasColumnName("Skill_Performance");
+                sk.Property(s => s.Persuasion).HasColumnName("Skill_Persuasion");
+            });
+            entity.OwnsOne(c => c.SavingThrows, st =>
+            {
+                st.Property(s => s.Strength).HasColumnName("SavingThrow_Strength");
+                st.Property(s => s.Dexterity).HasColumnName("SavingThrow_Dexterity");
+                st.Property(s => s.Constitution).HasColumnName("SavingThrow_Constitution");
+                st.Property(s => s.Intelligence).HasColumnName("SavingThrow_Intelligence");
+                st.Property(s => s.Wisdom).HasColumnName("SavingThrow_Wisdom");
+                st.Property(s => s.Charisma).HasColumnName("SavingThrow_Charisma");
+            });
+            entity.OwnsOne(c => c.AbilityScores, ab =>
+            {
+                ab.Property(a => a.Strength).HasColumnName("AbilityScores_Strength");
+                ab.Property(a => a.Dexterity).HasColumnName("AbilityScores_Dexterity");
+                ab.Property(a => a.Constitution).HasColumnName("AbilityScores_Constitution");
+                ab.Property(a => a.Intelligence).HasColumnName("AbilityScores_Intelligence");
+                ab.Property(a => a.Wisdom).HasColumnName("AbilityScores_Wisdom");
+                ab.Property(a => a.Charisma).HasColumnName("AbilityScores_Charisma");
             });
             entity.OwnsOne(c => c.Background, bg =>
             {
@@ -162,82 +182,6 @@ namespace large_fantasy_model.Data
 
                 d.Property(x => x.Physical)
                     .HasColumnName("Details_Physical");
-            });
-            entity.OwnsOne(c => c.Creature, creature =>
-            {
-                creature.Property(x => x.Name);
-                creature.Property(x => x.Alignment);
-                creature.Property(x => x.Inspiration);
-                creature.Property(x => x.Shield);
-
-                creature.OwnsOne(x => x.Speed, s =>
-                {
-                    s.OwnsOne(x => x.Burrow);
-                    s.OwnsOne(x => x.Climb);
-                    s.OwnsOne(x => x.Fly);
-                    s.OwnsOne(x => x.Hover);
-                    s.OwnsOne(x => x.Swim);
-                });
-                creature.OwnsOne(x => x.HitPoints);
-                creature.OwnsOne(x => x.Skills, s =>
-                {
-                    s.OwnsOne(x => x.Athletics);
-                    s.OwnsOne(x => x.Acrobatics);
-                    s.OwnsOne(x => x.SleightOfHand);
-                    s.OwnsOne(x => x.Stealth);
-                    s.OwnsOne(x => x.Arcana);
-                    s.OwnsOne(x => x.History);
-                    s.OwnsOne(x => x.Investigation);
-                    s.OwnsOne(x => x.Nature);
-                    s.OwnsOne(x => x.Religion);
-                    s.OwnsOne(x => x.AnimalHandling);
-                    s.OwnsOne(x => x.Insight);
-                    s.OwnsOne(x => x.Medicine);
-                    s.OwnsOne(x => x.Perception);
-                    s.OwnsOne(x => x.Survival);
-                    s.OwnsOne(x => x.Deception);
-                    s.OwnsOne(x => x.Intimidation);
-                    s.OwnsOne(x => x.Performance);
-                    s.OwnsOne(x => x.Persuasion);
-                });
-                creature.OwnsOne(x => x.AbilityScores);
-                creature.OwnsOne(x => x.SavingThrows, st =>
-                {
-                    st.OwnsOne(x => x.Str);
-                    st.OwnsOne(x => x.Dex);
-                    st.OwnsOne(x => x.Con);
-                    st.OwnsOne(x => x.Int);
-                    st.OwnsOne(x => x.Wis);
-                    st.OwnsOne(x => x.Cha);
-                });
-                creature.OwnsOne(x => x.Senses, s =>
-                {
-                    s.OwnsOne(x => x.Blindsight);
-                    s.OwnsOne(x => x.Darkvision);
-                    s.OwnsOne(x => x.Tremorsense);
-                    s.OwnsOne(x => x.Truesight);
-                });
-                creature.OwnsOne(x => x.ArmorClass);
-                creature.OwnsOne(x => x.Conditions);
-                creature.OwnsOne(x => x.ConditionImmunities);
-
-                creature.OwnsMany(x => x.Languages, b =>
-                {
-                    b.Property(p => p.Name).HasColumnName("Language");
-                });
-                creature.OwnsOne(x => x.HitPoints, hp =>
-                {
-                    hp.Property(x => x.Max);
-                    hp.Property(x => x.Current);
-                    hp.Property(x => x.Temporary);
-
-                    hp.OwnsMany(x => x.Dice, dice =>
-                    {
-                        dice.Property(d => d.Sides);
-                        dice.Property(d => d.Count);
-                        dice.Property(d => d.Mod);
-                    });
-                });
             });
         }
     }   
