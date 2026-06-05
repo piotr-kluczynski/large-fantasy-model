@@ -5,7 +5,7 @@ namespace large_fantasy_model.Models.CharacterModels.Json
 {
     public class Spell : IRulebookEntity
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [JsonPropertyName("name")]
         public string Name { get; set; }

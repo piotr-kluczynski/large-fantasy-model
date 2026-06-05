@@ -20,4 +20,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\JsonFiles\DnD_BasicRules_2018\Items\" />
+  </ItemGroup>
+
 </Project>

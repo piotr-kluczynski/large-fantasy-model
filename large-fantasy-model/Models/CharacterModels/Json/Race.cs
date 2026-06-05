@@ -1,12 +1,21 @@
-﻿namespace large_fantasy_model.Models.CharacterModels.Json
+﻿using large_fantasy_model.Models.Compendium;
+using System.Text.Json.Serialization;
+
+namespace large_fantasy_model.Models.CharacterModels.Json
 {
-    public class Race
+    public class Race : IRulebookEntity
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
+
+        [JsonPropertyName("name")]
         public string Name { get; set; }
-        public string SubType { get; set; }
+        
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+        
+        [JsonPropertyName("size")]
         public string Size { get; set; }
-        public List<Feature> Traits { get; set; }
-        public List<Action> Actions { get; set; }
+
+        // public List<string> Traits { get; set; } To be implemented
     }
 }
