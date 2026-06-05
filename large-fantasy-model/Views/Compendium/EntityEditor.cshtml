@@ -46,10 +46,8 @@
                         break;
                 
                     case "textarea":
-                        <textarea class="form-control" 
-                                  name="Values[@field.Key]">
-                            @(Model.Values.ContainsKey(field.Key) ? Model.Values[field.Key] : "")    
-                        </textarea>
+                        <textarea class="form-control"
+                                  name="Values[@field.Key]">@(Model.Values.ContainsKey(field.Key) ? Model.Values[field.Key] : "")</textarea>
                         break;
 
                     case "checkbox":
@@ -65,17 +63,27 @@
                             var selected = Model.ListValues.ContainsKey(field.Key)
                                 ? Model.ListValues[field.Key]
                                 : new List<string>();
-                            @foreach (var option in Model.AvailableOptions[field.Key])
-                            {
-                                <div class="form-check">
-                                    <input type="checkbox"
-                                           class="form-check-input"
-                                           name="ListValues[@field.Key]"
-                                           value="@option.Value"
-                                           @(selected.Contains(option.Value) ? "checked" : "") />
-                                    <label class="form-check-label">@option.Label</label>
-                                </div>
-                            }
+
+                            <input type="text"
+                                   class="form-control mb-2 entity-filter"
+                                   placeholder="Search features..." />
+
+                            <div class="border rounded p-2 entity-list-container" style="max-height:300px;overflow:auto">
+                                @foreach (var option in Model.AvailableOptions[field.Key])
+                                {
+                                    <div class="form-check entity-option">
+                                        <input type="checkbox"
+                                               class="form-check-input"
+                                               name="ListValues[@field.Key]"
+                                               value="@option.Value"
+                                        @(selected.Contains(option.Value) ? "checked" : "") />
+
+                                        <label class="form-check-label">
+                                            @option.Label
+                                        </label>
+                                    </div>
+                                }
+                            </div>
                         }
                         break;
                 }
@@ -109,3 +117,28 @@
         </div>
     </form>
 </div>
+
+<script>
+    document.querySelectorAll('.entity-filter').forEach(filter => {
+        filter.addEventListener('input', function () {
+
+            const container =
+                this.nextElementSibling;
+
+            const text =
+                this.value.toLowerCase();
+
+            container.querySelectorAll('.entity-option')
+                .forEach(option => {
+
+                    const label =
+                        option.innerText.toLowerCase();
+
+                    option.style.display =
+                        label.includes(text)
+                            ? ''
+                            : 'none';
+                });
+        });
+    });
+</script>
