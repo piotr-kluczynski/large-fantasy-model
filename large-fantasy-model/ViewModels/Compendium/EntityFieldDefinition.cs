@@ -22,10 +22,12 @@
         /// - "number"
         /// - "textarea"
         /// - "checkbox"
+        /// - "entity-list"
         /// </summary>
         public string Type { get; set; }
 
         // TO-DO
         public bool ShowInDetails { get; set; } = true;
+        public string? SourceCategory { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿@*
+@*
     Widok: EntityEditor
 
     Przeznaczenie:
@@ -57,6 +57,26 @@
                                name="Values[@field.Key]" 
                                value="true"
                                @(Model.Values.ContainsKey(field.Key) && Model.Values[field.Key] == "Yes" ? "checked" : "") />
+                        break;
+
+                    case "entity-list":
+                        @if (Model.AvailableOptions.ContainsKey(field.Key))
+                        {
+                            var selected = Model.ListValues.ContainsKey(field.Key)
+                                ? Model.ListValues[field.Key]
+                                : new List<string>();
+                            @foreach (var option in Model.AvailableOptions[field.Key])
+                            {
+                                <div class="form-check">
+                                    <input type="checkbox"
+                                           class="form-check-input"
+                                           name="ListValues[@field.Key]"
+                                           value="@option.Value"
+                                           @(selected.Contains(option.Value) ? "checked" : "") />
+                                    <label class="form-check-label">@option.Label</label>
+                                </div>
+                            }
+                        }
                         break;
                 }
             </div>

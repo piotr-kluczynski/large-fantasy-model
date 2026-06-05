@@ -4,12 +4,11 @@
   "hit_die": 10,
   "spellcasting": "",
   "features": [
-    { "id": "fighter.fighting_style" },
-    { "id": "fighter.second_wind" },
-    { "id": "fighter.action_surge" },
-    { "id": "fighter.martial_archetype" },
-    { "id": "common.ability_score_improvement" },
-    { "id": "fighter.extra_attack" },
-    { "id": "fighter.indomitable" }
+    "Fighting Style",
+    "Second Wind",
+    "Action Surge",
+    "Martial Archetype",
+    "Extra Attack",
+    "Indomitable"
   ]
 }

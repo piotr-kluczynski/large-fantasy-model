@@ -5,7 +5,6 @@ namespace large_fantasy_model.Models.CharacterModels.Json
 {
     public class Item : IRulebookEntity
     {
-        public string Id { get; set; }
         [JsonPropertyName("name")]
         public string Name { get; set; }
         [JsonPropertyName("description")]

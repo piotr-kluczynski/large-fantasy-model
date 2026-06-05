@@ -7,12 +7,12 @@ namespace large_fantasy_model.Models.Compendium
         public static List<EntityFieldDefinition> Fields => new()
         {
             new() { Key = "Name", Label = "Name", Type = "text" },
-            new() { Key = "Weight", Label = "Weight", Type = "number" },
             new() { Key = "Description", Label = "Description", Type = "textarea" },
+            new() { Key = "Weight", Label = "Weight", Type = "number" },
             new() { Key = "Magic", Label = "Magic", Type = "checkbox" },
-            new() { Key = "Damage", Label = "Damage", Type = "string" },
-            new() { Key = "Range", Label = "Range", Type = "number" },
-            new() { Key = "ThrowRange", Label = "Throw Range", Type = "number" },
+            new() { Key = "Damage", Label = "Damage", Type = "text" },
+            new() { Key = "Range", Label = "Range", Type = "text" },
+            new() { Key = "ThrowRange", Label = "Throw Range", Type = "text" },
             new() { Key = "Ammunition", Label = "Ammunition", Type = "text" },
             new() { Key = "Finesse", Label = "Finesse", Type = "checkbox" },
             new() { Key = "Heavy", Label = "Heavy", Type = "checkbox" },

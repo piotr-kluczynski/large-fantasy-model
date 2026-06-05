@@ -5,8 +5,6 @@ namespace large_fantasy_model.Models.CharacterModels.Json
 {
     public class Spell : IRulebookEntity
     {
-        public string Id { get; set; }
-
         [JsonPropertyName("name")]
         public string Name { get; set; }
 
@@ -25,11 +23,12 @@ namespace large_fantasy_model.Models.CharacterModels.Json
         [JsonPropertyName("range_area")]
         public string RangeArea { get; set; }
 
-        [JsonPropertyName("components")]
-        public List<string> Components { get; set; }
-
-        [JsonPropertyName("material")]
-        public string Material { get; set; }
+        [JsonPropertyName("component_v")]
+        public bool ComponentVerbal { get; set; }
+        [JsonPropertyName("component_s")]
+        public bool ComponentSomatic { get; set; }
+        [JsonPropertyName("components_m")]
+        public string ComponentMaterials { get; set; }
 
         [JsonPropertyName("ritual")]
         public bool Ritual { get; set; }

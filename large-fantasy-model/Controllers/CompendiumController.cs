@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using large_fantasy_model.Models.CharacterModels.Json;
 using large_fantasy_model.ViewModels.Compendium;
 using large_fantasy_model.Models.Compendium;
@@ -117,6 +117,9 @@ namespace large_fantasy_model.Controllers
                 Title = $"Create {category}"
             };
 
+            if (category == "Classes" || category == "Races")
+                model.AvailableOptions["Features"] = GetFeatureOptions(rulebook);
+
             return View("EntityEditor", model);
         }
         [HttpPost]
@@ -143,13 +146,15 @@ namespace large_fantasy_model.Controllers
             else if (model.Category == "Classes")
             {
                 var charcatcerClass = MapToEntity<Class>(model.Values);
-
+                if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var classFeatures))
+                    charcatcerClass.Features = classFeatures;
                 _classRepository.Save(charcatcerClass, model.Rulebook, model.Category);
             }
             else if (model.Category == "Races")
             {
                 var race = MapToEntity<Race>(model.Values);
-
+                if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var raceCreateFeatures))
+                    race.Features = raceCreateFeatures;
                 _raceRepository.Save(race, model.Rulebook, model.Category);
             }
             else if (model.Category == "Weapons")
@@ -277,10 +282,12 @@ namespace large_fantasy_model.Controllers
 
                 var fields = ClassSchema.Fields;
 
-                var values = fields.ToDictionary(
-                    f => f.Key,
-                    f => GetValue(characterClass, f.Key)
-                );
+                var values = fields
+                    .Where(f => f.Type != "entity-list")
+                    .ToDictionary(
+                        f => f.Key,
+                        f => GetValue(characterClass, f.Key)
+                    );
 
                 var model = new EntityEditorViewModel
                 {
@@ -289,7 +296,15 @@ namespace large_fantasy_model.Controllers
                     Fields = fields,
                     Values = values,
                     IsEdit = true,
-                    Title = $"Edit {characterClass.Name}"
+                    Title = $"Edit {characterClass.Name}",
+                    AvailableOptions = new Dictionary<string, List<EntitySelectOption>>
+                    {
+                        ["Features"] = GetFeatureOptions(rulebook)
+                    },
+                    ListValues = new Dictionary<string, List<string>>
+                    {
+                        ["Features"] = characterClass.Features ?? new List<string>()
+                    }
                 };
 
                 return View("EntityEditor", model);
@@ -307,12 +322,14 @@ namespace large_fantasy_model.Controllers
                     return NotFound();
                 }
 
-                var fields = ClassSchema.Fields;
+                var fields = RaceSchema.Fields;
 
-                var values = fields.ToDictionary(
-                    f => f.Key,
-                    f => GetValue(race, f.Key)
-                );
+                var values = fields
+                    .Where(f => f.Type != "entity-list")
+                    .ToDictionary(
+                        f => f.Key,
+                        f => GetValue(race, f.Key)
+                    );
 
                 var model = new EntityEditorViewModel
                 {
@@ -321,7 +338,15 @@ namespace large_fantasy_model.Controllers
                     Fields = fields,
                     Values = values,
                     IsEdit = true,
-                    Title = $"Edit {race.Name}"
+                    Title = $"Edit {race.Name}",
+                    AvailableOptions = new Dictionary<string, List<EntitySelectOption>>
+                    {
+                        ["Features"] = GetFeatureOptions(rulebook)
+                    },
+                    ListValues = new Dictionary<string, List<string>>
+                    {
+                        ["Features"] = race.Features ?? new List<string>()
+                    }
                 };
 
                 return View("EntityEditor", model);
@@ -385,11 +410,15 @@ namespace large_fantasy_model.Controllers
             else if (model.Category == "Classes")
             {
                 var characterClass = MapToEntity<Class>(model.Values);
+                if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var classEditFeatures))
+                    characterClass.Features = classEditFeatures;
                 _classRepository.Save(characterClass, model.Rulebook, model.Category);
             }
             else if (model.Category == "Races")
             {
                 var race = MapToEntity<Race>(model.Values);
+                if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var raceEditFeatures))
+                    race.Features = raceEditFeatures;
                 _raceRepository.Save(race, model.Rulebook, model.Category);
             }
             else if (model.Category == "Weapons")
@@ -627,6 +656,21 @@ namespace large_fantasy_model.Controllers
                         .ToList()
                 };
 
+                if (characterClass.Features != null && characterClass.Features.Any())
+                {
+                    model.SubLists.Add(new EntitySubList
+                    {
+                        Label = "Features",
+                        Items = characterClass.Features.Select(f => new EntitySubListItem
+                        {
+                            Name = f,
+                            Rulebook = rulebook,
+                            Category = "Features",
+                            Slug = f.ToLower().Replace(" ", "-")
+                        }).ToList()
+                    });
+                }
+
                 return View("EntityDetails", model);
             }
             else if (category == "Races")
@@ -656,6 +700,21 @@ namespace large_fantasy_model.Controllers
                         })
                         .ToList()
                 };
+
+                if (race.Features != null && race.Features.Any())
+                {
+                    model.SubLists.Add(new EntitySubList
+                    {
+                        Label = "Features",
+                        Items = race.Features.Select(f => new EntitySubListItem
+                        {
+                            Name = f,
+                            Rulebook = rulebook,
+                            Category = "Features",
+                            Slug = f.ToLower().Replace(" ", "-")
+                        }).ToList()
+                    });
+                }
 
                 return View("EntityDetails", model);
             }
@@ -789,7 +848,21 @@ namespace large_fantasy_model.Controllers
             if (value is bool b)
                 return b ? "Yes" : "No";
 
+            if (value is IEnumerable<string> list)
+                return string.Join(", ", list);
+
             return value.ToString();
+        }
+
+        /// <summary>
+        /// Zwraca listę opcji EntitySelectOption dla pola entity-list
+        /// wypełnioną Features dostępnymi w danym podręczniku.
+        /// </summary>
+        private List<EntitySelectOption> GetFeatureOptions(string rulebook)
+        {
+            return _featureRepository.GetAll(rulebook, "Features")
+                .Select(f => new EntitySelectOption { Value = f.Name, Label = f.Name })
+                .ToList();
         }
     }
 }

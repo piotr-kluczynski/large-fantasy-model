@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.ViewModels.Compendium;
+using large_fantasy_model.ViewModels.Compendium;
 
 namespace large_fantasy_model.Models.Compendium
 {
@@ -9,7 +9,7 @@ namespace large_fantasy_model.Models.Compendium
             new() { Key = "Name", Label = "Name", Type = "text" },
             new() { Key = "Description", Label = "Description", Type = "textarea" },
             new() { Key = "Size", Label = "Size", Type = "text" },
-            // new() { Key = "Traits", Label = "Traits", Type = "list" } to be implemented
+            new() { Key = "Features", Label = "Features", Type = "entity-list", SourceCategory = "features", ShowInDetails = false }
         };
     }
 }
