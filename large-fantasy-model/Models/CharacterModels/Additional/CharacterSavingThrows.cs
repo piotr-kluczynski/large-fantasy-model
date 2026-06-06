@@ -2,11 +2,11 @@
 {
     public class CharacterSavingThrows
     {
-        public int Strength { get; set; }
-        public int Dexterity { get; set; }
-        public int Constitution { get; set; }
-        public int Intelligence { get; set; }
-        public int Wisdom { get; set; }
-        public int Charisma { get; set; }
+        public bool Strength { get; set; }
+        public bool Dexterity { get; set; }
+        public bool Constitution { get; set; }
+        public bool Intelligence { get; set; }
+        public bool Wisdom { get; set; }
+        public bool Charisma { get; set; }
     }
 }

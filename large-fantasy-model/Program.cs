@@ -19,11 +19,13 @@ namespace large_fantasy_model
             builder.Services.AddScoped(i =>
                 new JsonRepository<Item>("Data/JsonFiles"));
             builder.Services.AddScoped(i =>
-                new JsonRepository<Class>("Data/JsonFiles"));
+                new JsonRepository<CClass>("Data/JsonFiles"));
             builder.Services.AddScoped(i =>
                 new JsonRepository<Race>("Data/JsonFiles"));
             builder.Services.AddScoped(i =>
                 new JsonRepository<Weapon>("Data/JsonFiles"));
+            builder.Services.AddScoped(i =>
+                new JsonRepository<Background>("Data/JsonFiles"));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();

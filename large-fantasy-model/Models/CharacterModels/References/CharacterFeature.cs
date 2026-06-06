@@ -1,9 +1,10 @@
 ﻿namespace large_fantasy_model.Models.CharacterModels.References
 {
-    public class CharacterFeatures
+    public class CharacterFeature
     {
         public int Id { get; set; }
+        public string FeatureName { get; set; }
         public int CharacterId { get; set; }
-        public int FeatureId { get; set; }
+        public Character Character { get; set; }
     }
 }

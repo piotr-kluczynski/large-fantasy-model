@@ -1,5 +1,6 @@
 ﻿using large_fantasy_model.Models;
 using large_fantasy_model.Models.CharacterModels;
+using large_fantasy_model.Models.CharacterModels.Additional;
 using large_fantasy_model.Models.CharacterModels.References;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +23,7 @@ namespace large_fantasy_model.Data
         public DbSet<CharacterEquipment> Equipment { get; set; }
         public DbSet<CharacterWeapon> Weapons { get; set; }
         public DbSet<CharacterSpell> Spells { get; set; }
-        public DbSet<CharacterFeatures> Features { get; set; }
+        public DbSet<CharacterFeature> Features { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -78,7 +79,7 @@ namespace large_fantasy_model.Data
                  .WithOne(cr => cr.Character)
                  .HasForeignKey<CharacterRace>(cr => cr.CharacterId)
                  .OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne(c => c.Classes) // CharacterClass
+            entity.HasOne(c => c.Class) // CharacterClass
                 .WithOne()
                 .HasForeignKey<CharacterClass>(cc => cc.CharacterId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -138,12 +139,6 @@ namespace large_fantasy_model.Data
                 ab.Property(a => a.Intelligence).HasColumnName("AbilityScores_Intelligence");
                 ab.Property(a => a.Wisdom).HasColumnName("AbilityScores_Wisdom");
                 ab.Property(a => a.Charisma).HasColumnName("AbilityScores_Charisma");
-            });
-            entity.OwnsOne(c => c.Background, bg =>
-            {
-                bg.Property(b => b.Name).HasColumnName("Background_Name");
-                bg.Property(b => b.Option).HasColumnName("Background_Option");
-                bg.Property(b => b.Description).HasColumnName("Background_Description");
             });
             entity.OwnsOne(c => c.Details, d =>
             {

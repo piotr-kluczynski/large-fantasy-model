@@ -4,9 +4,8 @@
     public class CharacterClass
     {
         public int Id { get; set; }
+        public string ClassName { get; set; }
         public int CharacterId { get; set; }
-        public string ClassId { get; set; }
-        public int Level { get; set; }
-        public string Subtype { get; set; }
+        public Character Character { get; set; }
     }
 }

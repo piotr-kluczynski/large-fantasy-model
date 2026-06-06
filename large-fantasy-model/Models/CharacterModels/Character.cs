@@ -18,13 +18,15 @@ namespace large_fantasy_model.Models.CharacterModels
         [Range(0, int.MaxValue)]
         public int Xp { get; set; } = 0;
 
+        public int Level { get; set; }
+
         public CharacterRace Race { get; set; }
-        public CharacterClass Classes { get; set; }
+        public CharacterClass Class { get; set; }
         public CharacterBackground Background { get; set; }
         public CharacterDetails Details { get; set; }
 
 
-        public List<CharacterFeatures> Features { get; set; }
+        public List<CharacterFeature> Features { get; set; }
 
         public List<CharacterSpell> Spells { get; set; }
 

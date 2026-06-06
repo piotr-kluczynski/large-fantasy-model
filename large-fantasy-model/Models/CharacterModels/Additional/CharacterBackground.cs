@@ -3,8 +3,9 @@
     // Class describing the character background in the database
     public class CharacterBackground
     {
-        public string Name { get; set; }
-        public string Option { get; set; }
-        public string Description { get; set; }
+        public int Id { get; set; }
+        public string BackgroundName { get; set; }
+        public int CharacterId { get; set; }
+        public Character Character { get; set; }
     }
 }

@@ -16,17 +16,19 @@ namespace large_fantasy_model.Controllers
         private readonly JsonRepository<Spell> _spellRepository;
         private readonly JsonRepository<Feature> _featureRepository;
         private readonly JsonRepository<Item> _itemRepository;
-        private readonly JsonRepository<Class> _classRepository;
+        private readonly JsonRepository<CClass> _classRepository;
         private readonly JsonRepository<Race> _raceRepository;
         private readonly JsonRepository<Weapon> _weaponRepository;
+        private readonly JsonRepository<Background> _backgroundRepository;
 
         public CompendiumController(
             JsonRepository<Spell> spellRepository,
             JsonRepository<Feature> featureRepository,
             JsonRepository<Item> itemRepository,
-            JsonRepository<Class> classRepository,
+            JsonRepository<CClass> classRepository,
             JsonRepository<Race> raceRepository,
-            JsonRepository<Weapon> weaponRepository)
+            JsonRepository<Weapon> weaponRepository,
+            JsonRepository<Background> backgroundRepository)
         {
             _spellRepository = spellRepository;
             _featureRepository = featureRepository;
@@ -34,6 +36,7 @@ namespace large_fantasy_model.Controllers
             _classRepository = classRepository;
             _raceRepository = raceRepository;
             _weaponRepository = weaponRepository;
+            _backgroundRepository = backgroundRepository;
         }
 
         /// <summary>
@@ -105,6 +108,7 @@ namespace large_fantasy_model.Controllers
                 "Classes" => ClassSchema.Fields,
                 "Races" => RaceSchema.Fields,
                 "Weapons" => WeaponSchema.Fields,
+                "Backgrounds" => BackgroundSchema.Fields,
                 _ => new List<EntityFieldDefinition>()
             };
 
@@ -145,7 +149,7 @@ namespace large_fantasy_model.Controllers
             }
             else if (model.Category == "Classes")
             {
-                var charcatcerClass = MapToEntity<Class>(model.Values);
+                var charcatcerClass = MapToEntity<CClass>(model.Values);
                 if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var classFeatures))
                     charcatcerClass.Features = classFeatures;
                 _classRepository.Save(charcatcerClass, model.Rulebook, model.Category);
@@ -162,6 +166,13 @@ namespace large_fantasy_model.Controllers
                 var weapon = MapToEntity<Weapon>(model.Values);
 
                 _weaponRepository.Save(weapon, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Backgrounds")
+            {
+                var background = MapToEntity<Background>(model.Values);
+                if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var backgroundCreateFeatures))
+                    background.Features = backgroundCreateFeatures;
+                _backgroundRepository.Save(background, model.Rulebook, model.Category);
             }
 
             return RedirectToAction("Details", new { id = 1 });
@@ -383,6 +394,38 @@ namespace large_fantasy_model.Controllers
 
                 return View("EntityEditor", model);
             }
+            if (category == "Backgrounds")
+            {
+                var backgrounds = _backgroundRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var background = backgrounds.FirstOrDefault(x =>
+                x.Name.ToLower() == normalized.ToLower());
+
+                if (background == null)
+                {
+                    return NotFound();
+                }
+
+                var fields = BackgroundSchema.Fields;
+
+                var values = fields.ToDictionary(
+                    f => f.Key,
+                    f => GetValue(background, f.Key)
+                );
+
+                var model = new EntityEditorViewModel
+                {
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields,
+                    Values = values,
+                    IsEdit = true,
+                    Title = $"Edit {background.Name}"
+                };
+
+                return View("EntityEditor", model);
+            }
 
 
             return NotFound();
@@ -409,7 +452,7 @@ namespace large_fantasy_model.Controllers
             }
             else if (model.Category == "Classes")
             {
-                var characterClass = MapToEntity<Class>(model.Values);
+                var characterClass = MapToEntity<CClass>(model.Values);
                 if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var classEditFeatures))
                     characterClass.Features = classEditFeatures;
                 _classRepository.Save(characterClass, model.Rulebook, model.Category);
@@ -425,6 +468,11 @@ namespace large_fantasy_model.Controllers
             {
                 var weapon = MapToEntity<Weapon>(model.Values);
                 _weaponRepository.Save(weapon, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Backgrounds")
+            {
+                var background = MapToEntity<Background>(model.Values);
+                _backgroundRepository.Save(background, model.Rulebook, model.Category);
             }
 
             return RedirectToAction("Details", new { id = 1 });
@@ -524,6 +572,20 @@ namespace large_fantasy_model.Controllers
                         category.FilesPathName);
 
                     category.Items = weapons.Select(i => new RulebookItemViewModel
+                    {
+                        Name = i.Name,
+                        Rulebook = rulebook.FilesPathName,
+                        Category = category.FilesPathName,
+                        Slug = i.Name.ToLower().Replace(" ", "-")
+                    }).ToList();
+                }
+                else if (category.Key == "backgrounds")
+                {
+                    var backgrounds = _backgroundRepository.GetAll(
+                        rulebook.FilesPathName,
+                        category.FilesPathName);
+
+                    category.Items = backgrounds.Select(i => new RulebookItemViewModel
                     {
                         Name = i.Name,
                         Rulebook = rulebook.FilesPathName,
@@ -748,6 +810,36 @@ namespace large_fantasy_model.Controllers
 
                 return View("EntityDetails", model);
             }
+            else if (category == "Backgrounds")
+            {
+                var backgrounds = _backgroundRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var background = backgrounds.FirstOrDefault(x =>
+                    x.Name.ToLower() == normalized.ToLower());
+
+                if (background == null)
+                    return NotFound();
+
+                var fields = BackgroundSchema.Fields;
+
+                var model = new EntityDetailsViewModel
+                {
+                    Title = background.Name,
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields
+                        .Where(f => f.ShowInDetails)
+                        .Select(f => new EntityFieldValue
+                        {
+                            Label = f.Label,
+                            Value = GetValue(background, f.Key)
+                        })
+                        .ToList()
+                };
+
+                return View("EntityDetails", model);
+            }
 
             return NotFound();
         }
@@ -831,6 +923,13 @@ namespace large_fantasy_model.Controllers
                             Key = "races",
                             Title = "Races",
                             FilesPathName = "Races"
+                        },
+                        new RulebookCategory
+                        {
+                            Id = 7,
+                            Key = "backgrounds",
+                            Title = "Backgrounds",
+                            FilesPathName = "Backgrounds"
                         }
                     }
                 }
