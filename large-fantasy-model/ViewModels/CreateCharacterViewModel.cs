@@ -65,7 +65,7 @@ namespace large_fantasy_model.ViewModels
         public int TempHitPoints { get; set; }
         public int Inspiration { get; set; }
         public int ArmorClass { get; set; }
-        public List<string> Languages { get; set; }
+        public string Languages { get; set; }
 
         // Character Details
         public int Age { get; set; }

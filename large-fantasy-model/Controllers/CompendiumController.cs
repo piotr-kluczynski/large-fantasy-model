@@ -121,7 +121,7 @@ namespace large_fantasy_model.Controllers
                 Title = $"Create {category}"
             };
 
-            if (category == "Classes" || category == "Races")
+            if (category == "Classes" || category == "Races" || category == "Backgrounds")
                 model.AvailableOptions["Features"] = GetFeatureOptions(rulebook);
 
             return View("EntityEditor", model);
@@ -409,10 +409,12 @@ namespace large_fantasy_model.Controllers
 
                 var fields = BackgroundSchema.Fields;
 
-                var values = fields.ToDictionary(
-                    f => f.Key,
-                    f => GetValue(background, f.Key)
-                );
+                var values = fields
+                    .Where(f => f.Type != "entity-list")
+                    .ToDictionary(
+                        f => f.Key,
+                        f => GetValue(background, f.Key)
+                    );
 
                 var model = new EntityEditorViewModel
                 {
@@ -421,7 +423,15 @@ namespace large_fantasy_model.Controllers
                     Fields = fields,
                     Values = values,
                     IsEdit = true,
-                    Title = $"Edit {background.Name}"
+                    Title = $"Edit {background.Name}",
+                    AvailableOptions = new Dictionary<string, List<EntitySelectOption>>
+                    {
+                        ["Features"] = GetFeatureOptions(rulebook)
+                    },
+                    ListValues = new Dictionary<string, List<string>>
+                    {
+                        ["Features"] = background.Features ?? new List<string>()
+                    }
                 };
 
                 return View("EntityEditor", model);
@@ -472,6 +482,8 @@ namespace large_fantasy_model.Controllers
             else if (model.Category == "Backgrounds")
             {
                 var background = MapToEntity<Background>(model.Values);
+                if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var backgroundEditFeatures))
+                    background.Features = backgroundEditFeatures;
                 _backgroundRepository.Save(background, model.Rulebook, model.Category);
             }
 
@@ -837,6 +849,21 @@ namespace large_fantasy_model.Controllers
                         })
                         .ToList()
                 };
+
+                if (background.Features != null && background.Features.Any())
+                {
+                    model.SubLists.Add(new EntitySubList
+                    {
+                        Label = "Features",
+                        Items = background.Features.Select(f => new EntitySubListItem
+                        {
+                            Name = f,
+                            Rulebook = rulebook,
+                            Category = "Features",
+                            Slug = f.ToLower().Replace(" ", "-")
+                        }).ToList()
+                    });
+                }
 
                 return View("EntityDetails", model);
             }

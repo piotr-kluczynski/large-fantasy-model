@@ -137,7 +137,7 @@ namespace large_fantasy_model.Controllers
                 feature_names.Add(feature);
             }
 
-            // Creating equipment dictionary
+            // Creating equipment dictionary - CORRECT
             var equipment_dict = model.SelectedItemNames
                 .GroupBy(x => x)
                 .ToDictionary(g => g.Key, g => g.Count());

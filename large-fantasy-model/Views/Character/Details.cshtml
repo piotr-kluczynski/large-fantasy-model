@@ -1,5 +1,366 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model large_fantasy_model.Models.CharacterModels.Character
+
 @{
+    ViewData["Title"] = Model?.Name ?? "Character";
 }
+
+<div class="container py-4">
+
+    <!-- HEADER -->
+
+    <div class="card shadow-lg border-0 mb-4">
+        <div class="card-body">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bold mb-1">
+                        @Model.Name
+                    </h1>
+
+                    <p class="text-muted fs-5 mb-0">
+                        Level @Model.Level
+                        • @(Model.Race?.RaceName ?? "Unknown Race")
+                        • @(Model.Class?.ClassName ?? "Unknown Class")
+                    </p>
+
+                    <small class="text-secondary">
+                        Background: @(Model.Background?.BackgroundName ?? "-")
+                    </small>
+                </div>
+
+                <div class="col-md-4 text-md-end">
+
+                    <span class="badge bg-primary fs-6 p-2">
+                        XP: @Model.Xp
+                    </span>
+
+                    <br />
+
+                    <span class="badge bg-secondary fs-6 mt-2 p-2">
+                        @Model.Alignment
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- COMBAT -->
+
+    <div class="row mb-4">
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm h-100">
+                <div class="card-body">
+                    <h6>HP</h6>
+                    <h2>@Model.CurrentHitPoints</h2>
+                    <small>/ @Model.MaxHitPoints</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm h-100">
+                <div class="card-body">
+                    <h6>Armor Class</h6>
+                    <h2>@Model.ArmorClass</h2>
+                    <small>AC</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm h-100">
+                <div class="card-body">
+                    <h6>Speed</h6>
+                    <h2>@Model.Speed</h2>
+                    <small>ft.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm h-100">
+                <div class="card-body">
+                    <h6>Inspiration</h6>
+                    <h2>@Model.Inspiration</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ABILITY SCORES -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <h4 class="mb-0">Atrybuty</h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row text-center">
+
+                <div class="col">
+                    <h6>STR</h6>
+                    <h3>@Model.AbilityScores?.Strength</h3>
+                </div>
+
+                <div class="col">
+                    <h6>DEX</h6>
+                    <h3>@Model.AbilityScores?.Dexterity</h3>
+                </div>
+
+                <div class="col">
+                    <h6>CON</h6>
+                    <h3>@Model.AbilityScores?.Constitution</h3>
+                </div>
+
+                <div class="col">
+                    <h6>INT</h6>
+                    <h3>@Model.AbilityScores?.Intelligence</h3>
+                </div>
+
+                <div class="col">
+                    <h6>WIS</h6>
+                    <h3>@Model.AbilityScores?.Wisdom</h3>
+                </div>
+
+                <div class="col">
+                    <h6>CHA</h6>
+                    <h3>@Model.AbilityScores?.Charisma</h3>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SAVING THROWS + SKILLS -->
+
+    <div class="row">
+
+        <div class="col-lg-4 mb-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-header">
+                    <h4 class="mb-0">Saving Throws</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <ul class="list-group list-group-flush">
+
+                        <li class="list-group-item">
+                            Strength
+                            @(Model.SavingThrows?.Strength == true ? "✓" : "")
+                        </li>
+
+                        <li class="list-group-item">
+                            Dexterity
+                            @(Model.SavingThrows?.Dexterity == true ? "✓" : "")
+                        </li>
+
+                        <li class="list-group-item">
+                            Constitution
+                            @(Model.SavingThrows?.Constitution == true ? "✓" : "")
+                        </li>
+
+                        <li class="list-group-item">
+                            Intelligence
+                            @(Model.SavingThrows?.Intelligence == true ? "✓" : "")
+                        </li>
+
+                        <li class="list-group-item">
+                            Wisdom
+                            @(Model.SavingThrows?.Wisdom == true ? "✓" : "")
+                        </li>
+
+                        <li class="list-group-item">
+                            Charisma
+                            @(Model.SavingThrows?.Charisma == true ? "✓" : "")
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0">Umiejętności</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+
+                            <p><strong>Athletics:</strong> @Model.Skills?.Athletics</p>
+                            <p><strong>Acrobatics:</strong> @Model.Skills?.Acrobatics</p>
+                            <p><strong>Stealth:</strong> @Model.Skills?.Stealth</p>
+                            <p><strong>Sleight Of Hand:</strong> @Model.Skills?.SleightOfHand</p>
+                            <p><strong>Arcana:</strong> @Model.Skills?.Arcana</p>
+                            <p><strong>History:</strong> @Model.Skills?.History</p>
+                            <p><strong>Investigation:</strong> @Model.Skills?.Investigation</p>
+                            <p><strong>Nature:</strong> @Model.Skills?.Nature</p>
+                            <p><strong>Religion:</strong> @Model.Skills?.Religion</p>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <p><strong>Animal Handling:</strong> @Model.Skills?.AnimalHandling</p>
+                            <p><strong>Insight:</strong> @Model.Skills?.Insight</p>
+                            <p><strong>Medicine:</strong> @Model.Skills?.Medicine</p>
+                            <p><strong>Perception:</strong> @Model.Skills?.Perception</p>
+                            <p><strong>Survival:</strong> @Model.Skills?.Survival</p>
+                            <p><strong>Deception:</strong> @Model.Skills?.Deception</p>
+                            <p><strong>Intimidation:</strong> @Model.Skills?.Intimidation</p>
+                            <p><strong>Performance:</strong> @Model.Skills?.Performance</p>
+                            <p><strong>Persuasion:</strong> @Model.Skills?.Persuasion</p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHARACTER DETAILS -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h4 class="mb-0">Character Description</h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6">
+
+                    <p><strong>Age:</strong> @Model.Details?.Age</p>
+                    <p><strong>Height:</strong> @Model.Details?.Height</p>
+                    <p><strong>Weight:</strong> @Model.Details?.Weight</p>
+                    <p><strong>Eyes:</strong> @Model.Details?.Eyes</p>
+                    <p><strong>Hair:</strong> @Model.Details?.Hair</p>
+                    <p><strong>Skin:</strong> @Model.Details?.Skin</p>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <p><strong>Languages:</strong> @Model.Languages</p>
+
+                </div>
+
+            </div>
+
+            <hr />
+
+            <h5>Physical</h5>
+            <p>@Model.Details?.Physical</p>
+
+            <h5>Personality</h5>
+            <p>@Model.Details?.Personality</p>
+
+            <h5>Ideal</h5>
+            <p>@Model.Details?.Ideal</p>
+
+            <h5>Bond</h5>
+            <p>@Model.Details?.Bond</p>
+
+            <h5>Flaw</h5>
+            <p>@Model.Details?.Flaw</p>
+
+            <h5>Backstory</h5>
+            <p style="white-space: pre-line;">
+                @Model.Details?.Backstory
+            </p>
+        </div>
+    </div>
+
+    <!-- EQUIPMENT -->
+
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0">Weapons</h4>
+                </div>
+
+                <div class="card-body">
+
+                    @if (Model.Weapons?.Any() == true)
+                    {
+                        <ul class="list-group">
+                            @foreach (var weapon in Model.Weapons)
+                            {
+                                <li class="list-group-item">
+                                    @weapon.WeaponName
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <h4 class="mb-0">Spells</h4>
+                </div>
+
+                <div class="card-body">
+
+                    @if (Model.Spells?.Any() == true)
+                    {
+                        <ul class="list-group">
+                            @foreach (var spell in Model.Spells)
+                            {
+                                <li class="list-group-item">
+                                    @spell.SpellName
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <h4 class="mb-0">Equipment</h4>
+                </div>
+
+                <div class="card-body">
+
+                    @if (Model.Equipment?.Any() == true)
+                    {
+                        <ul class="list-group">
+                            @foreach (var item in Model.Equipment)
+                            {
+                                <li class="list-group-item">
+                                    @item.ItemName
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

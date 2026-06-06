@@ -257,7 +257,7 @@
                     @* STR *@
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Strength</label>
-                        <input asp-for="Strength"
+                        <input id="Strength" asp-for="Strength"
                                type="number"
                                class="form-control"
                                min="1"
@@ -267,7 +267,7 @@
                     @* DEX *@
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Dexterity</label>
-                        <input asp-for="Dexterity"
+                        <input id="Dexterity" asp-for="Dexterity"
                                type="number"
                                class="form-control"
                                min="1"
@@ -277,7 +277,7 @@
                     @* CON *@
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Constitution</label>
-                        <input asp-for="Constitution"
+                        <input id="Constitution" asp-for="Constitution"
                                type="number"
                                class="form-control"
                                min="1"
@@ -287,7 +287,7 @@
                     @* INT *@
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Intelligence</label>
-                        <input asp-for="Intelligence"
+                        <input id="Intelligence" asp-for="Intelligence"
                                type="number"
                                class="form-control"
                                min="1"
@@ -297,7 +297,7 @@
                     @* WIS *@
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Wisdom</label>
-                        <input asp-for="Wisdom"
+                        <input id="Wisdom" asp-for="Wisdom"
                                type="number"
                                class="form-control"
                                min="1"
@@ -307,7 +307,7 @@
                     @* CHA *@
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Charisma</label>
-                        <input asp-for="Charisma"
+                        <input id="Charisma" asp-for="Charisma"
                                type="number"
                                class="form-control"
                                min="1"
@@ -332,7 +332,7 @@
                             @* STR *@
                             <div class="col-md-4 mb-3">
                                 <div class="form-check">
-                                    <input asp-for="StrengthSave"
+                                    <input id="StrengthSave" asp-for="StrengthSave"
                                            class="form-check-input"
                                            type="checkbox"/>
                                     <label class="form-check-label">
@@ -344,7 +344,7 @@
                             @* DEX *@
                             <div class="col-md-4 mb-3">
                                 <div class="form-check">
-                                    <input asp-for="DexteritySave"
+                                    <input id="DexteritySave" asp-for="DexteritySave"
                                            class="form-check-input"
                                            type="checkbox"/>
                                     <label class="form-check-label">
@@ -356,7 +356,7 @@
                             @* CON *@
                             <div class="col-md-4 mb-3">
                                 <div class="form-check">
-                                    <input asp-for="ConstitutionSave"
+                                    <input id="ConstitutionSave" asp-for="ConstitutionSave"
                                            class="form-check-input"
                                            type="checkbox"/>
                                     <label class="form-check-label">
@@ -368,7 +368,7 @@
                             @* INT *@
                             <div class="col-md-4 mb-3">
                                 <div class="form-check">
-                                    <input asp-for="IntelligenceSave"
+                                    <input id="IntelligenceSave" asp-for="IntelligenceSave"
                                            class="form-check-input"
                                            type="checkbox"/>
                                     <label class="form-check-label">
@@ -380,7 +380,7 @@
                             @* WIS *@
                             <div class="col-md-4 mb-3">
                                 <div class="form-check">
-                                    <input asp-for="WisdomSave"
+                                    <input id="WisdomSave" asp-for="WisdomSave"
                                            class="form-check-input"
                                            type="checkbox"/>
                                     <label class="form-check-label">
@@ -392,7 +392,7 @@
                             @* CHA *@
                             <div class="col-md-4 mb-3">
                                 <div class="form-check">
-                                    <input asp-for="CharismaSave"
+                                    <input id="CharismaSave" asp-for="CharismaSave"
                                            class="form-check-input"
                                            type="checkbox"/>
                                     <label class="form-check-label">
@@ -636,7 +636,8 @@
 
                 <input asp-for="SelectedSpellNames"
                        type="hidden"
-                       id="selectedSpellsInput" />
+                       id="selectedSpellsInput" 
+                       name="SelectedSpellNames" />
 
                 <div class="row">
 
@@ -956,19 +957,19 @@
 
                                 <div class="mb-3">
                                     <label class="form-label">Character Name</label>
-                                    <input asp-for="Name" class="form-control" />
+                                    <input id="Name" asp-for="Name" class="form-control" />
                                 </div>
 
                                 <div class="row">
 
                                     <div class="col-6 mb-3">
                                         <label class="form-label">Age</label>
-                                        <input asp-for="Age" class="form-control" />
+                                        <input id="Age" asp-for="Age" class="form-control" />
                                     </div>
 
                                     <div class="col-6 mb-3">
                                         <label class="form-label">Alignment</label>
-                                        <input asp-for="Alignment" class="form-control" />
+                                        <input id="Alignment" asp-for="Alignment" class="form-control" />
                                     </div>
 
                                 </div>
@@ -976,7 +977,7 @@
                                 <div class="row">
                                     <div class="col-6 mb-3">
                                         <label class="form-label">Speed</label>
-                                        <input asp-for="Speed" class="form-control" />
+                                        <input id="Speed" asp-for="Speed" class="form-control" />
                                     </div>
 
                                     <div class="col-6 mb-3">
@@ -990,7 +991,7 @@
 
                                     <div class="col-6 mb-3">
                                         <label class="form-label">Level</label>
-                                        <input asp-for="Level" class="form-control" placeholder="Level" />
+                                        <input id="Level" asp-for="Level" class="form-control" placeholder="Level" />
                                     </div>
 
                                     <div class="col-6 mb-3">
@@ -1001,13 +1002,8 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Temporary HP</label>
-                                    <input asp-for="TempHitPoints" class="form-control" />
-                                </div>
-
-                                <div class="mb-3">
                                     <label class="form-label">Inspiration</label>
-                                    <input asp-for="Inspiration" class="form-control" />
+                                    <input id="Inspiration" asp-for="Inspiration" class="form-control" />
                                 </div>
 
                             </div>
@@ -1029,12 +1025,12 @@
 
                                     <div class="col-6 mb-3">
                                         <label class="form-label">Height</label>
-                                        <input asp-for="Height" class="form-control" />
+                                        <input id="Height" asp-for="Height" class="form-control" />
                                     </div>
 
                                     <div class="col-6 mb-3">
                                         <label class="form-label">Weight</label>
-                                        <input asp-for="Weight" class="form-control" />
+                                        <input id="Weight" asp-for="Weight" class="form-control" />
                                     </div>
 
                                 </div>
@@ -1043,24 +1039,24 @@
 
                                     <div class="col-4 mb-3">
                                         <label class="form-label">Eyes</label>
-                                        <input asp-for="Eyes" class="form-control" />
+                                        <input id="Eyes" asp-for="Eyes" class="form-control" />
                                     </div>
 
                                     <div class="col-4 mb-3">
                                         <label class="form-label">Hair</label>
-                                        <input asp-for="Hair" class="form-control" />
+                                        <input id="Hair" asp-for="Hair" class="form-control" />
                                     </div>
 
                                     <div class="col-4 mb-3">
                                         <label class="form-label">Skin</label>
-                                        <input asp-for="Skin" class="form-control" />
+                                        <input id="Skin" asp-for="Skin" class="form-control" />
                                     </div>
 
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Physical Description</label>
-                                    <textarea asp-for="Physical"
+                                    <textarea id="Physical" asp-for="Physical"
                                               class="form-control"
                                               rows="3"></textarea>
                                 </div>
@@ -1083,35 +1079,43 @@
 
                         <div class="mb-3">
                             <label class="form-label">Personality Traits</label>
-                            <textarea asp-for="Personality"
+                            <textarea id="Personality" asp-for="Personality"
+                                      class="form-control"
+                                      rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Languages</label>
+                            <textarea id="Languages" asp-for="Languages"
                                       class="form-control"
                                       rows="2"></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Ideal</label>
-                            <textarea asp-for="Ideal"
+                            <textarea id="Ideal" asp-for="Ideal"
                                       class="form-control"
                                       rows="2"></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Bond</label>
-                            <textarea asp-for="Bond"
+                            <textarea id="Bond" asp-for="Bond"
                                       class="form-control"
                                       rows="2"></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Flaw</label>
-                            <textarea asp-for="Flaw"
+                            <textarea id="Flaw" asp-for="Flaw"
                                       class="form-control"
                                       rows="2"></textarea>
                         </div>
 
+
                         <div class="mb-3">
                             <label class="form-label">Backstory</label>
-                            <textarea asp-for="Backstory"
+                            <textarea id="Backstory" asp-for="Backstory"
                                       class="form-control"
                                       rows="5"></textarea>
                         </div>
@@ -1140,12 +1144,12 @@
 
                             <div class="card-body">
 
-                                <p><strong>Name:</strong> @Model.Name</p>
-                                <p><strong>Level:</strong> @Model.Level</p>
-                                <p><strong>Class:</strong> @Model.SelectedClassName</p>
-                                <p><strong>Race:</strong> @Model.SelectedRaceName</p>
-                                <p><strong>Background:</strong> @Model.SelectedBackgroundName</p>
-                                <p><strong>Alignment:</strong> @Model.Alignment</p>
+                                <p id="nameSummary"><strong>Name:</strong> @Model.Name</p>
+                                <p id="levelSummary"><strong>Level:</strong> @Model.Level</p>
+                                <p id="classSummary"><strong>Class:</strong> @Model.SelectedClassName</p>
+                                <p id="raceSummary"><strong>Race:</strong> @Model.SelectedRaceName</p>
+                                <p id="backgroundSummary"><strong>Background:</strong> @Model.SelectedBackgroundName</p>
+                                <p id="alignmentSummary"><strong>Alignment:</strong> @Model.Alignment</p>
 
                             </div>
                         </div>
@@ -1158,12 +1162,12 @@
 
                             <div class="card-body">
 
-                                <p>STR: <strong>@Model.Strength</strong></p>
-                                <p>DEX: <strong>@Model.Dexterity</strong></p>
-                                <p>CON: <strong>@Model.Constitution</strong></p>
-                                <p>INT: <strong>@Model.Intelligence</strong></p>
-                                <p>WIS: <strong>@Model.Wisdom</strong></p>
-                                <p>CHA: <strong>@Model.Charisma</strong></p>
+                                <p id="strengthSummary">STR: <strong>@Model.Strength</strong></p>
+                                <p id="dexteritySummary">DEX: <strong>@Model.Dexterity</strong></p>
+                                <p id="constitutionSummary">CON: <strong>@Model.Constitution</strong></p>
+                                <p id="intelligenceSummary">INT: <strong>@Model.Intelligence</strong></p>
+                                <p id="wisdomSummary">WIS: <strong>@Model.Wisdom</strong></p>
+                                <p id="charismaSummary">CHA: <strong>@Model.Charisma</strong></p>
 
                             </div>
                         </div>
@@ -1176,12 +1180,12 @@
 
                             <div class="card-body">
 
-                                <p>STR: @(Model.StrengthSave ? "Yes" : "No")</p>
-                                <p>DEX: @(Model.DexteritySave ? "Yes" : "No")</p>
-                                <p>CON: @(Model.ConstitutionSave ? "Yes" : "No")</p>
-                                <p>INT: @(Model.IntelligenceSave ? "Yes" : "No")</p>
-                                <p>WIS: @(Model.WisdomSave ? "Yes" : "No")</p>
-                                <p>CHA: @(Model.CharismaSave ? "Yes" : "No")</p>
+                                <p id="strengthSaveSummary">STR: @(Model.StrengthSave ? "Yes" : "No")</p>
+                                <p id="dexteritySaveSummary">DEX: @(Model.DexteritySave ? "Yes" : "No")</p>
+                                <p id="constitutionSaveSummary">CON: @(Model.ConstitutionSave ? "Yes" : "No")</p>
+                                <p id="intelligenceSaveSummary">INT: @(Model.IntelligenceSave ? "Yes" : "No")</p>
+                                <p id="wisdomSaveSummary">WIS: @(Model.WisdomSave ? "Yes" : "No")</p>
+                                <p id="charismaSaveSummary">CHA: @(Model.CharismaSave ? "Yes" : "No")</p>
 
                             </div>
                         </div>
@@ -1199,9 +1203,8 @@
 
                             <div class="card-body">
 
-                                <p><strong>Temp HP:</strong> @Model.TempHitPoints</p>
-                                <p><strong>Speed:</strong> @Model.Speed</p>
-                                <p><strong>Inspiration:</strong> @Model.Inspiration</p>
+                                <p id="speedSummary"><strong>Speed:</strong> @Model.Speed</p>
+                                <p id="inspirationSummary"><strong>Inspiration:</strong> @Model.Inspiration</p>
 
                             </div>
                         </div>
@@ -1215,7 +1218,7 @@
                             <div class="card-body">
 
                                 <p><strong>Weapons:</strong></p>
-                                <ul>
+                                <ul id="weaponsSummary">
                                     @foreach (var w in Model.SelectedWeaponNames ?? new List<string>())
                                     {
                                         <li>@w</li>
@@ -1223,7 +1226,7 @@
                                 </ul>
 
                                 <p><strong>Items:</strong></p>
-                                <ul>
+                                <ul id="itemsSummary">
                                     @foreach (var i in Model.SelectedItemNames ?? new List<string>())
                                     {
                                         <li>@i</li>
@@ -1233,7 +1236,7 @@
                                 @if (Model.IsSpellcaster)
                                 {
                                     <p><strong>Spells:</strong></p>
-                                    <ul>
+                                    <ul id="spellsSummary">
                                         @foreach (var s in Model.SelectedSpellNames ?? new List<string>())
                                         {
                                             <li>@s</li>
@@ -1252,12 +1255,12 @@
 
                             <div class="card-body">
 
-                                <p><strong>Age:</strong> @Model.Age</p>
-                                <p><strong>Height:</strong> @Model.Height</p>
-                                <p><strong>Weight:</strong> @Model.Weight</p>
-                                <p><strong>Eyes:</strong> @Model.Eyes</p>
-                                <p><strong>Hair:</strong> @Model.Hair</p>
-                                <p><strong>Skin:</strong> @Model.Skin</p>
+                                <p id="ageSummary"><strong>Age:</strong> @Model.Age</p>
+                                <p id="heightSummary"><strong>Height:</strong> @Model.Height</p>
+                                <p id="weightSummary"><strong>Weight:</strong> @Model.Weight</p>
+                                <p id="eyesSummary"><strong>Eyes:</strong> @Model.Eyes</p>
+                                <p id="hairSummary"><strong>Hair:</strong> @Model.Hair</p>
+                                <p id="skinSummary"><strong>Skin:</strong> @Model.Skin</p>
 
                             </div>
                         </div>
@@ -1274,20 +1277,21 @@
 
                     <div class="card-body">
 
-                        <p><strong>Personality:</strong> @Model.Personality</p>
-                        <p><strong>Ideal:</strong> @Model.Ideal</p>
-                        <p><strong>Bond:</strong> @Model.Bond</p>
-                        <p><strong>Flaw:</strong> @Model.Flaw</p>
+                        <p id="personalitySummary"><strong>Personality:</strong> @Model.Personality</p>
+                        <p id="languagesSummary"><strong>Languages:</strong>@Model.Languages</p>
+                        <p id="idealSummary"><strong>Ideal:</strong> @Model.Ideal</p>
+                        <p id="bondSummary"><strong>Bond:</strong> @Model.Bond</p>
+                        <p id="flawSummary"><strong>Flaw:</strong> @Model.Flaw</p>
 
                         <hr />
 
                         <p><strong>Backstory:</strong></p>
-                        <p>@Model.Backstory</p>
+                        <p id="backstorySummary">@Model.Backstory</p>
 
                         <hr />
 
                         <p><strong>Physical Description:</strong></p>
-                        <p>@Model.Physical</p>
+                        <p id="physicalSummary">@Model.Physical</p>
 
                     </div>
                 </div>
@@ -1652,7 +1656,7 @@
     }
 
     // Select Spells
-    const selectedSpells = [];
+    let selectedSpells = [];
 
     document.querySelectorAll('.spell-card')
         .forEach(card => {
@@ -1778,25 +1782,146 @@
         progressBar.style.width = percent + '%';
     }
 
-    nextBtn.addEventListener('click', () => {
-        if (currentStep === 4 && !hasSpellcasting){ // We skip the spell screen if class doesn't have spellcasting abilities
-            currentStep += 2;
-        }
-        else{
-            currentStep++;
-        }
+    function updateSummary()
+    {
+        document.getElementById('backgroundSummary').innerHTML =
+            `<strong>Name:</strong> ${document.getElementById('Name').value}`;
 
+        document.getElementById('levelSummary').innerHTML =
+            `<strong>Level:</strong> ${document.getElementById('Level').value}`;
+
+        document.getElementById('classSummary').innerHTML =
+            `<strong>Class:</strong> ${document.getElementById('selectedClassInput').value}`;
+
+        document.getElementById('raceSummary').innerHTML =
+            `<strong>Race:</strong> ${document.getElementById('selectedRaceInput').value}`;
+
+        document.getElementById('backgroundSummary').innerHTML =
+            `<strong>Background:</strong> ${document.getElementById('selectedBackgroundInput').value}`;
+
+        document.getElementById('alignmentSummary').innerHTML =
+            `<strong>Alignment:</strong> ${document.getElementById('Alignment').value}`;
+
+
+        // Ability Scores
+
+        document.getElementById('strengthSummary').innerHTML =
+            `STR: <strong>${document.getElementById('Strength').value}</strong>`;
+
+        document.getElementById('dexteritySummary').innerHTML =
+            `DEX: <strong>${document.getElementById('Dexterity').value}</strong>`;
+
+        document.getElementById('constitutionSummary').innerHTML =
+            `CON: <strong>${document.getElementById('Constitution').value}</strong>`;
+
+        document.getElementById('intelligenceSummary').innerHTML =
+            `INT: <strong>${document.getElementById('Intelligence').value}</strong>`;
+
+        document.getElementById('wisdomSummary').innerHTML =
+            `WIS: <strong>${document.getElementById('Wisdom').value}</strong>`;
+
+        document.getElementById('charismaSummary').innerHTML =
+            `CHA: <strong>${document.getElementById('Charisma').value}</strong>`;
+
+
+        // Saving Throws
+
+        document.getElementById('strengthSaveSummary').textContent =
+            `STR: ${document.getElementById('StrengthSave').checked ? 'Yes' : 'No'}`;
+
+        document.getElementById('dexteritySaveSummary').textContent =
+            `DEX: ${document.getElementById('DexteritySave').checked ? 'Yes' : 'No'}`;
+
+        document.getElementById('constitutionSaveSummary').textContent =
+            `CON: ${document.getElementById('ConstitutionSave').checked ? 'Yes' : 'No'}`;
+
+        document.getElementById('intelligenceSaveSummary').textContent =
+            `INT: ${document.getElementById('IntelligenceSave').checked ? 'Yes' : 'No'}`;
+
+        document.getElementById('wisdomSaveSummary').textContent =
+            `WIS: ${document.getElementById('WisdomSave').checked ? 'Yes' : 'No'}`;
+
+        document.getElementById('charismaSaveSummary').textContent =
+            `CHA: ${document.getElementById('CharismaSave').checked ? 'Yes' : 'No'}`;
+
+
+        // Combat
+
+        document.getElementById('speedSummary').innerHTML =
+            `<strong>Speed:</strong> ${document.getElementById('Speed').value}`;
+
+        document.getElementById('inspirationSummary').innerHTML =
+            `<strong>Inspiration:</strong> ${document.getElementById('Inspiration').value}`;
+
+
+        // Weapons
+        document.getElementById('weaponsSummary').innerHTML =
+                    selectedWeapons
+                        .map(weapon => `<li>${weapon}</li>`)
+                        .join('');
+
+        // Equipment
+        document.getElementById('itemsSummary').innerHTML =
+            selectedItems
+                .map(item => `<li>${item}</li>`)
+                .join('');
+
+        // Spells
+        document.getElementById('spellsSummary').innerHTML = 
+            selectedSpells
+                .map(spell => `<li>${spell}</li>`)
+                .join('');
+
+
+        // Character Details
+
+        document.getElementById('ageSummary').innerHTML =
+            `<strong>Age:</strong> ${document.getElementById('Age').value}`;
+
+        document.getElementById('heightSummary').innerHTML =
+            `<strong>Height:</strong> ${document.getElementById('Height').value}`;
+
+        document.getElementById('weightSummary').innerHTML =
+            `<strong>Weight:</strong> ${document.getElementById('Weight').value}`;
+
+        document.getElementById('eyesSummary').innerHTML =
+            `<strong>Eyes:</strong> ${document.getElementById('Eyes').value}`;
+
+        document.getElementById('hairSummary').innerHTML =
+            `<strong>Hair:</strong> ${document.getElementById('Hair').value}`;
+
+        document.getElementById('skinSummary').innerHTML =
+            `<strong>Skin:</strong> ${document.getElementById('Skin').value}`;
+
+
+        // Roleplay
+
+        document.getElementById('personalitySummary').innerHTML =
+            `<strong>Personality:</strong> ${document.getElementById('Personality').value}`;
+
+        document.getElementById('idealSummary').innerHTML =
+            `<strong>Ideal:</strong> ${document.getElementById('Ideal').value}`;
+
+        document.getElementById('bondSummary').innerHTML =
+            `<strong>Bond:</strong> ${document.getElementById('Bond').value}`;
+
+        document.getElementById('flawSummary').innerHTML =
+            `<strong>Flaw:</strong> ${document.getElementById('Flaw').value}`;
+
+        document.getElementById('backstorySummary').textContent =
+            document.getElementById('Backstory').value;
+
+        document.getElementById('physicalSummary').textContent =
+            document.getElementById('Physical').value;
+    }
+
+    nextBtn.addEventListener('click', () => {
+        currentStep++;
         updateWizard();
     });
 
     prevBtn.addEventListener('click', () => {
-        if (currentStep === 6 && !hasSpellcasting){ // We skip the spell screen if class doesn't have spellcasting abilities
-            currentStep -= 2;
-        }
-        else{
-            currentStep--;
-        }
-
+        currentStep--;
         updateWizard();
     });
 
