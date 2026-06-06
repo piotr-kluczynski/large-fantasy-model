@@ -4,7 +4,7 @@
   "weight": 3,
   "magic": false,
   "damage": "1d6 piercing",
-  "range": "30ft",
+  "range": "melee",
   "thrown_range": "120ft",
   "ammunition": "NaN",
   "finesse": false,

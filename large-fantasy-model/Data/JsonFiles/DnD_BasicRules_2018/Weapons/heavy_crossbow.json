@@ -1,0 +1,19 @@
+{
+  "name": "Heavy Crossbow",
+  "description": "A heavy crossbow is a powerful, two-handed ranged weapon featuring a rigid prod (bow) mounted on a wooden or metal stock.",
+  "weight": 18,
+  "magic": false,
+  "damage": "1d10 piercing",
+  "range": "NaN",
+  "thrown_range": "400ft",
+  "ammunition": "Crossbow Arrow",
+  "finesse": false,
+  "heavy": true,
+  "light": false,
+  "loading": true,
+  "monk": false,
+  "reach": false,
+  "thrown": false,
+  "two_handed": true,
+  "versatile": false
+}

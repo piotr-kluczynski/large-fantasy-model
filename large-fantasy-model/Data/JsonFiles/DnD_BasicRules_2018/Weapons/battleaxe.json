@@ -1,0 +1,19 @@
+{
+  "name": "Battleaxe",
+  "description": "A battleaxe is a specialized axe designed for combat, characterized by a lighter, broader blade optimized for cleaving rather than splitting wood.",
+  "weight": 4,
+  "magic": false,
+  "damage": "1d8 slashing",
+  "range": "melee",
+  "thrown_range": "NaN",
+  "ammunition": "NaN",
+  "finesse": false,
+  "heavy": false,
+  "light": false,
+  "loading": false,
+  "monk": false,
+  "reach": false,
+  "thrown": false,
+  "two_handed": false,
+  "versatile": true
+}

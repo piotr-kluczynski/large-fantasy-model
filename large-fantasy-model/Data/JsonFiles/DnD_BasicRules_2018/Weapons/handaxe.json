@@ -1,0 +1,19 @@
+{
+  "name": "Handaxe",
+  "description": "A hatchet is a single-handed striking tool with a sharp blade on one side used to cut and split wood, and a hammerhead on the other side. ",
+  "weight": 2,
+  "magic": false,
+  "damage": "1d6 slashing",
+  "range": "melee",
+  "thrown_range": "60ft",
+  "ammunition": "NaN",
+  "finesse": false,
+  "heavy": false,
+  "light": true,
+  "loading": false,
+  "monk": false,
+  "reach": false,
+  "thrown": true,
+  "two_handed": false,
+  "versatile": false
+}

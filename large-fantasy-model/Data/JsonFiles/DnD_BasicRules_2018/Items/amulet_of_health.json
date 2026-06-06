@@ -1,0 +1,6 @@
+{
+  "name": "Amulet of Health",
+  "description": "Your Constitution score is 19 while you wear this amulet. It has no effect on you if your Constitution is 19 or higher without it.",
+  "weight": 0,
+  "magic": true
+}

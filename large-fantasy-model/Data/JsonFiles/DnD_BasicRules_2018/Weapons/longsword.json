@@ -1,0 +1,19 @@
+{
+  "name": "Longsword",
+  "description": "The longsword is a versatile sword designed for both cutting and thrusting.",
+  "weight": 3,
+  "magic": false,
+  "damage": "1d8 slashing",
+  "range": "melee",
+  "thrown_range": "NaN",
+  "ammunition": "NaN",
+  "finesse": false,
+  "heavy": false,
+  "light": false,
+  "loading": false,
+  "monk": false,
+  "reach": false,
+  "thrown": false,
+  "two_handed": false,
+  "versatile": true
+}

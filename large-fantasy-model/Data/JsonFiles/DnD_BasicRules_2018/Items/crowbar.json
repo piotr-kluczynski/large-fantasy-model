@@ -1,0 +1,6 @@
+{
+  "name": "Crowbar",
+  "description": "A heavy-duty hand tool consisting of a straight, solid steel bar with a flattened wedge at one end and a curved, forked 'claw' at the other.",
+  "weight": 2,
+  "magic": false
+}
