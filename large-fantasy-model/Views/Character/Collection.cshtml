@@ -16,7 +16,7 @@
         </a>
     </div>
 
-    @if (!Model.Any())
+    @if (Model != null || !Model.Any())
     {
         <div class="alert alert-info">
             You don't have any characters yet
