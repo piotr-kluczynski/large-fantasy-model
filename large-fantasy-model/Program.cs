@@ -11,8 +11,22 @@ namespace large_fantasy_model
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddScoped<JsonRepository<Spell>>(sp =>
+
+            // Rejestrowanie repozytoriów dla plików JSON
+            builder.Services.AddScoped(sp =>
                 new JsonRepository<Spell>("Data/JsonFiles"));
+            builder.Services.AddScoped(f =>
+                new JsonRepository<Feature>("Data/JsonFiles"));
+            builder.Services.AddScoped(i =>
+                new JsonRepository<Item>("Data/JsonFiles"));
+            builder.Services.AddScoped(i =>
+                new JsonRepository<CClass>("Data/JsonFiles"));
+            builder.Services.AddScoped(i =>
+                new JsonRepository<Race>("Data/JsonFiles"));
+            builder.Services.AddScoped(i =>
+                new JsonRepository<Weapon>("Data/JsonFiles"));
+            builder.Services.AddScoped(i =>
+                new JsonRepository<Background>("Data/JsonFiles"));
 
             builder.Services.AddControllersWithViews();
 

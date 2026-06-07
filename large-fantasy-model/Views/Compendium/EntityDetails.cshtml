@@ -1,4 +1,20 @@
-﻿@using large_fantasy_model.ViewModels.Compendium
+@*
+    Widok: EntityDetails
+
+    Przeznaczenie:
+    - Uniwersalny widok, pozwalający na inspekcję wartości wszystkich pól elementu istniejącego systemu RPG
+
+    Model:
+    - EntityDetailsViewModel
+
+    Zachowanie:
+    - Pozwala na zmianę wyświetlenie wszystkich pól wybranego elementu
+    - Przycisk "Back" cofa użytkownika do widoku Details danego systemu RPG
+    - Przycisk "Edit" przenosi użytkownika do widoku EntityEditor, który pozwala na zmianę wartości pól otwartego elementu
+
+*@
+
+@using large_fantasy_model.ViewModels.Compendium
 @model EntityDetailsViewModel
 
 <div class="container mt-4">
@@ -15,6 +31,24 @@
                 <strong>@field.Label:</strong> @field.Value
             </p>
         }
+    }
+
+    @foreach (var subList in Model.SubLists)
+    {
+        <div class="mt-3">
+            <p><strong>@subList.Label:</strong></p>
+            <ul>
+                @foreach (var item in subList.Items)
+                {
+                    <li>
+                        <a asp-action="Entity"
+                           asp-route-rulebook="@item.Rulebook"
+                           asp-route-category="@item.Category"
+                           asp-route-name="@item.Slug">@item.Name</a>
+                    </li>
+                }
+            </ul>
+        </div>
     }
 
     <div class="d-flex justify-content-between mt-4">

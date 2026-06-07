@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Character Management";
+}
+
+<div class="container-fluid vh-100">
+    <div class="row h-100">
+
+        @* Character Creator Panel *@
+        <div class="col-md-6 d-flex flex-column justify-content-center align-items-center border-end character-panel">
+            <h1 class="display-3 fw-bold text-center mb-4">
+                Create New<br />Character
+            </h1>
+
+            <p class="lead text-center mb-5">
+                Begin a new adventure and create your next hero.
+            </p>
+
+            <a asp-controller="Character"
+               asp-action="Create"
+               class="btn btn-primary btn-lg px-5">
+                Create Character
+            </a>
+        </div>
+
+        @* Character Collection Panel *@
+        <div class="col-md-6 d-flex flex-column justify-content-center align-items-center character-panel">
+            <h1 class="display-3 fw-bold text-center mb-4">
+                Character<br />Collection
+            </h1>
+
+            <p class="lead text-center mb-5">
+                Browse and manage all your existing characters.
+            </p>
+
+            <a asp-controller="Character"
+               asp-action="Collection"
+               class="btn btn-success btn-lg px-5">
+                Open Collection
+            </a>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,6 @@
+{
+  "name": "Shield",
+  "description": "A piece of personal defense armor held in the hand or strapped to the forearm. Adds +2 to your Armor Class.",
+  "weight": 6,
+  "magic": false
+}

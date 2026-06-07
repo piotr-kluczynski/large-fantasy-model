@@ -1,9 +1,6 @@
 ﻿using large_fantasy_model.Models.CharacterModels.Additional;
-using large_fantasy_model.Models.CharacterModels.Additional.Creature;
 using large_fantasy_model.Models.CharacterModels.References;
-using large_fantasy_model.Models.CharacterModels.Additional;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace large_fantasy_model.Models.CharacterModels
 {
@@ -16,52 +13,20 @@ namespace large_fantasy_model.Models.CharacterModels
         public int UserId { get; set; }
         public User User { get; set; }
 
-        public Creature Creature { get; set; }
-
-        public string Nickname { get; set; }
-
-        public string Player { get; set; } = "NPC";
+        public string Name { get; set; }
 
         [Range(0, int.MaxValue)]
         public int Xp { get; set; } = 0;
 
+        public int Level { get; set; }
+
         public CharacterRace Race { get; set; }
-
-        public List<CharacterClass> Classes { get; set; }
-
+        public CharacterClass Class { get; set; }
         public CharacterBackground Background { get; set; }
-
         public CharacterDetails Details { get; set; }
 
-        public List<CharacterProficiency> Proficiencies { get; set; }
 
-        [NotMapped]
-        public List<CharacterProficiency> WeaponProficiencies => 
-            Proficiencies.Where(p => p.Type == ProficiencyType.Weapon).ToList();
-
-        [NotMapped]
-        public List<CharacterProficiency> ArmorProficiencies =>
-            Proficiencies.Where(p => p.Type == ProficiencyType.Armor).ToList();
-
-        [NotMapped]
-        public List<CharacterProficiency> ToolProficiencies =>
-            Proficiencies.Where(p => p.Type == ProficiencyType.Tool).ToList();
-
-        public List<CharacterDamageType> DamageTypes { get; set; }
-
-        [NotMapped]
-        public List<CharacterDamageType> DamageImmunities =>
-           DamageTypes.Where(p => p.Category == DamageCategory.Immunity).ToList();
-
-        [NotMapped]
-        public List<CharacterDamageType> DamageResistances =>
-           DamageTypes.Where(p => p.Category == DamageCategory.Resistance).ToList();
-
-        [NotMapped]
-        public List<CharacterDamageType> Vulnerabilities =>
-           DamageTypes.Where(p => p.Category == DamageCategory.Vulnerability).ToList();
-
-        public List<CharacterFeat> Feats { get; set; }
+        public List<CharacterFeature> Features { get; set; }
 
         public List<CharacterSpell> Spells { get; set; }
 
@@ -69,6 +34,18 @@ namespace large_fantasy_model.Models.CharacterModels
 
         public List<CharacterEquipment> Equipment { get; set; } 
 
-        public CharacterCurrency Currency { get; set; }
+        // Creature properties
+        public string Alignment { get; set; }
+        public int Speed { get; set; }
+        public int CurrentHitPoints { get; set; }
+        public int MaxHitPoints { get; set; }
+        public int TempHitPoints { get; set; }
+        public int Inspiration { get; set; }
+        public int ArmorClass { get; set; }
+        public string Languages { get; set; }
+
+        public CharacterAbilityScores AbilityScores { get; set; }
+        public CharacterSavingThrows SavingThrows { get; set; }
+        public CharacterSkills Skills { get; set; }
     }
 }

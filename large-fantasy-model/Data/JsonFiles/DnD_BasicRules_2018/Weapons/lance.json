@@ -1,0 +1,19 @@
+{
+  "name": "Lance",
+  "description": "A lance is a long, wooden shaft with a pointed metal head used historically as a weapon by mounted cavalry and knights.",
+  "weight": 6,
+  "magic": false,
+  "damage": "1d12 piercing",
+  "range": "melee",
+  "thrown_range": "NaN",
+  "ammunition": "NaN",
+  "finesse": false,
+  "heavy": false,
+  "light": false,
+  "loading": false,
+  "monk": false,
+  "reach": true,
+  "thrown": false,
+  "two_handed": false,
+  "versatile": false
+}

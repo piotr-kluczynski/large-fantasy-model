@@ -1,0 +1,19 @@
+{
+  "name": "Light Crossbow",
+  "description": "The light crossbow is a compact, two-handed ranged weapon that shoots metal or wooden bolts.",
+  "weight": 5,
+  "magic": false,
+  "damage": "1d8 piercing",
+  "range": "NaN",
+  "thrown_range": "320ft",
+  "ammunition": "Crossbow Arrow",
+  "finesse": false,
+  "heavy": false,
+  "light": false,
+  "loading": true,
+  "monk": false,
+  "reach": false,
+  "thrown": false,
+  "two_handed": true,
+  "versatile": false
+}

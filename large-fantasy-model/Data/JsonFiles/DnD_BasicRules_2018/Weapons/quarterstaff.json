@@ -1,0 +1,19 @@
+{
+  "name": "Quarterstaff",
+  "description": "The quarterstaff is a polearm made of a stout hardwood shaft, typically measuring 6 to 9 feet (1.8 to 2.7 m) in length.",
+  "weight": 1,
+  "magic": false,
+  "damage": "1d6 bludgeoning",
+  "range": "melee",
+  "thrown_range": "60ft",
+  "ammunition": "NaN",
+  "finesse": false,
+  "heavy": false,
+  "light": false,
+  "loading": false,
+  "monk": false,
+  "reach": false,
+  "thrown": false,
+  "two_handed": false,
+  "versatile": true
+}

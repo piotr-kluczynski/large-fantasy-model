@@ -1,14 +1,14 @@
 {
   "name": "Fighter",
+  "description": "Fighters share an unparalleled mastery with weapons and armor, and a thorough knowledge of the skills of combat. They are well acquainted with death, both meting it out and staring it defiantly in the face.",
   "hit_die": 10,
   "spellcasting": "",
   "features": [
-    { "id": "fighter.fighting_style" },
-    { "id": "fighter.second_wind" },
-    { "id": "fighter.action_surge" },
-    { "id": "fighter.martial_archetype" },
-    { "id": "common.ability_score_improvement" },
-    { "id": "fighter.extra_attack" }, 
-    { "id": "fighter.indomitable" }
+    "Fighting Style",
+    "Second Wind",
+    "Action Surge",
+    "Martial Archetype",
+    "Extra Attack",
+    "Indomitable"
   ]
 }

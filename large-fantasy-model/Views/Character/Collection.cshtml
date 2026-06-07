@@ -1,0 +1,118 @@
+﻿@model IEnumerable<large_fantasy_model.Models.CharacterModels.Character>
+
+@{
+    ViewData["Title"] = "My characters";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Characters</h1>
+
+        <a asp-controller="Character"
+           asp-action="Create"
+           class="btn btn-primary">
+            Create Character
+        </a>
+    </div>
+
+    @if (Model != null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            You don't have any characters yet
+        </div>
+    }
+    else
+    {
+        <div class="row">
+
+            @foreach (var character in Model)
+            {
+                <div class="col-md-6 col-xl-4 mb-4">
+
+                    <div class="card h-100 shadow-sm">
+
+                        <div class="card-header">
+                            <h5 class="mb-0">@character.Name</h5>
+                        </div>
+
+                        <div class="card-body">
+
+                            <div class="mb-2">
+                                <strong>Level:</strong>
+                                @character.Level
+                            </div>
+
+                            <div class="mb-2">
+                                <strong>XP:</strong>
+                                @character.Xp
+                            </div>
+
+                            <div class="mb-2">
+                                <strong>Race:</strong>
+                                @(character.Race.RaceName ?? "None" )
+                            </div>
+
+                            <div class="mb-2">
+                                <strong>Class:</strong>
+                                @(character.Class?.ClassName ?? "None")
+                            </div>
+
+                            <div class="mb-2">
+                                <strong>HP:</strong>
+                                @character.CurrentHitPoints / @character.MaxHitPoints
+                            </div>
+
+                            <div class="mb-2">
+                                <strong>AC:</strong>
+                                @character.ArmorClass
+                            </div>
+
+                            <div>
+                                <strong>Alignment:</strong>
+                                @character.Alignment
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer">
+
+                            <div class="btn-group w-100">
+
+                                <a asp-controller="Character"
+                                   asp-action="Details"
+                                   asp-route-id="@character.Id"
+                                   class="btn btn-outline-primary">
+                                    Details
+                                </a>
+
+                                <a asp-controller="Character"
+                                   asp-action="Edit"
+                                   asp-route-id="@character.Id"
+                                   class="btn btn-outline-secondary">
+                                    Edit
+                                </a>
+
+                                <form asp-controller="Character"
+                                      asp-action="Delete"
+                                      method="post"
+                                      class="d-inline w-100">
+
+                                    <input type="hidden"
+                                           name="id"
+                                           value="@character.Id" />
+
+                                    <button type="submit"
+                                            class="btn btn-outline-danger w-100"
+                                            onclick="return confirm('Do you want to delete the character?');">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

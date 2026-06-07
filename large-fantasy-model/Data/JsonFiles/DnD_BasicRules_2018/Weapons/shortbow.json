@@ -1,0 +1,19 @@
+{
+  "name": "Shortbow",
+  "description": "A shortbow is a lightweight, compact ranged weapon (typically 3 to 5 feet in length) used to shoot arrows.",
+  "weight": 2,
+  "magic": false,
+  "damage": "1d6 piercing",
+  "range": "NaN",
+  "thrown_range": "320ft",
+  "ammunition": "Arrow",
+  "finesse": false,
+  "heavy": false,
+  "light": false,
+  "loading": false,
+  "monk": false,
+  "reach": false,
+  "thrown": false,
+  "two_handed": true,
+  "versatile": false
+}

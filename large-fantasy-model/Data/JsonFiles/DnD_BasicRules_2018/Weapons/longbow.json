@@ -1,0 +1,19 @@
+{
+  "name": "Longbow",
+  "description": "A longbow is a tall, hand-drawn archery weapon that typically matches or exceeds the user's height.",
+  "weight": 2,
+  "magic": false,
+  "damage": "1d8 piercing",
+  "range": "NaN",
+  "thrown_range": "600ft",
+  "ammunition": "Arrow",
+  "finesse": false,
+  "heavy": true,
+  "light": false,
+  "loading": false,
+  "monk": false,
+  "reach": false,
+  "thrown": false,
+  "two_handed": true,
+  "versatile": false
+}

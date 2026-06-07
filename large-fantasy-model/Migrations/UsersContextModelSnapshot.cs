@@ -67,31 +67,6 @@ namespace large_fantasy_model.Migrations
                     b.ToTable("UserUser");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Additional.CharacterProficiency", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CharacterId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CharacterId");
-
-                    b.ToTable("Proficiencies");
-                });
-
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Character", b =>
                 {
                     b.Property<int>("Id")
@@ -100,13 +75,35 @@ namespace large_fantasy_model.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Nickname")
+                    b.Property<string>("Alignment")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Player")
+                    b.Property<int>("ArmorClass")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentHitPoints")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Inspiration")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Languages")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MaxHitPoints")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Speed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TempHitPoints")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -145,33 +142,10 @@ namespace large_fantasy_model.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CharacterId");
+                    b.HasIndex("CharacterId")
+                        .IsUnique();
 
                     b.ToTable("Classes");
-                });
-
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterDamageType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Category")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CharacterId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DamageTypeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CharacterId");
-
-                    b.ToTable("CharacterDamageType");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterEquipment", b =>
@@ -198,7 +172,7 @@ namespace large_fantasy_model.Migrations
                     b.ToTable("Equipment");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterFeat", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterFeatures", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -209,14 +183,14 @@ namespace large_fantasy_model.Migrations
                     b.Property<int>("CharacterId")
                         .HasColumnType("int");
 
-                    b.Property<int>("FeatId")
+                    b.Property<int>("FeatureId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CharacterId");
 
-                    b.ToTable("Feats");
+                    b.ToTable("Features");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterRace", b =>
@@ -655,17 +629,6 @@ namespace large_fantasy_model.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Additional.CharacterProficiency", b =>
-                {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", "Character")
-                        .WithMany("Proficiencies")
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Character");
-                });
-
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Character", b =>
                 {
                     b.HasOne("large_fantasy_model.Models.User", "User")
@@ -673,6 +636,43 @@ namespace large_fantasy_model.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.CharacterAbilityScores", "AbilityScores", b1 =>
+                        {
+                            b1.Property<int>("CharacterId")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Charisma")
+                                .HasColumnType("int")
+                                .HasColumnName("AbilityScores_Charisma");
+
+                            b1.Property<int>("Constitution")
+                                .HasColumnType("int")
+                                .HasColumnName("AbilityScores_Constitution");
+
+                            b1.Property<int>("Dexterity")
+                                .HasColumnType("int")
+                                .HasColumnName("AbilityScores_Dexterity");
+
+                            b1.Property<int>("Intelligence")
+                                .HasColumnType("int")
+                                .HasColumnName("AbilityScores_Intelligence");
+
+                            b1.Property<int>("Strength")
+                                .HasColumnType("int")
+                                .HasColumnName("AbilityScores_Strength");
+
+                            b1.Property<int>("Wisdom")
+                                .HasColumnType("int")
+                                .HasColumnName("AbilityScores_Wisdom");
+
+                            b1.HasKey("CharacterId");
+
+                            b1.ToTable("Characters");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CharacterId");
+                        });
 
                     b.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.CharacterBackground", "Background", b1 =>
                         {
@@ -693,39 +693,6 @@ namespace large_fantasy_model.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Background_Option");
-
-                            b1.HasKey("CharacterId");
-
-                            b1.ToTable("Characters");
-
-                            b1.WithOwner()
-                                .HasForeignKey("CharacterId");
-                        });
-
-                    b.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.CharacterCurrency", "Currency", b1 =>
-                        {
-                            b1.Property<int>("CharacterId")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Copper")
-                                .HasColumnType("int")
-                                .HasColumnName("Currency_Copper");
-
-                            b1.Property<int>("Electrum")
-                                .HasColumnType("int")
-                                .HasColumnName("Currency_Electrum");
-
-                            b1.Property<int>("Gold")
-                                .HasColumnType("int")
-                                .HasColumnName("Currency_Gold");
-
-                            b1.Property<int>("Platinum")
-                                .HasColumnType("int")
-                                .HasColumnName("Currency_Platinum");
-
-                            b1.Property<int>("Silver")
-                                .HasColumnType("int")
-                                .HasColumnName("Currency_Silver");
 
                             b1.HasKey("CharacterId");
 
@@ -806,25 +773,34 @@ namespace large_fantasy_model.Migrations
                                 .HasForeignKey("CharacterId");
                         });
 
-                    b.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.Creature", "Creature", b1 =>
+                    b.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.CharacterSavingThrows", "SavingThrows", b1 =>
                         {
                             b1.Property<int>("CharacterId")
                                 .HasColumnType("int");
 
-                            b1.Property<string>("Alignment")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<int>("Charisma")
+                                .HasColumnType("int")
+                                .HasColumnName("SavingThrow_Charisma");
 
-                            b1.Property<string>("Inspiration")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<int>("Constitution")
+                                .HasColumnType("int")
+                                .HasColumnName("SavingThrow_Constitution");
 
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<int>("Dexterity")
+                                .HasColumnType("int")
+                                .HasColumnName("SavingThrow_Dexterity");
 
-                            b1.Property<bool>("Shield")
-                                .HasColumnType("bit");
+                            b1.Property<int>("Intelligence")
+                                .HasColumnType("int")
+                                .HasColumnName("SavingThrow_Intelligence");
+
+                            b1.Property<int>("Strength")
+                                .HasColumnType("int")
+                                .HasColumnName("SavingThrow_Strength");
+
+                            b1.Property<int>("Wisdom")
+                                .HasColumnType("int")
+                                .HasColumnName("SavingThrow_Wisdom");
 
                             b1.HasKey("CharacterId");
 
@@ -832,1081 +808,106 @@ namespace large_fantasy_model.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("CharacterId");
-
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.AbilityScores", "AbilityScores", b2 =>
-                                {
-                                    b2.Property<int>("CreatureCharacterId")
-                                        .HasColumnType("int");
-
-                                    b2.Property<int>("Cha")
-                                        .HasColumnType("int");
-
-                                    b2.Property<int>("Con")
-                                        .HasColumnType("int");
-
-                                    b2.Property<int>("Dex")
-                                        .HasColumnType("int");
-
-                                    b2.Property<int>("Int")
-                                        .HasColumnType("int");
-
-                                    b2.Property<int>("Str")
-                                        .HasColumnType("int");
-
-                                    b2.Property<int>("Wis")
-                                        .HasColumnType("int");
-
-                                    b2.HasKey("CreatureCharacterId");
-
-                                    b2.ToTable("Characters");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("CreatureCharacterId");
-                                });
-
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.ArmorClass", "ArmorClass", b2 =>
-                                {
-                                    b2.Property<int>("CreatureCharacterId")
-                                        .HasColumnType("int");
-
-                                    b2.Property<string>("Description")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)");
-
-                                    b2.Property<int>("Value")
-                                        .HasColumnType("int");
-
-                                    b2.HasKey("CreatureCharacterId");
-
-                                    b2.ToTable("Characters");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("CreatureCharacterId");
-                                });
-
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.Conditions", "ConditionImmunities", b2 =>
-                                {
-                                    b2.Property<int>("CreatureCharacterId")
-                                        .HasColumnType("int");
-
-                                    b2.Property<bool>("Blinded")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Charmed")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Deafened")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Exhausted")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Frightened")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Grappled")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Incapacitated")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Invisible")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Necrotic")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Paralyzed")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Petrified")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Poisoned")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Prone")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Restrained")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Stunned")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Unconscious")
-                                        .HasColumnType("bit");
-
-                                    b2.HasKey("CreatureCharacterId");
-
-                                    b2.ToTable("Characters");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("CreatureCharacterId");
-                                });
-
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.Conditions", "Conditions", b2 =>
-                                {
-                                    b2.Property<int>("CreatureCharacterId")
-                                        .HasColumnType("int");
-
-                                    b2.Property<bool>("Blinded")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Charmed")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Deafened")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Exhausted")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Frightened")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Grappled")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Incapacitated")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Invisible")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Necrotic")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Paralyzed")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Petrified")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Poisoned")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Prone")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Restrained")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Stunned")
-                                        .HasColumnType("bit");
-
-                                    b2.Property<bool>("Unconscious")
-                                        .HasColumnType("bit");
-
-                                    b2.HasKey("CreatureCharacterId");
-
-                                    b2.ToTable("Characters");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("CreatureCharacterId");
-                                });
-
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.HitPoints", "HitPoints", b2 =>
-                                {
-                                    b2.Property<int>("CreatureCharacterId")
-                                        .HasColumnType("int");
-
-                                    b2.Property<int>("Current")
-                                        .HasColumnType("int");
-
-                                    b2.Property<int>("Max")
-                                        .HasColumnType("int");
-
-                                    b2.Property<int>("Temporary")
-                                        .HasColumnType("int");
-
-                                    b2.HasKey("CreatureCharacterId");
-
-                                    b2.ToTable("Characters");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("CreatureCharacterId");
-
-                                    b2.OwnsMany("large_fantasy_model.Models.CharacterModels.Additional.Creature.Dice", "Dice", b3 =>
-                                        {
-                                            b3.Property<int>("HitPointsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<int>("Id")
-                                                .ValueGeneratedOnAdd()
-                                                .HasColumnType("int");
-
-                                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b3.Property<int>("Id"));
-
-                                            b3.Property<int>("Count")
-                                                .HasColumnType("int");
-
-                                            b3.Property<int>("Mod")
-                                                .HasColumnType("int");
-
-                                            b3.Property<int>("Sides")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("HitPointsCreatureCharacterId", "Id");
-
-                                            b3.ToTable("Dice");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("HitPointsCreatureCharacterId");
-                                        });
-
-                                    b2.Navigation("Dice");
-                                });
-
-                            b1.OwnsMany("large_fantasy_model.Models.CharacterModels.Additional.Creature.Language", "Languages", b2 =>
-                                {
-                                    b2.Property<int>("CreatureCharacterId")
-                                        .HasColumnType("int");
-
-                                    b2.Property<int>("Id")
-                                        .ValueGeneratedOnAdd()
-                                        .HasColumnType("int");
-
-                                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b2.Property<int>("Id"));
-
-                                    b2.Property<string>("Name")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(max)")
-                                        .HasColumnName("Language");
-
-                                    b2.HasKey("CreatureCharacterId", "Id");
-
-                                    b2.ToTable("Language");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("CreatureCharacterId");
-                                });
-
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrows", "SavingThrows", b2 =>
-                                {
-                                    b2.Property<int>("CreatureCharacterId")
-                                        .HasColumnType("int");
-
-                                    b2.HasKey("CreatureCharacterId");
-
-                                    b2.ToTable("Characters");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("CreatureCharacterId");
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrowValue", "Cha", b3 =>
-                                        {
-                                            b3.Property<int>("SavingThrowsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<int>("Amount")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.HasKey("SavingThrowsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SavingThrowsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrowValue", "Con", b3 =>
-                                        {
-                                            b3.Property<int>("SavingThrowsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<int>("Amount")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.HasKey("SavingThrowsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SavingThrowsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrowValue", "Dex", b3 =>
-                                        {
-                                            b3.Property<int>("SavingThrowsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<int>("Amount")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.HasKey("SavingThrowsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SavingThrowsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrowValue", "Int", b3 =>
-                                        {
-                                            b3.Property<int>("SavingThrowsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<int>("Amount")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.HasKey("SavingThrowsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SavingThrowsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrowValue", "Str", b3 =>
-                                        {
-                                            b3.Property<int>("SavingThrowsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<int>("Amount")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.HasKey("SavingThrowsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SavingThrowsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SavingThrowValue", "Wis", b3 =>
-                                        {
-                                            b3.Property<int>("SavingThrowsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<int>("Amount")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.HasKey("SavingThrowsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SavingThrowsCreatureCharacterId");
-                                        });
-
-                                    b2.Navigation("Cha")
-                                        .IsRequired();
-
-                                    b2.Navigation("Con")
-                                        .IsRequired();
-
-                                    b2.Navigation("Dex")
-                                        .IsRequired();
-
-                                    b2.Navigation("Int")
-                                        .IsRequired();
-
-                                    b2.Navigation("Str")
-                                        .IsRequired();
-
-                                    b2.Navigation("Wis")
-                                        .IsRequired();
-                                });
-
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.Senses", "Senses", b2 =>
-                                {
-                                    b2.Property<int>("CreatureCharacterId")
-                                        .HasColumnType("int");
-
-                                    b2.HasKey("CreatureCharacterId");
-
-                                    b2.ToTable("Characters");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("CreatureCharacterId");
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SenseValue", "Blindsight", b3 =>
-                                        {
-                                            b3.Property<int>("SensesCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<string>("Description")
-                                                .IsRequired()
-                                                .HasColumnType("nvarchar(max)");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.HasKey("SensesCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SensesCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SenseValue", "Darkvision", b3 =>
-                                        {
-                                            b3.Property<int>("SensesCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<string>("Description")
-                                                .IsRequired()
-                                                .HasColumnType("nvarchar(max)");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.HasKey("SensesCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SensesCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SenseValue", "Tremorsense", b3 =>
-                                        {
-                                            b3.Property<int>("SensesCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<string>("Description")
-                                                .IsRequired()
-                                                .HasColumnType("nvarchar(max)");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.HasKey("SensesCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SensesCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SenseValue", "Truesight", b3 =>
-                                        {
-                                            b3.Property<int>("SensesCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<string>("Description")
-                                                .IsRequired()
-                                                .HasColumnType("nvarchar(max)");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.HasKey("SensesCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SensesCreatureCharacterId");
-                                        });
-
-                                    b2.Navigation("Blindsight")
-                                        .IsRequired();
-
-                                    b2.Navigation("Darkvision")
-                                        .IsRequired();
-
-                                    b2.Navigation("Tremorsense")
-                                        .IsRequired();
-
-                                    b2.Navigation("Truesight")
-                                        .IsRequired();
-                                });
-
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.Skills", "Skills", b2 =>
-                                {
-                                    b2.Property<int>("CreatureCharacterId")
-                                        .HasColumnType("int");
-
-                                    b2.HasKey("CreatureCharacterId");
-
-                                    b2.ToTable("Characters");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("CreatureCharacterId");
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Acrobatics", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "AnimalHandling", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Arcana", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Athletics", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Deception", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "History", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Insight", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Intimidation", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Investigation", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Medicine", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Nature", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Perception", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Performance", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Persuasion", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Religion", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "SleightOfHand", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Stealth", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SkillValue", "Survival", b3 =>
-                                        {
-                                            b3.Property<int>("SkillsCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Level")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SkillsCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SkillsCreatureCharacterId");
-                                        });
-
-                                    b2.Navigation("Acrobatics")
-                                        .IsRequired();
-
-                                    b2.Navigation("AnimalHandling")
-                                        .IsRequired();
-
-                                    b2.Navigation("Arcana")
-                                        .IsRequired();
-
-                                    b2.Navigation("Athletics")
-                                        .IsRequired();
-
-                                    b2.Navigation("Deception")
-                                        .IsRequired();
-
-                                    b2.Navigation("History")
-                                        .IsRequired();
-
-                                    b2.Navigation("Insight")
-                                        .IsRequired();
-
-                                    b2.Navigation("Intimidation")
-                                        .IsRequired();
-
-                                    b2.Navigation("Investigation")
-                                        .IsRequired();
-
-                                    b2.Navigation("Medicine")
-                                        .IsRequired();
-
-                                    b2.Navigation("Nature")
-                                        .IsRequired();
-
-                                    b2.Navigation("Perception")
-                                        .IsRequired();
-
-                                    b2.Navigation("Performance")
-                                        .IsRequired();
-
-                                    b2.Navigation("Persuasion")
-                                        .IsRequired();
-
-                                    b2.Navigation("Religion")
-                                        .IsRequired();
-
-                                    b2.Navigation("SleightOfHand")
-                                        .IsRequired();
-
-                                    b2.Navigation("Stealth")
-                                        .IsRequired();
-
-                                    b2.Navigation("Survival")
-                                        .IsRequired();
-                                });
-
-                            b1.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.Speed", "Speed", b2 =>
-                                {
-                                    b2.Property<int>("CreatureCharacterId")
-                                        .HasColumnType("int");
-
-                                    b2.Property<int>("Walk")
-                                        .HasColumnType("int");
-
-                                    b2.HasKey("CreatureCharacterId");
-
-                                    b2.ToTable("Characters");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("CreatureCharacterId");
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SpeedValue", "Burrow", b3 =>
-                                        {
-                                            b3.Property<int>("SpeedCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Speed")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SpeedCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SpeedCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SpeedValue", "Climb", b3 =>
-                                        {
-                                            b3.Property<int>("SpeedCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Speed")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SpeedCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SpeedCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SpeedValue", "Fly", b3 =>
-                                        {
-                                            b3.Property<int>("SpeedCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Speed")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SpeedCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SpeedCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SpeedValue", "Hover", b3 =>
-                                        {
-                                            b3.Property<int>("SpeedCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Speed")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SpeedCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SpeedCreatureCharacterId");
-                                        });
-
-                                    b2.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.Creature.SpeedValue", "Swim", b3 =>
-                                        {
-                                            b3.Property<int>("SpeedCreatureCharacterId")
-                                                .HasColumnType("int");
-
-                                            b3.Property<bool>("Enabled")
-                                                .HasColumnType("bit");
-
-                                            b3.Property<int>("Speed")
-                                                .HasColumnType("int");
-
-                                            b3.HasKey("SpeedCreatureCharacterId");
-
-                                            b3.ToTable("Characters");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("SpeedCreatureCharacterId");
-                                        });
-
-                                    b2.Navigation("Burrow")
-                                        .IsRequired();
-
-                                    b2.Navigation("Climb")
-                                        .IsRequired();
-
-                                    b2.Navigation("Fly")
-                                        .IsRequired();
-
-                                    b2.Navigation("Hover")
-                                        .IsRequired();
-
-                                    b2.Navigation("Swim")
-                                        .IsRequired();
-                                });
-
-                            b1.Navigation("AbilityScores")
-                                .IsRequired();
-
-                            b1.Navigation("ArmorClass")
-                                .IsRequired();
-
-                            b1.Navigation("ConditionImmunities")
-                                .IsRequired();
-
-                            b1.Navigation("Conditions")
-                                .IsRequired();
-
-                            b1.Navigation("HitPoints")
-                                .IsRequired();
-
-                            b1.Navigation("Languages");
-
-                            b1.Navigation("SavingThrows")
-                                .IsRequired();
-
-                            b1.Navigation("Senses")
-                                .IsRequired();
-
-                            b1.Navigation("Skills")
-                                .IsRequired();
-
-                            b1.Navigation("Speed")
-                                .IsRequired();
                         });
+
+                    b.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.CharacterSkills", "Skills", b1 =>
+                        {
+                            b1.Property<int>("CharacterId")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Acrobatics")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Acrobatics");
+
+                            b1.Property<int>("AnimalHandling")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_AnimalHandling");
+
+                            b1.Property<int>("Arcana")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Arcana");
+
+                            b1.Property<int>("Athletics")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Athletics");
+
+                            b1.Property<int>("Deception")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Deception");
+
+                            b1.Property<int>("History")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_History");
+
+                            b1.Property<int>("Insight")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Insight");
+
+                            b1.Property<int>("Intimidation")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Intimidation");
+
+                            b1.Property<int>("Investigation")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Investigation");
+
+                            b1.Property<int>("Medicine")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Medicine");
+
+                            b1.Property<int>("Nature")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Nature");
+
+                            b1.Property<int>("Perception")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Perception");
+
+                            b1.Property<int>("Performance")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Performance");
+
+                            b1.Property<int>("Persuasion")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Persuasion");
+
+                            b1.Property<int>("Religion")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Religion");
+
+                            b1.Property<int>("SleightOfHand")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_SleightOfHand");
+
+                            b1.Property<int>("Stealth")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Stealth");
+
+                            b1.Property<int>("Survival")
+                                .HasColumnType("int")
+                                .HasColumnName("Skill_Survival");
+
+                            b1.HasKey("CharacterId");
+
+                            b1.ToTable("Characters");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CharacterId");
+                        });
+
+                    b.Navigation("AbilityScores")
+                        .IsRequired();
 
                     b.Navigation("Background")
                         .IsRequired();
 
-                    b.Navigation("Creature")
-                        .IsRequired();
-
-                    b.Navigation("Currency")
-                        .IsRequired();
-
                     b.Navigation("Details")
+                        .IsRequired();
+
+                    b.Navigation("SavingThrows")
+                        .IsRequired();
+
+                    b.Navigation("Skills")
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1915,21 +916,10 @@ namespace large_fantasy_model.Migrations
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterClass", b =>
                 {
                     b.HasOne("large_fantasy_model.Models.CharacterModels.Character", null)
-                        .WithMany("Classes")
-                        .HasForeignKey("CharacterId")
+                        .WithOne("Classes")
+                        .HasForeignKey("large_fantasy_model.Models.CharacterModels.References.CharacterClass", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterDamageType", b =>
-                {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", "Character")
-                        .WithMany("DamageTypes")
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Character");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterEquipment", b =>
@@ -1941,10 +931,10 @@ namespace large_fantasy_model.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterFeat", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterFeatures", b =>
                 {
                     b.HasOne("large_fantasy_model.Models.CharacterModels.Character", null)
-                        .WithMany("Feats")
+                        .WithMany("Features")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2077,15 +1067,12 @@ namespace large_fantasy_model.Migrations
 
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Character", b =>
                 {
-                    b.Navigation("Classes");
-
-                    b.Navigation("DamageTypes");
+                    b.Navigation("Classes")
+                        .IsRequired();
 
                     b.Navigation("Equipment");
 
-                    b.Navigation("Feats");
-
-                    b.Navigation("Proficiencies");
+                    b.Navigation("Features");
 
                     b.Navigation("Race")
                         .IsRequired();

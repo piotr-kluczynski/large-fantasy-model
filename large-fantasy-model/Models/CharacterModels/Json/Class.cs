@@ -1,16 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
+using large_fantasy_model.Models.Compendium;
+using System.Text.Json.Serialization;
 
 namespace large_fantasy_model.Models.CharacterModels.Json
 {
-    public class Class
+    public class CClass : IRulebookEntity
     {
-        public int Id { get; set; }
+        [JsonPropertyName("name")]
         public string Name { get; set; }
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+        [JsonPropertyName("hit_die")]
+        public int HitDie { get; set; }
+        [JsonPropertyName("spellcasting")]
+        public string Spellcasting { get; set; } = "";
 
-        public int HitDie { get; set; } // Change to enum
-
-        public string Spellcasting { get; set; } = ""; // Change to enum
-
-        public List<Feature> Features { get; set; }
+        [JsonPropertyName("features")]
+        public List<string> Features { get; set; }
     }
 }

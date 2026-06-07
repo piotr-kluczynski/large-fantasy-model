@@ -1,0 +1,19 @@
+{
+  "name": "Rapier",
+  "description": "A rapier is a type of sword ates a sword with a straight, slender and sharply pointed two-edged long blade wielded in one hand.",
+  "weight": 2,
+  "magic": false,
+  "damage": "1d8 piercing",
+  "range": "melee",
+  "thrown_range": "NaN",
+  "ammunition": "NaN",
+  "finesse": true,
+  "heavy": false,
+  "light": false,
+  "loading": false,
+  "monk": false,
+  "reach": false,
+  "thrown": false,
+  "two_handed": false,
+  "versatile": false
+}

@@ -1,13 +1,13 @@
 {
   "name": "Wizard",
+  "description": "Wizards are supreme magic-users, defined and united as a class by the spells they cast. Drawing on the subtle weave of magic that permeates the cosmos, wizards cast spells of explosive fire, arcing lightning, subtle deception, brute-force mind control, and much more.",
   "hit_die": 6,
-  "spellcasting": "int",
+  "spellcasting": "Intelligence",
   "features": [
-    { "id": "common.spellcasting" },
-    { "id": "wizard.arcane_recovery" },
-    { "id": "wizard.arcane_tradition" },
-    { "id": "common.ability_score_improvement" },
-    { "id": "wizard.spell_mastery" },
-    { "id": "wizard.signature_spells" }
+    "Spellcasting",
+    "Arcane Recovery",
+    "Arcane Tradition",
+    "Spell Mastery",
+    "Signature Spells"
   ]
 }

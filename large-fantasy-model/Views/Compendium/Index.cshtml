@@ -1,4 +1,19 @@
-﻿@model IEnumerable<large_fantasy_model.Models.GameModeRulebook>
+﻿@using large_fantasy_model.Models.Compendium
+@*
+    Widok: Index
+
+    Przeznaczenie:
+    - Strona główna kompendium, zawierająca listę wszystkich systemów RPG dostępny w aplikacji
+
+    Model:
+    - GameModeRuleBook
+
+    Zachowanie:
+    - Wyświetla pobieżne dane dotyczące każdego z systemów RPG
+    - Pozwala na wejście do szczegółowego opisu systemu RPG (widok Details.cshtml)
+*@
+
+@model IEnumerable<GameModeRulebook>
 @{
     ViewData["Title"] = "Compendium";
 }

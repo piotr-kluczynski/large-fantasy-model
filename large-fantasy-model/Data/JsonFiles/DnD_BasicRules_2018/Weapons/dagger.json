@@ -1,0 +1,19 @@
+{
+  "name": "Dagger",
+  "description": "A dagger is a fighting knife with a very sharp point and usually one or two sharp edges, typically designed or capable of being used as a cutting or thrusting weapon.",
+  "weight": 1,
+  "magic": false,
+  "damage": "1d4 piercing",
+  "range": "melee",
+  "thrown_range": "60ft",
+  "ammunition": "NaN",
+  "finesse": true,
+  "heavy": false,
+  "light": true,
+  "loading": false,
+  "monk": false,
+  "reach": false,
+  "thrown": true,
+  "two_handed": false,
+  "versatile": false
+}

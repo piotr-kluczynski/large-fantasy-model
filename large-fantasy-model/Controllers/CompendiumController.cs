@@ -1,20 +1,51 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using large_fantasy_model.Models;
+using Microsoft.AspNetCore.Mvc;
 using large_fantasy_model.Models.CharacterModels.Json;
 using large_fantasy_model.ViewModels.Compendium;
+using large_fantasy_model.Models.Compendium;
 using Microsoft.AspNetCore.Authorization;
 
 namespace large_fantasy_model.Controllers
 {
+    /// <summary>
+    /// Kontroler zarządzający podstronami dotyczącymi różnych systemów RPG oraz powiązanymi z nimi podmiotami.
+    /// </summary>
     public class CompendiumController : Controller
     {
+        /// <summary>
+        /// Repozytorium przechowujące listę zaklęć załadowaną z plików JSON.
+        /// </summary>
         private readonly JsonRepository<Spell> _spellRepository;
+        private readonly JsonRepository<Feature> _featureRepository;
+        private readonly JsonRepository<Item> _itemRepository;
+        private readonly JsonRepository<CClass> _classRepository;
+        private readonly JsonRepository<Race> _raceRepository;
+        private readonly JsonRepository<Weapon> _weaponRepository;
+        private readonly JsonRepository<Background> _backgroundRepository;
 
-        public CompendiumController(JsonRepository<Spell> spellRepository)
+        public CompendiumController(
+            JsonRepository<Spell> spellRepository,
+            JsonRepository<Feature> featureRepository,
+            JsonRepository<Item> itemRepository,
+            JsonRepository<CClass> classRepository,
+            JsonRepository<Race> raceRepository,
+            JsonRepository<Weapon> weaponRepository,
+            JsonRepository<Background> backgroundRepository)
         {
             _spellRepository = spellRepository;
+            _featureRepository = featureRepository;
+            _itemRepository = itemRepository;
+            _classRepository = classRepository;
+            _raceRepository = raceRepository;
+            _weaponRepository = weaponRepository;
+            _backgroundRepository = backgroundRepository;
         }
 
+        /// <summary>
+        /// Funkcja pomocnicza mapująca zawartość słownika na odpowiednie typy danych.
+        /// Służy do zapisywania informacji otrzymanych z formularza (np. parametrów nowego zaklęcia dodanego przez admina) do plików aplikacji.
+        /// </summary>
+        /// <param name="values">Słownik przechowujący informacje na temat elementu, który chcemy zmapować</param>
+        /// <returns>Element systemu RPG o wartościach przekazanych przez słownik.</returns>
         private T MapToEntity<T>(Dictionary<string, string> values)
             where T : new()
         {
@@ -23,12 +54,14 @@ namespace large_fantasy_model.Controllers
 
             foreach (var kv in values)
             {
+                // Znajdujemy odpowiednie pole elementu, przy pomocy klucza ze słownika
                 var prop = type.GetProperty(kv.Key);
                 if (prop == null || !prop.CanWrite)
                     continue;
 
                 object convertedValue = null;
 
+                // Zależnie od rodzaju pola elementu, konwertujemy wartość na odpowiedni typ.
                 if (prop.PropertyType == typeof(string))
                 {
                     convertedValue = kv.Value;
@@ -52,6 +85,7 @@ namespace large_fantasy_model.Controllers
             var boolProps = type.GetProperties()
                 .Where(p => p.PropertyType == typeof(bool));
 
+            // W przypadku pól elementu, dla których nie znaleźliśmy pasującego klucza ustawiamy negatywną wartość.
             foreach (var prop in boolProps)
             {
                 if (!values.ContainsKey(prop.Name))
@@ -70,6 +104,12 @@ namespace large_fantasy_model.Controllers
             var fields = category switch
             {
                 "Spells" => SpellSchema.Fields,
+                "Features" => FeatureSchema.Fields,
+                "Items" => ItemSchema.Fields,
+                "Classes" => ClassSchema.Fields,
+                "Races" => RaceSchema.Fields,
+                "Weapons" => WeaponSchema.Fields,
+                "Backgrounds" => BackgroundSchema.Fields,
                 _ => new List<EntityFieldDefinition>()
             };
 
@@ -81,6 +121,9 @@ namespace large_fantasy_model.Controllers
                 IsEdit = false,
                 Title = $"Create {category}"
             };
+
+            if (category == "Classes" || category == "Races" || category == "Backgrounds")
+                model.AvailableOptions["Features"] = GetFeatureOptions(rulebook);
 
             return View("EntityEditor", model);
         }
@@ -94,6 +137,45 @@ namespace large_fantasy_model.Controllers
                 var spell = MapToEntity<Spell>(model.Values);
                 
                 _spellRepository.Save(spell, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Features")
+            {
+                var feature = MapToEntity<Feature>(model.Values);
+
+                _featureRepository.Save(feature, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Items")
+            {
+                var item = MapToEntity<Item>(model.Values);
+
+                _itemRepository.Save(item, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Classes")
+            {
+                var charcatcerClass = MapToEntity<CClass>(model.Values);
+                if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var classFeatures))
+                    charcatcerClass.Features = classFeatures;
+                _classRepository.Save(charcatcerClass, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Races")
+            {
+                var race = MapToEntity<Race>(model.Values);
+                if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var raceCreateFeatures))
+                    race.Features = raceCreateFeatures;
+                _raceRepository.Save(race, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Weapons")
+            {
+                var weapon = MapToEntity<Weapon>(model.Values);
+
+                _weaponRepository.Save(weapon, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Backgrounds")
+            {
+                var background = MapToEntity<Background>(model.Values);
+                if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var backgroundCreateFeatures))
+                    background.Features = backgroundCreateFeatures;
+                _backgroundRepository.Save(background, model.Rulebook, model.Category);
             }
 
             return RedirectToAction("Details", new { id = 1 });
@@ -135,6 +217,229 @@ namespace large_fantasy_model.Controllers
 
                 return View("EntityEditor", model);
             }
+            if (category == "Features")
+            {
+                var items = _featureRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var feature = items.FirstOrDefault(x =>
+                x.Name.ToLower() == normalized.ToLower());
+
+                if (feature == null)
+                {
+                    return NotFound();
+                }
+
+                var fields = FeatureSchema.Fields;
+
+                var values = fields.ToDictionary(
+                    f => f.Key,
+                    f => GetValue(feature, f.Key)
+                );
+
+                var model = new EntityEditorViewModel
+                {
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields,
+                    Values = values,
+                    IsEdit = true,
+                    Title = $"Edit {feature.Name}"
+                };
+
+                return View("EntityEditor", model);
+            }
+            if (category == "Items")
+            {
+                var items = _itemRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var item = items.FirstOrDefault(x =>
+                x.Name.ToLower() == normalized.ToLower());
+
+                if (item == null)
+                {
+                    return NotFound();
+                }
+
+                var fields = ItemSchema.Fields;
+
+                var values = fields.ToDictionary(
+                    f => f.Key,
+                    f => GetValue(item, f.Key)
+                );
+
+                var model = new EntityEditorViewModel
+                {
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields,
+                    Values = values,
+                    IsEdit = true,
+                    Title = $"Edit {item.Name}"
+                };
+
+                return View("EntityEditor", model);
+            }
+            if (category == "Classes")
+            {
+                var classes = _classRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var characterClass = classes.FirstOrDefault(x =>
+                x.Name.ToLower() == normalized.ToLower());
+
+                if (characterClass == null)
+                {
+                    return NotFound();
+                }
+
+                var fields = ClassSchema.Fields;
+
+                var values = fields
+                    .Where(f => f.Type != "entity-list")
+                    .ToDictionary(
+                        f => f.Key,
+                        f => GetValue(characterClass, f.Key)
+                    );
+
+                var model = new EntityEditorViewModel
+                {
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields,
+                    Values = values,
+                    IsEdit = true,
+                    Title = $"Edit {characterClass.Name}",
+                    AvailableOptions = new Dictionary<string, List<EntitySelectOption>>
+                    {
+                        ["Features"] = GetFeatureOptions(rulebook)
+                    },
+                    ListValues = new Dictionary<string, List<string>>
+                    {
+                        ["Features"] = characterClass.Features ?? new List<string>()
+                    }
+                };
+
+                return View("EntityEditor", model);
+            }
+            if (category == "Races")
+            {
+                var races = _raceRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var race = races.FirstOrDefault(x =>
+                x.Name.ToLower() == normalized.ToLower());
+
+                if (race == null)
+                {
+                    return NotFound();
+                }
+
+                var fields = RaceSchema.Fields;
+
+                var values = fields
+                    .Where(f => f.Type != "entity-list")
+                    .ToDictionary(
+                        f => f.Key,
+                        f => GetValue(race, f.Key)
+                    );
+
+                var model = new EntityEditorViewModel
+                {
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields,
+                    Values = values,
+                    IsEdit = true,
+                    Title = $"Edit {race.Name}",
+                    AvailableOptions = new Dictionary<string, List<EntitySelectOption>>
+                    {
+                        ["Features"] = GetFeatureOptions(rulebook)
+                    },
+                    ListValues = new Dictionary<string, List<string>>
+                    {
+                        ["Features"] = race.Features ?? new List<string>()
+                    }
+                };
+
+                return View("EntityEditor", model);
+            }
+            if (category == "Weapons")
+            {
+                var weapons = _weaponRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var weapon = weapons.FirstOrDefault(x =>
+                x.Name.ToLower() == normalized.ToLower());
+
+                if (weapon == null)
+                {
+                    return NotFound();
+                }
+
+                var fields = WeaponSchema.Fields;
+
+                var values = fields.ToDictionary(
+                    f => f.Key,
+                    f => GetValue(weapon, f.Key)
+                );
+
+                var model = new EntityEditorViewModel
+                {
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields,
+                    Values = values,
+                    IsEdit = true,
+                    Title = $"Edit {weapon.Name}"
+                };
+
+                return View("EntityEditor", model);
+            }
+            if (category == "Backgrounds")
+            {
+                var backgrounds = _backgroundRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var background = backgrounds.FirstOrDefault(x =>
+                x.Name.ToLower() == normalized.ToLower());
+
+                if (background == null)
+                {
+                    return NotFound();
+                }
+
+                var fields = BackgroundSchema.Fields;
+
+                var values = fields
+                    .Where(f => f.Type != "entity-list")
+                    .ToDictionary(
+                        f => f.Key,
+                        f => GetValue(background, f.Key)
+                    );
+
+                var model = new EntityEditorViewModel
+                {
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields,
+                    Values = values,
+                    IsEdit = true,
+                    Title = $"Edit {background.Name}",
+                    AvailableOptions = new Dictionary<string, List<EntitySelectOption>>
+                    {
+                        ["Features"] = GetFeatureOptions(rulebook)
+                    },
+                    ListValues = new Dictionary<string, List<string>>
+                    {
+                        ["Features"] = background.Features ?? new List<string>()
+                    }
+                };
+
+                return View("EntityEditor", model);
+            }
+
 
             return NotFound();
         }
@@ -148,6 +453,42 @@ namespace large_fantasy_model.Controllers
                 var spell = MapToEntity<Spell>(model.Values);
 
                 _spellRepository.Save(spell, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Features")
+            {
+                var feature = MapToEntity<Feature>(model.Values);
+                _featureRepository.Save(feature, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Items")
+            {
+                var item = MapToEntity<Item>(model.Values);
+                _itemRepository.Save(item, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Classes")
+            {
+                var characterClass = MapToEntity<CClass>(model.Values);
+                if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var classEditFeatures))
+                    characterClass.Features = classEditFeatures;
+                _classRepository.Save(characterClass, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Races")
+            {
+                var race = MapToEntity<Race>(model.Values);
+                if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var raceEditFeatures))
+                    race.Features = raceEditFeatures;
+                _raceRepository.Save(race, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Weapons")
+            {
+                var weapon = MapToEntity<Weapon>(model.Values);
+                _weaponRepository.Save(weapon, model.Rulebook, model.Category);
+            }
+            else if (model.Category == "Backgrounds")
+            {
+                var background = MapToEntity<Background>(model.Values);
+                if (model.ListValues != null && model.ListValues.TryGetValue("Features", out var backgroundEditFeatures))
+                    background.Features = backgroundEditFeatures;
+                _backgroundRepository.Save(background, model.Rulebook, model.Category);
             }
 
             return RedirectToAction("Details", new { id = 1 });
@@ -184,6 +525,90 @@ namespace large_fantasy_model.Controllers
                         Slug = s.Name.ToLower().Replace(" ", "-")
                     }).ToList();
                 }
+                else if (category.Key == "features")
+                {
+                    var items = _featureRepository.GetAll(
+                        rulebook.FilesPathName,
+                        category.FilesPathName);
+
+                    category.Items = items.Select(f => new RulebookItemViewModel
+                    {
+                        Name = f.Name,
+                        Rulebook = rulebook.FilesPathName,
+                        Category = category.FilesPathName,
+                        Slug = f.Name.ToLower().Replace(" ", "-")
+                    }).ToList();
+                }
+                else if (category.Key == "items")
+                {
+                    var items = _itemRepository.GetAll(
+                        rulebook.FilesPathName,
+                        category.FilesPathName);
+
+                    category.Items = items.Select(i => new RulebookItemViewModel
+                    {
+                        Name = i.Name,
+                        Rulebook = rulebook.FilesPathName,
+                        Category = category.FilesPathName,
+                        Slug = i.Name.ToLower().Replace(" ", "-")
+                    }).ToList();
+                }
+                else if (category.Key == "classes")
+                {
+                    var classes = _classRepository.GetAll(
+                        rulebook.FilesPathName,
+                        category.FilesPathName);
+
+                    category.Items = classes.Select(i => new RulebookItemViewModel
+                    {
+                        Name = i.Name,
+                        Rulebook = rulebook.FilesPathName,
+                        Category = category.FilesPathName,
+                        Slug = i.Name.ToLower().Replace(" ", "-")
+                    }).ToList();
+                }
+                else if (category.Key == "races")
+                {
+                    var races = _raceRepository.GetAll(
+                        rulebook.FilesPathName,
+                        category.FilesPathName);
+
+                    category.Items = races.Select(i => new RulebookItemViewModel
+                    {
+                        Name = i.Name,
+                        Rulebook = rulebook.FilesPathName,
+                        Category = category.FilesPathName,
+                        Slug = i.Name.ToLower().Replace(" ", "-")
+                    }).ToList();
+                }
+                else if (category.Key == "weapons")
+                {
+                    var weapons = _weaponRepository.GetAll(
+                        rulebook.FilesPathName,
+                        category.FilesPathName);
+
+                    category.Items = weapons.Select(i => new RulebookItemViewModel
+                    {
+                        Name = i.Name,
+                        Rulebook = rulebook.FilesPathName,
+                        Category = category.FilesPathName,
+                        Slug = i.Name.ToLower().Replace(" ", "-")
+                    }).ToList();
+                }
+                else if (category.Key == "backgrounds")
+                {
+                    var backgrounds = _backgroundRepository.GetAll(
+                        rulebook.FilesPathName,
+                        category.FilesPathName);
+
+                    category.Items = backgrounds.Select(i => new RulebookItemViewModel
+                    {
+                        Name = i.Name,
+                        Rulebook = rulebook.FilesPathName,
+                        Category = category.FilesPathName,
+                        Slug = i.Name.ToLower().Replace(" ", "-")
+                    }).ToList();
+                }
             }
 
             return View(rulebook);
@@ -218,6 +643,231 @@ namespace large_fantasy_model.Controllers
                         })
                         .ToList()
                 };
+
+                return View("EntityDetails", model);
+            }
+            else if(category == "Features")
+            {
+                var items = _featureRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var feature = items.FirstOrDefault(x =>
+                    x.Name.ToLower() == normalized.ToLower());
+
+                if (feature == null)
+                    return NotFound();
+
+                var fields = FeatureSchema.Fields;
+
+                var model = new EntityDetailsViewModel
+                {
+                    Title = feature.Name,
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields
+                        .Where(f => f.ShowInDetails)
+                        .Select(f => new EntityFieldValue
+                        {
+                            Label = f.Label,
+                            Value = GetValue(feature, f.Key)
+                        })
+                        .ToList()
+                };
+
+                return View("EntityDetails", model);
+            }
+            else if (category == "Items")
+            {
+                var items = _itemRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var item = items.FirstOrDefault(x =>
+                    x.Name.ToLower() == normalized.ToLower());
+
+                if (item == null)
+                    return NotFound();
+
+                var fields = ItemSchema.Fields;
+
+                var model = new EntityDetailsViewModel
+                {
+                    Title = item.Name,
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields
+                        .Where(f => f.ShowInDetails)
+                        .Select(f => new EntityFieldValue
+                        {
+                            Label = f.Label,
+                            Value = GetValue(item, f.Key)
+                        })
+                        .ToList()
+                };
+
+                return View("EntityDetails", model);
+            }
+            else if (category == "Classes")
+            {
+                var classes = _classRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var characterClass = classes.FirstOrDefault(x =>
+                    x.Name.ToLower() == normalized.ToLower());
+
+                if (characterClass == null)
+                    return NotFound();
+
+                var fields = ClassSchema.Fields;
+
+                var model = new EntityDetailsViewModel
+                {
+                    Title = characterClass.Name,
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields
+                        .Where(f => f.ShowInDetails)
+                        .Select(f => new EntityFieldValue
+                        {
+                            Label = f.Label,
+                            Value = GetValue(characterClass, f.Key)
+                        })
+                        .ToList()
+                };
+
+                if (characterClass.Features != null && characterClass.Features.Any())
+                {
+                    model.SubLists.Add(new EntitySubList
+                    {
+                        Label = "Features",
+                        Items = characterClass.Features.Select(f => new EntitySubListItem
+                        {
+                            Name = f,
+                            Rulebook = rulebook,
+                            Category = "Features",
+                            Slug = f.ToLower().Replace(" ", "-")
+                        }).ToList()
+                    });
+                }
+
+                return View("EntityDetails", model);
+            }
+            else if (category == "Races")
+            {
+                var races = _raceRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var race = races.FirstOrDefault(x =>
+                    x.Name.ToLower() == normalized.ToLower());
+
+                if (race == null)
+                    return NotFound();
+
+                var fields = RaceSchema.Fields;
+
+                var model = new EntityDetailsViewModel
+                {
+                    Title = race.Name,
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields
+                        .Where(f => f.ShowInDetails)
+                        .Select(f => new EntityFieldValue
+                        {
+                            Label = f.Label,
+                            Value = GetValue(race, f.Key)
+                        })
+                        .ToList()
+                };
+
+                if (race.Features != null && race.Features.Any())
+                {
+                    model.SubLists.Add(new EntitySubList
+                    {
+                        Label = "Features",
+                        Items = race.Features.Select(f => new EntitySubListItem
+                        {
+                            Name = f,
+                            Rulebook = rulebook,
+                            Category = "Features",
+                            Slug = f.ToLower().Replace(" ", "-")
+                        }).ToList()
+                    });
+                }
+
+                return View("EntityDetails", model);
+            }
+            else if (category == "Weapons")
+            {
+                var weapons = _weaponRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var weapon = weapons.FirstOrDefault(x =>
+                    x.Name.ToLower() == normalized.ToLower());
+
+                if (weapon == null)
+                    return NotFound();
+
+                var fields = WeaponSchema.Fields;
+
+                var model = new EntityDetailsViewModel
+                {
+                    Title = weapon.Name,
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields
+                        .Where(f => f.ShowInDetails)
+                        .Select(f => new EntityFieldValue
+                        {
+                            Label = f.Label,
+                            Value = GetValue(weapon, f.Key)
+                        })
+                        .ToList()
+                };
+
+                return View("EntityDetails", model);
+            }
+            else if (category == "Backgrounds")
+            {
+                var backgrounds = _backgroundRepository.GetAll(rulebook, category);
+                var normalized = name.Replace("-", " ");
+
+                var background = backgrounds.FirstOrDefault(x =>
+                    x.Name.ToLower() == normalized.ToLower());
+
+                if (background == null)
+                    return NotFound();
+
+                var fields = BackgroundSchema.Fields;
+
+                var model = new EntityDetailsViewModel
+                {
+                    Title = background.Name,
+                    Rulebook = rulebook,
+                    Category = category,
+                    Fields = fields
+                        .Where(f => f.ShowInDetails)
+                        .Select(f => new EntityFieldValue
+                        {
+                            Label = f.Label,
+                            Value = GetValue(background, f.Key)
+                        })
+                        .ToList()
+                };
+
+                if (background.Features != null && background.Features.Any())
+                {
+                    model.SubLists.Add(new EntitySubList
+                    {
+                        Label = "Features",
+                        Items = background.Features.Select(f => new EntitySubListItem
+                        {
+                            Name = f,
+                            Rulebook = rulebook,
+                            Category = "Features",
+                            Slug = f.ToLower().Replace(" ", "-")
+                        }).ToList()
+                    });
+                }
 
                 return View("EntityDetails", model);
             }
@@ -269,6 +919,48 @@ namespace large_fantasy_model.Controllers
                             Key = "spells",
                             Title = "Spells",
                             FilesPathName = "Spells"
+                        },
+                        new RulebookCategory
+                        {
+                            Id = 2,
+                            Key = "features",
+                            Title = "Features",
+                            FilesPathName = "Features"
+                        },
+                        new RulebookCategory
+                        {
+                            Id = 3,
+                            Key = "items",
+                            Title = "Items",
+                            FilesPathName = "Items"
+                        },
+                        new RulebookCategory
+                        {
+                            Id = 4,
+                            Key = "weapons",
+                            Title = "Weapons",
+                            FilesPathName = "Weapons"
+                        },
+                        new RulebookCategory
+                        {
+                            Id = 5,
+                            Key = "classes",
+                            Title = "Classes",
+                            FilesPathName = "Classes"
+                        },
+                        new RulebookCategory
+                        {
+                            Id = 6,
+                            Key = "races",
+                            Title = "Races",
+                            FilesPathName = "Races"
+                        },
+                        new RulebookCategory
+                        {
+                            Id = 7,
+                            Key = "backgrounds",
+                            Title = "Backgrounds",
+                            FilesPathName = "Backgrounds"
                         }
                     }
                 }
@@ -286,7 +978,21 @@ namespace large_fantasy_model.Controllers
             if (value is bool b)
                 return b ? "Yes" : "No";
 
+            if (value is IEnumerable<string> list)
+                return string.Join(", ", list);
+
             return value.ToString();
+        }
+
+        /// <summary>
+        /// Zwraca listę opcji EntitySelectOption dla pola entity-list
+        /// wypełnioną Features dostępnymi w danym podręczniku.
+        /// </summary>
+        private List<EntitySelectOption> GetFeatureOptions(string rulebook)
+        {
+            return _featureRepository.GetAll(rulebook, "Features")
+                .Select(f => new EntitySelectOption { Value = f.Name, Label = f.Name })
+                .ToList();
         }
     }
 }

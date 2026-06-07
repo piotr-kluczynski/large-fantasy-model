@@ -1,0 +1,19 @@
+{
+  "name": "Javelin",
+  "description": "A javelin is a light spear designed primarily to be thrown, commonly used as a ranged weapon.",
+  "weight": 3,
+  "magic": false,
+  "damage": "1d6 piercing",
+  "range": "melee",
+  "thrown_range": "120ft",
+  "ammunition": "NaN",
+  "finesse": false,
+  "heavy": false,
+  "light": false,
+  "loading": false,
+  "monk": false,
+  "reach": false,
+  "thrown": true,
+  "two_handed": false,
+  "versatile": false
+}
