@@ -19,11 +19,13 @@ namespace large_fantasy_model.Controllers
     {
         private readonly IConfiguration _config;
         private readonly LargeFantasyModelContext _context;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public AiController(IConfiguration config, LargeFantasyModelContext context)
+        public AiController(IConfiguration config, LargeFantasyModelContext context, IHttpClientFactory httpClientFactory)
         {
             _config = config;
             _context = context;
+            _httpClientFactory = httpClientFactory;
         }
 
         [HttpPost("generate")]
@@ -56,7 +58,7 @@ namespace large_fantasy_model.Controllers
             var apiKey = _config["Gemini:ApiKey"];
             var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key={apiKey}";
 
-            using var client = new HttpClient();
+            using var client = _httpClientFactory.CreateClient();
             var requestBody = new
             {
                 contents = new[] { new { parts = new[] { new { text = systemPrompt } } } }

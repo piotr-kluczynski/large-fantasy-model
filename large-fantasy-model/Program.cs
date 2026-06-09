@@ -28,6 +28,7 @@ namespace large_fantasy_model
             builder.Services.AddScoped(i =>
                 new JsonRepository<Background>("Data/JsonFiles"));
 
+            builder.Services.AddHttpClient();
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddHostedService<large_fantasy_model.Services.AvatarWatcherService>();
