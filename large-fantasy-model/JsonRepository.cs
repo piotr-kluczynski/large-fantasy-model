@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Models.Compendium;
+using large_fantasy_model.Models.Compendium;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -24,7 +24,7 @@ namespace large_fantasy_model
 
         public void Save(T entity, string rulebook, string category)
         {
-            var fileName = Regex.Replace(entity.Name.ToLower().Replace(" ", "_"), @"[^\w\s]", "") + ".json";
+            var fileName = entity.Name.ToLower().Replace(" ", "_") + ".json";
             var path = Path.Combine(_basePath, rulebook, category, fileName);
 
             var json = JsonSerializer.Serialize(entity, new JsonSerializerOptions
@@ -33,6 +33,17 @@ namespace large_fantasy_model
             });
 
             System.IO.File.WriteAllText(path, json);
+        }
+
+        public void Delete(string rulebook, string category, string name)
+        {
+            var fileName = name.ToLower().Replace(" ", "_") + ".json";
+            var path = Path.Combine(_basePath, rulebook, category, fileName);
+
+            if (System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
         }
     }
 }

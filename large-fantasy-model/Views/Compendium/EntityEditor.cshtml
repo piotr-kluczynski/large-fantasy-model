@@ -33,9 +33,20 @@
                 @switch (field.Type)
                 {
                     case "text":
-                        <input class="form-control" 
-                               name="Values[@field.Key]"
-                               value="@(Model.Values.ContainsKey(field.Key) ? Model.Values[field.Key] : "")" />
+                        @if (field.Key == "Name")
+                        {
+                            <input class="form-control" 
+                                   name="Values[@field.Key]"
+                                   value="@(Model.Values.ContainsKey(field.Key) ? Model.Values[field.Key] : "")"
+                                   required pattern="^[a-zA-Z0-9 ]+$" title="Only letters, numbers, and spaces are allowed" />
+                            @Html.ValidationMessage($"Values[{field.Key}]", "", new { @class = "text-danger" })
+                        }
+                        else
+                        {
+                            <input class="form-control" 
+                                   name="Values[@field.Key]"
+                                   value="@(Model.Values.ContainsKey(field.Key) ? Model.Values[field.Key] : "")" />
+                        }
                         break;
                     
                     case "number":

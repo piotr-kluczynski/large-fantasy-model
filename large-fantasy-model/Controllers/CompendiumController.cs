@@ -132,6 +132,13 @@ namespace large_fantasy_model.Controllers
         [HttpPost]
         public IActionResult Create(EntityEditorViewModel model)
         {
+            if (!model.Values.ContainsKey("Name") || string.IsNullOrWhiteSpace(model.Values["Name"]) || !System.Text.RegularExpressions.Regex.IsMatch(model.Values["Name"], "^[a-zA-Z0-9 ]+$"))
+            {
+                ModelState.AddModelError("Values[Name]", "Name is required and can only contain letters, numbers, and spaces.");
+                model.Fields = model.Category == "Spells" ? SpellSchema.Fields : new List<EntityFieldDefinition>();
+                return View("EntityEditor", model);
+            }
+
             if (model.Category == "Spells")
             {
                 var spell = MapToEntity<Spell>(model.Values);
@@ -448,6 +455,13 @@ namespace large_fantasy_model.Controllers
         [HttpPost]
         public IActionResult Edit(EntityEditorViewModel model)
         {
+            if (!model.Values.ContainsKey("Name") || string.IsNullOrWhiteSpace(model.Values["Name"]) || !System.Text.RegularExpressions.Regex.IsMatch(model.Values["Name"], "^[a-zA-Z0-9 ]+$"))
+            {
+                ModelState.AddModelError("Values[Name]", "Name is required and can only contain letters, numbers, and spaces.");
+                model.Fields = model.Category == "Spells" ? SpellSchema.Fields : new List<EntityFieldDefinition>();
+                return View("EntityEditor", model);
+            }
+
             if (model.Category == "Spells")
             {
                 var spell = MapToEntity<Spell>(model.Values);
@@ -493,7 +507,28 @@ namespace large_fantasy_model.Controllers
 
             return RedirectToAction("Details", new { id = 1 });
         }
-        
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public IActionResult Delete(string rulebook, string category, string name)
+        {
+            if (category == "Spells")
+                _spellRepository.Delete(rulebook, category, name);
+            else if (category == "Features")
+                _featureRepository.Delete(rulebook, category, name);
+            else if (category == "Items")
+                _itemRepository.Delete(rulebook, category, name);
+            else if (category == "Classes")
+                _classRepository.Delete(rulebook, category, name);
+            else if (category == "Races")
+                _raceRepository.Delete(rulebook, category, name);
+            else if (category == "Weapons")
+                _weaponRepository.Delete(rulebook, category, name);
+            else if (category == "Backgrounds")
+                _backgroundRepository.Delete(rulebook, category, name);
+
+            return RedirectToAction("Details", new { id = 1 });
+        }
+
 
         public IActionResult Index()
         {
