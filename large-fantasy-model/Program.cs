@@ -75,8 +75,8 @@ namespace large_fantasy_model
 
      
             app.MapHub<PrivateMessageHub>("/privateMessageHub");
-            app.MapHub<large_fantasy_model.Hubs.GameHub>("/gameHub");
-            app.MapHub<large_fantasy_model.Hubs.LobbyHub>("/lobbyHub");
+            app.MapHub<GameHub>("/gameHub");
+            app.MapHub<LobbyHub>("/lobbyHub");
 
             app.MapControllerRoute(
                 name: "default",

@@ -230,3 +230,56 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const rawLore = document.getElementById('raw-lore');
+    const renderedLore = document.getElementById('rendered-lore');
+    if (rawLore && renderedLore) {
+        renderedLore.innerHTML = marked.parse(rawLore.value);
+    }
+
+    const dmRawLore = document.getElementById('dm-raw-lore');
+    const dmRenderedLore = document.getElementById('dm-rendered-lore');
+    if (dmRawLore && dmRenderedLore) {
+        dmRenderedLore.innerHTML = marked.parse(dmRawLore.value);
+    }
+
+    const btnEditLore = document.getElementById('btn-edit-lore');
+    const btnCancelEdit = document.getElementById('btn-cancel-edit');
+    const dmViewMode = document.getElementById('dm-view-mode');
+    const loreForm = document.getElementById('lore-form');
+
+    if (btnEditLore && dmViewMode && loreForm) {
+        btnEditLore.addEventListener('click', function() {
+            dmViewMode.style.display = 'none';
+            loreForm.style.display = 'block';
+        });
+    }
+
+    if (btnCancelEdit && dmViewMode && loreForm) {
+        btnCancelEdit.addEventListener('click', function() {
+            dmViewMode.style.display = 'block';
+            loreForm.style.display = 'none';
+        });
+    }
+
+    // Update URL when switching tabs
+    const mainTab = document.getElementById('main-tab');
+    const loreTab = document.getElementById('lore-tab');
+    
+    if (mainTab) {
+        mainTab.addEventListener('shown.bs.tab', function () {
+            const url = new URL(window.location);
+            url.searchParams.delete('tab'); // Remove ?tab=lore
+            window.history.replaceState({}, '', url);
+        });
+    }
+    
+    if (loreTab) {
+        loreTab.addEventListener('shown.bs.tab', function () {
+            const url = new URL(window.location);
+            url.searchParams.set('tab', 'lore'); // Add ?tab=lore
+            window.history.replaceState({}, '', url);
+        });
+    }
+});
