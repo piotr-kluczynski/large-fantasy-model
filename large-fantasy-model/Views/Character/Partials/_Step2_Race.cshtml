@@ -1,0 +1,53 @@
+@using large_fantasy_model.ViewModels
+@model CreateCharacterViewModel
+
+<div class="wizard-step">
+    <h3 class="mb-4">Choose Your Race</h3>
+    <input asp-for="SelectedRaceName"
+           type="hidden"
+           id="selectedRaceInput" />
+
+    <div id="raceAccordion">
+        @for (int i = 0; i < Model.AvailableRaces.Count; i++)
+        {
+            var characterRace = Model.AvailableRaces[i];
+            var collapseId = $"race-details-{i}";
+
+            <div class="card class-card mb-3">
+                <div class="card-header p-0">
+                    <button type="button"
+                            class="btn w-100 text-start p-4 class-header-btn"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#@collapseId">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-1">@characterRace.Name</h4>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted">Size: @characterRace.Size</small>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+                <div id="@collapseId" class="collapse" data-bs-parent="#raceAccordion">
+                    <div class="card-body">
+                        <p>@characterRace.Description</p>
+                        <hr />
+                        <h6>Race Traits</h6>
+                        <ul>
+                            @foreach (var feature in characterRace.Features)
+                            {
+                                <li>@feature</li>
+                            }
+                        </ul>
+                        <button type="button"
+                                class="btn btn-success select-race-btn mt-3"
+                                data-race-name="@characterRace.Name">
+                            Select Race
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

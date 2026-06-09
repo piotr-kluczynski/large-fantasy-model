@@ -1,6 +1,7 @@
-﻿namespace large_fantasy_model.ViewModels
+namespace large_fantasy_model.ViewModels
 {
-    public class EditCharacterViewModel
+    public class EditCharacterViewModel : CreateCharacterViewModel
     {
+        public int Id { get; set; }
     }
 }

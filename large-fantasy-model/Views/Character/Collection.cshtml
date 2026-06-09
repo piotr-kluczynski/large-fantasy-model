@@ -1,4 +1,4 @@
-﻿@model IEnumerable<large_fantasy_model.Models.CharacterModels.Character>
+@model IEnumerable<large_fantasy_model.Models.CharacterModels.Character>
 
 @{
     ViewData["Title"] = "My characters";
@@ -16,7 +16,7 @@
         </a>
     </div>
 
-    @if (Model != null || !Model.Any())
+    @if (Model == null || !Model.Any())
     {
         <div class="alert alert-info">
             You don't have any characters yet

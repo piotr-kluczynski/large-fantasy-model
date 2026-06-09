@@ -1,5 +1,111 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+@using large_fantasy_model.ViewModels
+@model EditCharacterViewModel
+
+<form asp-action="Edit" method="post" id="characterForm">
+    <input type="hidden" asp-for="Id" />
+    
+    <div class="card shadow">
+        <div class="card-header">
+            <h2>Edit Character: @Model.Name</h2>
+        </div>
+        <div class="card-body">
+            @* Progress *@
+            <div class="progress mb-4">
+                <div id="wizardProgress" class="progress-bar" style="width:14%"></div>
+            </div>
+
+            @await Html.PartialAsync("Partials/_Step1_Class", Model)
+            @await Html.PartialAsync("Partials/_Step2_Race", Model)
+            @await Html.PartialAsync("Partials/_Step3_Background", Model)
+            @await Html.PartialAsync("Partials/_Step4_AbilityScores", Model)
+            @await Html.PartialAsync("Partials/_Step5_Skills", Model)
+            @await Html.PartialAsync("Partials/_Step6_Spells", Model)
+            @await Html.PartialAsync("Partials/_Step7_Equipment", Model)
+            @await Html.PartialAsync("Partials/_Step8_About", Model)
+            @await Html.PartialAsync("Partials/_Step9_Summary", Model)
+
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <button type="button" id="cancelBtn" class="btn btn-danger">Cancel</button>
+                    <button type="button" id="prevBtn" class="btn btn-secondary d-none">Previous</button>
+                </div>
+                <div>
+                    <button type="button" id="nextBtn" class="btn btn-primary">Next</button>
+                    <button type="submit" id="submitBtn" class="btn btn-success d-none">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@await Html.PartialAsync("Partials/_CreatorScripts", Model)
+
+<script>
+    // Pre-fill logic for Editor
+    document.addEventListener("DOMContentLoaded", function () {
+        // Pre-select arrays for JS arrays used in _CreatorScripts
+        @if(Model.SelectedWeaponNames != null)
+        {
+            foreach(var weapon in Model.SelectedWeaponNames)
+            {
+                @:selectedWeapons.push("@weapon");
+            }
+        }
+        @if(Model.SelectedItemNames != null)
+        {
+            foreach(var item in Model.SelectedItemNames)
+            {
+                @:selectedItems.push("@item");
+            }
+        }
+        @if(Model.SelectedSpellNames != null)
+        {
+            foreach(var spell in Model.SelectedSpellNames)
+            {
+                @:selectedSpells.push("@spell");
+            }
+        }
+
+        renderWeapons();
+        renderItems();
+        renderSelectedSpells();
+
+        // Highlight selected class/race/background buttons
+        const selClass = document.getElementById('selectedClassInput').value;
+        if(selClass) {
+            const normalizedSelClass = selClass.toLowerCase().replace(/ /g, '_');
+            document.querySelectorAll('.select-class-btn').forEach(btn => {
+                if(btn.dataset.className.toLowerCase().replace(/ /g, '_') === normalizedSelClass) {
+                    btn.closest('.class-card').classList.add('selected');
+                    hasSpellcasting = btn.dataset.spellcaster === "true";
+                }
+            });
+        }
+
+        const selRace = document.getElementById('selectedRaceInput').value;
+        if(selRace) {
+            const normalizedSelRace = selRace.toLowerCase().replace(/ /g, '_');
+            document.querySelectorAll('.select-race-btn').forEach(btn => {
+                if(btn.dataset.raceName.toLowerCase().replace(/ /g, '_') === normalizedSelRace) {
+                    btn.closest('.class-card').classList.add('selected');
+                }
+            });
+        }
+
+        const selBg = document.getElementById('selectedBackgroundInput').value;
+        if(selBg) {
+            const normalizedSelBg = selBg.toLowerCase().replace(/ /g, '_');
+            document.querySelectorAll('.select-background-btn').forEach(btn => {
+                if(btn.dataset.backgroundName.toLowerCase().replace(/ /g, '_') === normalizedSelBg) {
+                    btn.closest('.class-card').classList.add('selected');
+                }
+            });
+        }
+
+        // Trigger updates
+        updateSkills();
+        updateWizard();
+    });
+</script>

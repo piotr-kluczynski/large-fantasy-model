@@ -1,0 +1,43 @@
+@using large_fantasy_model.ViewModels
+@model CreateCharacterViewModel
+
+<div class="wizard-step">
+    <h3 class="mb-4">Ability Scores</h3>
+    <div class="alert alert-secondary">
+        Enter values freely (recommended: 8–18)
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Strength</label>
+            <input id="Strength" asp-for="Strength" type="number" class="form-control" min="1" max="30" />
+            <span asp-validation-for="Strength" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Dexterity</label>
+            <input id="Dexterity" asp-for="Dexterity" type="number" class="form-control" min="1" max="30" />
+            <span asp-validation-for="Dexterity" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Constitution</label>
+            <input id="Constitution" asp-for="Constitution" type="number" class="form-control" min="1" max="30" />
+            <span asp-validation-for="Constitution" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Intelligence</label>
+            <input id="Intelligence" asp-for="Intelligence" type="number" class="form-control" min="1" max="30" />
+            <span asp-validation-for="Intelligence" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Wisdom</label>
+            <input id="Wisdom" asp-for="Wisdom" type="number" class="form-control" min="1" max="30" />
+            <span asp-validation-for="Wisdom" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Charisma</label>
+            <input id="Charisma" asp-for="Charisma" type="number" class="form-control" min="1" max="30" />
+            <span asp-validation-for="Charisma" class="text-danger"></span>
+        </div>
+    </div>
+
+
+</div>

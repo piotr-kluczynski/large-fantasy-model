@@ -1,0 +1,59 @@
+@using large_fantasy_model.ViewModels
+@model CreateCharacterViewModel
+
+<div class="wizard-step active">
+    <h3 class="mb-4">Choose Your Class</h3>
+    <input asp-for="SelectedClassName"
+           type="hidden"
+           id="selectedClassInput" />
+
+    <div id="classAccordion">
+        @for (int i = 0; i < Model.AvailableClasses.Count; i++)
+        {
+            var characterClass = Model.AvailableClasses[i];
+            var collapseId = $"class-details-{i}";
+
+            <div class="card class-card mb-3">
+                <div class="card-header p-0">
+                    <button type="button"
+                            class="btn w-100 text-start p-4 class-header-btn"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#@collapseId">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-1">@characterClass.Name</h4>
+                                @if (!string.IsNullOrWhiteSpace(characterClass.Spellcasting))
+                                {
+                                    <span class="badge bg-primary">Spellcaster</span>
+                                }
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted">Hit Die d@(characterClass.HitDie)</small>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+                <div id="@collapseId" class="collapse" data-bs-parent="#classAccordion">
+                    <div class="card-body">
+                        <p>@characterClass.Description</p>
+                        <hr />
+                        <h6>Class Features</h6>
+                        <ul>
+                            @foreach (var feature in characterClass.Features)
+                            {
+                                <li>@feature</li>
+                            }
+                        </ul>
+                        <button type="button"
+                                class="btn btn-success select-class-btn mt-3"
+                                data-class-name="@characterClass.Name"
+                                data-spellcaster="@(!string.IsNullOrWhiteSpace(characterClass.Spellcasting)).ToString().ToLower()"
+                                data-hit-die="@characterClass.HitDie">
+                            Select Class
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

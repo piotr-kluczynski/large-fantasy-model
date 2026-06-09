@@ -1,0 +1,57 @@
+@using large_fantasy_model.ViewModels
+@model CreateCharacterViewModel
+
+<div class="wizard-step">
+    <h3 class="mb-4">Choose Spells</h3>
+    <input type="hidden"
+           id="selectedSpellsInput" />
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5>Available Spells</h5>
+                </div>
+                <div class="card-body spell-list">
+                    @foreach (var spell in Model.AvailableSpells.OrderBy(s => s.Name))
+                    {
+                        <div class="spell-card card mb-2" data-spell-name="@spell.Name">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <strong>@spell.Name</strong>
+                                    <span class="badge bg-secondary">@spell.Level</span>
+                                </div>
+                                <small>@spell.School</small>
+                                <div class="collapse mt-3" id="spell-@spell.Name.Replace(" ", "-")">
+                                    <hr />
+                                    <p>@spell.Description</p>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Casting Time:</strong> @spell.CastingTime</li>
+                                        <li><strong>Range:</strong> @spell.RangeArea</li>
+                                        <li><strong>Duration:</strong> @spell.Duration</li>
+                                    </ul>
+                                    <button type="button" class="btn btn-success add-spell-btn" data-spell-name="@spell.Name">
+                                        Add Spell
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5>Selected Spells</h5>
+                </div>
+                <div class="card-body">
+                    <div id="selectedSpellsContainer">
+                        <p class="text-muted">No spells selected.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

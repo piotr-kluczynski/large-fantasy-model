@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Models.CharacterModels.Additional;
+using large_fantasy_model.Models.CharacterModels.Additional;
 using large_fantasy_model.Models.CharacterModels.References;
 using System.ComponentModel.DataAnnotations;
 
@@ -35,14 +35,14 @@ namespace large_fantasy_model.Models.CharacterModels
         public List<CharacterEquipment> Equipment { get; set; } 
 
         // Creature properties
-        public string Alignment { get; set; }
+        public string? Alignment { get; set; }
         public int Speed { get; set; }
         public int CurrentHitPoints { get; set; }
         public int MaxHitPoints { get; set; }
         public int TempHitPoints { get; set; }
         public int Inspiration { get; set; }
         public int ArmorClass { get; set; }
-        public string Languages { get; set; }
+        public string? Languages { get; set; }
 
         public CharacterAbilityScores AbilityScores { get; set; }
         public CharacterSavingThrows SavingThrows { get; set; }

@@ -11,7 +11,7 @@ using large_fantasy_model.Data;
 namespace large_fantasy_model.Migrations
 {
     [DbContext(typeof(LargeFantasyModelContext))]
-    partial class UsersContextModelSnapshot : ModelSnapshot
+    partial class LargeFantasyModelContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -67,6 +67,29 @@ namespace large_fantasy_model.Migrations
                     b.ToTable("UserUser");
                 });
 
+            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Additional.CharacterBackground", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BackgroundName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CharacterId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId")
+                        .IsUnique();
+
+                    b.ToTable("Backgrounds");
+                });
+
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Character", b =>
                 {
                     b.Property<int>("Id")
@@ -76,7 +99,6 @@ namespace large_fantasy_model.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Alignment")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ArmorClass")
@@ -89,8 +111,10 @@ namespace large_fantasy_model.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Languages")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
 
                     b.Property<int>("MaxHitPoints")
                         .HasColumnType("int");
@@ -129,14 +153,7 @@ namespace large_fantasy_model.Migrations
                     b.Property<int>("CharacterId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ClassId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Subtype")
+                    b.Property<string>("ClassName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -159,8 +176,9 @@ namespace large_fantasy_model.Migrations
                     b.Property<int>("CharacterId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -172,7 +190,7 @@ namespace large_fantasy_model.Migrations
                     b.ToTable("Equipment");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterFeatures", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterFeature", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -183,8 +201,9 @@ namespace large_fantasy_model.Migrations
                     b.Property<int>("CharacterId")
                         .HasColumnType("int");
 
-                    b.Property<int>("FeatureId")
-                        .HasColumnType("int");
+                    b.Property<string>("FeatureName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -204,8 +223,9 @@ namespace large_fantasy_model.Migrations
                     b.Property<int>("CharacterId")
                         .HasColumnType("int");
 
-                    b.Property<int>("RaceId")
-                        .HasColumnType("int");
+                    b.Property<string>("RaceName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -226,7 +246,7 @@ namespace large_fantasy_model.Migrations
                     b.Property<int>("CharacterId")
                         .HasColumnType("int");
 
-                    b.Property<string>("SpellId")
+                    b.Property<string>("SpellName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -248,10 +268,7 @@ namespace large_fantasy_model.Migrations
                     b.Property<int>("CharacterId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Equipped")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("WeaponId")
+                    b.Property<string>("WeaponName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -629,6 +646,17 @@ namespace large_fantasy_model.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Additional.CharacterBackground", b =>
+                {
+                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", "Character")
+                        .WithOne("Background")
+                        .HasForeignKey("large_fantasy_model.Models.CharacterModels.Additional.CharacterBackground", "CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Character", b =>
                 {
                     b.HasOne("large_fantasy_model.Models.User", "User")
@@ -674,34 +702,6 @@ namespace large_fantasy_model.Migrations
                                 .HasForeignKey("CharacterId");
                         });
 
-                    b.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.CharacterBackground", "Background", b1 =>
-                        {
-                            b1.Property<int>("CharacterId")
-                                .HasColumnType("int");
-
-                            b1.Property<string>("Description")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Background_Description");
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Background_Name");
-
-                            b1.Property<string>("Option")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Background_Option");
-
-                            b1.HasKey("CharacterId");
-
-                            b1.ToTable("Characters");
-
-                            b1.WithOwner()
-                                .HasForeignKey("CharacterId");
-                        });
-
                     b.OwnsOne("large_fantasy_model.Models.CharacterModels.Additional.CharacterDetails", "Details", b1 =>
                         {
                             b1.Property<int>("CharacterId")
@@ -712,52 +712,42 @@ namespace large_fantasy_model.Migrations
                                 .HasColumnName("Details_Age");
 
                             b1.Property<string>("Backstory")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Details_Backstory");
 
                             b1.Property<string>("Bond")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Details_Bond");
 
                             b1.Property<string>("Eyes")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Details_Eyes");
 
                             b1.Property<string>("Flaw")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Details_Flaw");
 
                             b1.Property<string>("Hair")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Details_Hair");
 
                             b1.Property<string>("Height")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Details_Height");
 
                             b1.Property<string>("Ideal")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Details_Ideal");
 
                             b1.Property<string>("Personality")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Details_Personality");
 
                             b1.Property<string>("Physical")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Details_Physical");
 
                             b1.Property<string>("Skin")
-                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Details_Skin");
 
@@ -778,28 +768,28 @@ namespace large_fantasy_model.Migrations
                             b1.Property<int>("CharacterId")
                                 .HasColumnType("int");
 
-                            b1.Property<int>("Charisma")
-                                .HasColumnType("int")
+                            b1.Property<bool>("Charisma")
+                                .HasColumnType("bit")
                                 .HasColumnName("SavingThrow_Charisma");
 
-                            b1.Property<int>("Constitution")
-                                .HasColumnType("int")
+                            b1.Property<bool>("Constitution")
+                                .HasColumnType("bit")
                                 .HasColumnName("SavingThrow_Constitution");
 
-                            b1.Property<int>("Dexterity")
-                                .HasColumnType("int")
+                            b1.Property<bool>("Dexterity")
+                                .HasColumnType("bit")
                                 .HasColumnName("SavingThrow_Dexterity");
 
-                            b1.Property<int>("Intelligence")
-                                .HasColumnType("int")
+                            b1.Property<bool>("Intelligence")
+                                .HasColumnType("bit")
                                 .HasColumnName("SavingThrow_Intelligence");
 
-                            b1.Property<int>("Strength")
-                                .HasColumnType("int")
+                            b1.Property<bool>("Strength")
+                                .HasColumnType("bit")
                                 .HasColumnName("SavingThrow_Strength");
 
-                            b1.Property<int>("Wisdom")
-                                .HasColumnType("int")
+                            b1.Property<bool>("Wisdom")
+                                .HasColumnType("bit")
                                 .HasColumnName("SavingThrow_Wisdom");
 
                             b1.HasKey("CharacterId");
@@ -898,9 +888,6 @@ namespace large_fantasy_model.Migrations
                     b.Navigation("AbilityScores")
                         .IsRequired();
 
-                    b.Navigation("Background")
-                        .IsRequired();
-
                     b.Navigation("Details")
                         .IsRequired();
 
@@ -915,29 +902,35 @@ namespace large_fantasy_model.Migrations
 
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterClass", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", null)
-                        .WithOne("Classes")
+                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", "Character")
+                        .WithOne("Class")
                         .HasForeignKey("large_fantasy_model.Models.CharacterModels.References.CharacterClass", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Character");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterEquipment", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", null)
+                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", "Character")
                         .WithMany("Equipment")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Character");
                 });
 
-            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterFeatures", b =>
+            modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterFeature", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", null)
+                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", "Character")
                         .WithMany("Features")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Character");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterRace", b =>
@@ -953,20 +946,24 @@ namespace large_fantasy_model.Migrations
 
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterSpell", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", null)
+                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", "Character")
                         .WithMany("Spells")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Character");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.References.CharacterWeapon", b =>
                 {
-                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", null)
+                    b.HasOne("large_fantasy_model.Models.CharacterModels.Character", "Character")
                         .WithMany("Weapons")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Character");
                 });
 
             modelBuilder.Entity("large_fantasy_model.Models.Game", b =>
@@ -1067,7 +1064,10 @@ namespace large_fantasy_model.Migrations
 
             modelBuilder.Entity("large_fantasy_model.Models.CharacterModels.Character", b =>
                 {
-                    b.Navigation("Classes")
+                    b.Navigation("Background")
+                        .IsRequired();
+
+                    b.Navigation("Class")
                         .IsRequired();
 
                     b.Navigation("Equipment");

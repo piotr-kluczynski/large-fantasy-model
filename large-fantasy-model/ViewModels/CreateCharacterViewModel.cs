@@ -1,33 +1,59 @@
-﻿using large_fantasy_model.Models.CharacterModels.Json;
+using System.ComponentModel.DataAnnotations;
+using large_fantasy_model.Models.CharacterModels.Json;
 
 namespace large_fantasy_model.ViewModels
 {
     public class CreateCharacterViewModel
     {
-        public List<CClass> AvailableClasses { get; set; }
-        public List<Race> AvailableRaces { get; set; }
-        public List<Background> AvailableBackgrounds { get; set; }
-        public List<Item> AvailableItems { get; set; }
-        public List<Weapon> AvailableWeapons { get; set; }
-        public List<Spell> AvailableSpells { get; set; }
+        public List<CClass>? AvailableClasses { get; set; }
+        public List<Race>? AvailableRaces { get; set; }
+        public List<Background>? AvailableBackgrounds { get; set; }
+        public List<Item>? AvailableItems { get; set; }
+        public List<Weapon>? AvailableWeapons { get; set; }
+        public List<Spell>? AvailableSpells { get; set; }
 
         public bool IsSpellcaster { get; set; }
 
+        [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; }
+
+        [Required]
+        [Range(1, 20, ErrorMessage = "Level must be between 1 and 20")]
         public int Level { get; set; }
+
+        [Required]
+        [Range(0, 355000, ErrorMessage = "XP must be non-negative")]
+        public int Xp { get; set; } = 0;
+
+        [Required(ErrorMessage = "You must select a class")]
         public string SelectedClassName { get; set; }
+
+        [Required(ErrorMessage = "You must select a race")]
         public string SelectedRaceName { get; set; }
-        public string SelectedBackgroundName { get; set; }
-        public List<string> SelectedItemNames { get; set; }
-        public List<string> SelectedWeaponNames { get; set; }
-        public List<string> SelectedSpellNames { get; set; }
+
+        [Required(ErrorMessage = "You must select a background")]
+        public string? SelectedBackgroundName { get; set; }
+        public List<string>? SelectedItemNames { get; set; }
+        public List<string>? SelectedWeaponNames { get; set; }
+        public List<string>? SelectedSpellNames { get; set; }
 
         // Abilities
+        [Range(1, 30, ErrorMessage = "Strength must be between 1 and 30")]
         public int Strength { get; set; } = 10;
+
+        [Range(1, 30, ErrorMessage = "Dexterity must be between 1 and 30")]
         public int Dexterity { get; set; } = 10;
+
+        [Range(1, 30, ErrorMessage = "Constitution must be between 1 and 30")]
         public int Constitution { get; set; } = 10;
+
+        [Range(1, 30, ErrorMessage = "Intelligence must be between 1 and 30")]
         public int Intelligence { get; set; } = 10;
+
+        [Range(1, 30, ErrorMessage = "Wisdom must be between 1 and 30")]
         public int Wisdom { get; set; } = 10;
+
+        [Range(1, 30, ErrorMessage = "Charisma must be between 1 and 30")]
         public int Charisma { get; set; } = 10;
 
         // Saving Throws
@@ -59,27 +85,40 @@ namespace large_fantasy_model.ViewModels
         public int Persuasion { get; set; }
 
         // Creature properties
-        public string Alignment { get; set; }
+        public string? Alignment { get; set; }
+
+        [Range(0, 999)]
         public int Speed { get; set; }
+
+        [Range(1, 999, ErrorMessage = "Max Hit Points must be greater than 0")]
         public int MaxHitPoints { get; set; }
+
         public int TempHitPoints { get; set; }
+
+        [Range(0, 99)]
         public int Inspiration { get; set; }
+
+        [Range(1, 99)]
         public int ArmorClass { get; set; }
-        public string Languages { get; set; }
+
+        public string? Languages { get; set; }
 
         // Character Details
+        [Range(0, 9999)]
         public int Age { get; set; }
-        public string Eyes { get; set; }
-        public string Hair { get; set; }
-        public string Skin { get; set; }
+        public string? Eyes { get; set; }
+        public string? Hair { get; set; }
+        public string? Skin { get; set; }
+
+        [Range(0, 9999)]
         public int Weight { get; set; }
-        public string Height { get; set; }
-        public string Personality { get; set; }
-        public string Ideal { get; set; }
-        public string Bond { get; set; }
-        public string Flaw { get; set; }
-        public string Backstory { get; set; }
-        public string Physical { get; set; }
+        public string? Height { get; set; }
+        public string? Personality { get; set; }
+        public string? Ideal { get; set; }
+        public string? Bond { get; set; }
+        public string? Flaw { get; set; }
+        public string? Backstory { get; set; }
+        public string? Physical { get; set; }
 
     }
 }

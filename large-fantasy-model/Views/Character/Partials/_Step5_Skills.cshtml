@@ -1,0 +1,161 @@
+@using large_fantasy_model.ViewModels
+@model CreateCharacterViewModel
+
+<div class="wizard-step">
+    <h3 class="mb-4">Skills</h3>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Saving Throws</h5>
+            <small class="text-muted">Select proficiencies</small>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="form-check">
+                        <input id="StrengthSave" asp-for="StrengthSave" class="form-check-input" type="checkbox"/>
+                        <label class="form-check-label">Strength</label>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check">
+                        <input id="DexteritySave" asp-for="DexteritySave" class="form-check-input" type="checkbox"/>
+                        <label class="form-check-label">Dexterity</label>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check">
+                        <input id="ConstitutionSave" asp-for="ConstitutionSave" class="form-check-input" type="checkbox"/>
+                        <label class="form-check-label">Constitution</label>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check">
+                        <input id="IntelligenceSave" asp-for="IntelligenceSave" class="form-check-input" type="checkbox"/>
+                        <label class="form-check-label">Intelligence</label>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check">
+                        <input id="WisdomSave" asp-for="WisdomSave" class="form-check-input" type="checkbox"/>
+                        <label class="form-check-label">Wisdom</label>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check">
+                        <input id="CharismaSave" asp-for="CharismaSave" class="form-check-input" type="checkbox"/>
+                        <label class="form-check-label">Charisma</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><strong>Strength</strong></div>
+                <div class="card-body">
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="athletics" /> Athletics</label>
+                        <span id="athleticsValue" class="badge bg-dark">+0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><strong>Dexterity</strong></div>
+                <div class="card-body">
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="acrobatics" /> Acrobatics</label>
+                        <span id="acrobaticsValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="sleight" /> Sleight of Hand</label>
+                        <span id="sleightValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="stealth" /> Stealth</label>
+                        <span id="stealthValue" class="badge bg-dark">+0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><strong>Intelligence</strong></div>
+                <div class="card-body">
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="arcana" /> Arcana</label>
+                        <span id="arcanaValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="history" /> History</label>
+                        <span id="historyValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="investigation" /> Investigation</label>
+                        <span id="investigationValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="nature" /> Nature</label>
+                        <span id="natureValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="religion" /> Religion</label>
+                        <span id="religionValue" class="badge bg-dark">+0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><strong>Wisdom</strong></div>
+                <div class="card-body">
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="animal" /> Animal Handling</label>
+                        <span id="animalValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="insight" /> Insight</label>
+                        <span id="insightValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="medicine" /> Medicine</label>
+                        <span id="medicineValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="perception" /> Perception</label>
+                        <span id="perceptionValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="survival" /> Survival</label>
+                        <span id="survivalValue" class="badge bg-dark">+0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><strong>Charisma</strong></div>
+                <div class="card-body">
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="deception" /> Deception</label>
+                        <span id="deceptionValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="intimidation" /> Intimidation</label>
+                        <span id="intimidationValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="performance" /> Performance</label>
+                        <span id="performanceValue" class="badge bg-dark">+0</span>
+                    </div>
+                    <div class="skill-row">
+                        <label><input type="checkbox" class="skill-prof" data-skill="persuasion" /> Persuasion</label>
+                        <span id="persuasionValue" class="badge bg-dark">+0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

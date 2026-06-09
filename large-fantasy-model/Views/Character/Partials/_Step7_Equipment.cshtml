@@ -1,0 +1,93 @@
+@using large_fantasy_model.ViewModels
+@model CreateCharacterViewModel
+
+<div class="wizard-step">
+    <h3 class="mb-4">Equipment & Weapons</h3>
+    <input type="hidden" id="selectedWeaponsInput" />
+    <input type="hidden" id="selectedItemsInput" />
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5>Available Equipment</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="border-bottom pb-2">Weapons</h6>
+                    <div class="equipment-list">
+                        @foreach (var weapon in Model.AvailableWeapons.OrderBy(w => w.Name))
+                        {
+                            var collapseId = $"weapon-{weapon.Name.Replace(" ", "-")}";
+                            <div class="card mb-2">
+                                <div class="card-header">
+                                    <button type="button" class="btn w-100 text-start" data-bs-toggle="collapse" data-bs-target="#@collapseId">
+                                        <strong>@weapon.Name</strong>
+                                    </button>
+                                </div>
+                                <div id="@collapseId" class="collapse">
+                                    <div class="card-body">
+                                        <p>@weapon.Description</p>
+                                        <ul class="list-unstyled">
+                                            <li><strong>Damage:</strong> @weapon.Damage</li>
+                                            <li><strong>Range:</strong> @weapon.Range</li>
+                                            <li><strong>Weight:</strong> @weapon.Weight</li>
+                                        </ul>
+                                        <button type="button" class="btn btn-success add-weapon-btn" data-weapon-name="@weapon.Name">
+                                            Add Weapon
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <hr />
+                    <h6 class="border-bottom pb-2">Items</h6>
+                    <div class="equipment-list">
+                        @foreach (var item in Model.AvailableItems.OrderBy(i => i.Name))
+                        {
+                            var collapseId = $"item-{item.Name.Replace(" ", "-")}";
+                            <div class="card mb-2">
+                                <div class="card-header">
+                                    <button type="button" class="btn w-100 text-start" data-bs-toggle="collapse" data-bs-target="#@collapseId">
+                                        <strong>@item.Name</strong>
+                                    </button>
+                                </div>
+                                <div id="@collapseId" class="collapse">
+                                    <div class="card-body">
+                                        <p>@item.Description</p>
+                                        <ul class="list-unstyled">
+                                            <li><strong>Weight:</strong> @item.Weight</li>
+                                            <li><strong>Magic:</strong> @(item.Magic ? "Yes" : "No")</li>
+                                        </ul>
+                                        <button type="button" class="btn btn-success add-item-btn" data-item-name="@item.Name">
+                                            Add Item
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5>Current Equipment</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Weapons</h6>
+                    <div id="selectedWeaponsContainer">
+                        <p class="text-muted">No weapons selected.</p>
+                    </div>
+                    <hr />
+                    <h6>Items</h6>
+                    <div id="selectedItemsContainer">
+                        <p class="text-muted">No items selected.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

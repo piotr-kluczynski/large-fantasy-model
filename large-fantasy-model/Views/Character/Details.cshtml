@@ -1,10 +1,18 @@
-﻿@model large_fantasy_model.Models.CharacterModels.Character
+@model large_fantasy_model.Models.CharacterModels.Character
 
 @{
     ViewData["Title"] = Model?.Name ?? "Character";
 }
 
 <div class="container py-4">
+    <style>
+        @@media print {
+            .d-print-none { display: none !important; }
+            .card { border: none !important; box-shadow: none !important; }
+            body { font-size: 12pt; }
+            .container { max-width: 100% !important; width: 100% !important; padding: 0 !important; }
+        }
+    </style>
 
     <!-- HEADER -->
 
@@ -41,6 +49,13 @@
                         @Model.Alignment
                     </span>
 
+                    <br />
+                    <button onclick="window.print()" class="btn btn-outline-secondary d-print-none mt-3">
+                        Print to PDF
+                    </button>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary d-print-none mt-3">
+                        Edit Character
+                    </a>
                 </div>
 
             </div>
@@ -98,7 +113,7 @@
     <div class="card shadow-sm mb-4">
 
         <div class="card-header">
-            <h4 class="mb-0">Atrybuty</h4>
+            <h4 class="mb-0">Ability Scores</h4>
         </div>
 
         <div class="card-body">
@@ -194,7 +209,7 @@
         <div class="col-lg-8 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header">
-                    <h4 class="mb-0">Umiejętności</h4>
+                    <h4 class="mb-0">Skills</h4>
                 </div>
 
                 <div class="card-body">

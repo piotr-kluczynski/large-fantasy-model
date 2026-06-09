@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Models;
+using large_fantasy_model.Models;
 using large_fantasy_model.Models.CharacterModels;
 using large_fantasy_model.Models.CharacterModels.Additional;
 using large_fantasy_model.Models.CharacterModels.References;
@@ -20,6 +20,7 @@ namespace large_fantasy_model.Data
 
         public DbSet<CharacterRace> Races { get; set; }
         public DbSet<CharacterClass> Classes { get; set; }
+        public DbSet<CharacterBackground> Backgrounds { get; set; }
         public DbSet<CharacterEquipment> Equipment { get; set; }
         public DbSet<CharacterWeapon> Weapons { get; set; }
         public DbSet<CharacterSpell> Spells { get; set; }
@@ -82,23 +83,27 @@ namespace large_fantasy_model.Data
                  .HasForeignKey<CharacterRace>(cr => cr.CharacterId)
                  .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(c => c.Class) // CharacterClass
-                .WithOne()
+                .WithOne(cc => cc.Character)
                 .HasForeignKey<CharacterClass>(cc => cc.CharacterId)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(c => c.Background) // CharacterBackground
+                .WithOne(cb => cb.Character)
+                .HasForeignKey<CharacterBackground>(cb => cb.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(c => c.Equipment) // Character Equipment
-                .WithOne()
+                .WithOne(ce => ce.Character)
                 .HasForeignKey(ce => ce.CharacterId)
                 .OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(c => c.Weapons) // Character Weapon
-                .WithOne()
+                .WithOne(cw => cw.Character)
                 .HasForeignKey(cw => cw.CharacterId)
                 .OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(c => c.Spells) // CharacterSpells
-                .WithOne()
+                .WithOne(cs => cs.Character)
                 .HasForeignKey(s => s.CharacterId)
                 .OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(c => c.Features) // Character Features
-                .WithOne()
+                .WithOne(cf => cf.Character)
                 .HasForeignKey(f => f.CharacterId)
                 .OnDelete(DeleteBehavior.Cascade);
 

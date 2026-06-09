@@ -1,0 +1,148 @@
+@using large_fantasy_model.ViewModels
+@model CreateCharacterViewModel
+
+<div class="wizard-step">
+    <h3 class="mb-4">About Your Character</h3>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card mb-3">
+                <div class="card-header"><h5>Basic Information</h5></div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Character Name <span class="text-danger">*</span></label>
+                        <input id="Name" asp-for="Name" class="form-control" />
+                        <span id="errorName" asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Age <span class="text-danger">*</span></label>
+                            <input id="Age" asp-for="Age" class="form-control" type="number" min="1" />
+                            <span id="errorAge" asp-validation-for="Age" class="text-danger"></span>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Alignment</label>
+                            <input id="Alignment" asp-for="Alignment" class="form-control" />
+                            <span asp-validation-for="Alignment" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Speed <span class="text-danger">*</span></label>
+                            <input id="Speed" asp-for="Speed" class="form-control" type="number" min="1" />
+                            <span id="errorSpeed" asp-validation-for="Speed" class="text-danger"></span>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Armor Class <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input id="ArmorClass" asp-for="ArmorClass" class="form-control" placeholder="AC" type="number" min="1" max="99" />
+                                <button class="btn btn-outline-secondary" type="button" id="autoCalcAcBtn">Auto</button>
+                            </div>
+                            <span id="errorArmorClass" asp-validation-for="ArmorClass" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Level <span class="text-danger">*</span></label>
+                            <input id="Level" asp-for="Level" class="form-control" placeholder="Level" type="number" min="1" />
+                            <span id="errorLevel" asp-validation-for="Level" class="text-danger"></span>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Hit Points <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input id="MaxHitPoints" asp-for="MaxHitPoints" class="form-control" placeholder="Max HP" type="number" min="1" />
+                                <button class="btn btn-outline-secondary" type="button" id="autoCalcHpBtn">Auto</button>
+                            </div>
+                            <span id="errorMaxHitPoints" asp-validation-for="MaxHitPoints" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Inspiration <span class="text-danger">*</span></label>
+                            <input id="Inspiration" asp-for="Inspiration" class="form-control" type="number" min="0" max="99" />
+                            <span id="errorInspiration" asp-validation-for="Inspiration" class="text-danger"></span>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">XP <span class="text-danger">*</span></label>
+                            <input id="Xp" asp-for="Xp" class="form-control" type="number" min="0" />
+                            <span id="errorXp" asp-validation-for="Xp" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card mb-3">
+                <div class="card-header"><h5>Appearance</h5></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Height <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input id="Height" asp-for="Height" class="form-control" type="number" min="1" />
+                                <span class="input-group-text">cm</span>
+                            </div>
+                            <span id="errorHeight" asp-validation-for="Height" class="text-danger"></span>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Weight <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input id="Weight" asp-for="Weight" class="form-control" type="number" min="1" />
+                                <span class="input-group-text">kg</span>
+                            </div>
+                            <span id="errorWeight" asp-validation-for="Weight" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 mb-3">
+                            <label class="form-label">Eyes</label>
+                            <input id="Eyes" asp-for="Eyes" class="form-control" />
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label class="form-label">Hair</label>
+                            <input id="Hair" asp-for="Hair" class="form-control" />
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label class="form-label">Skin</label>
+                            <input id="Skin" asp-for="Skin" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Physical Description</label>
+                        <textarea id="Physical" asp-for="Physical" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header"><h5>Personality & Story</h5></div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Personality Traits</label>
+                <textarea id="Personality" asp-for="Personality" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Languages</label>
+                <textarea id="Languages" asp-for="Languages" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Ideal</label>
+                <textarea id="Ideal" asp-for="Ideal" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Bond</label>
+                <textarea id="Bond" asp-for="Bond" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Flaw</label>
+                <textarea id="Flaw" asp-for="Flaw" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Backstory</label>
+                <textarea id="Backstory" asp-for="Backstory" class="form-control" rows="5"></textarea>
+            </div>
+        </div>
+    </div>
+</div>

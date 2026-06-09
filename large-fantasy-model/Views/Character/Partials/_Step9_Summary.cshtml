@@ -1,0 +1,93 @@
+@using large_fantasy_model.ViewModels
+@model CreateCharacterViewModel
+
+<div class="wizard-step">
+    <h2 class="mb-4">Character Summary</h2>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card mb-3">
+                <div class="card-header"><h5>Identity</h5></div>
+                <div class="card-body">
+                    <p id="nameSummary"><strong>Name:</strong> </p>
+                    <p id="levelSummary"><strong>Level:</strong> </p>
+                    <p id="classSummary"><strong>Class:</strong> </p>
+                    <p id="raceSummary"><strong>Race:</strong> </p>
+                    <p id="backgroundSummary"><strong>Background:</strong> </p>
+                    <p id="alignmentSummary"><strong>Alignment:</strong> </p>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-header"><h5>Ability Scores</h5></div>
+                <div class="card-body">
+                    <p id="strengthSummary">STR: <strong></strong></p>
+                    <p id="dexteritySummary">DEX: <strong></strong></p>
+                    <p id="constitutionSummary">CON: <strong></strong></p>
+                    <p id="intelligenceSummary">INT: <strong></strong></p>
+                    <p id="wisdomSummary">WIS: <strong></strong></p>
+                    <p id="charismaSummary">CHA: <strong></strong></p>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-header"><h5>Saving Throws</h5></div>
+                <div class="card-body">
+                    <p id="strengthSaveSummary">STR: </p>
+                    <p id="dexteritySaveSummary">DEX: </p>
+                    <p id="constitutionSaveSummary">CON: </p>
+                    <p id="intelligenceSaveSummary">INT: </p>
+                    <p id="wisdomSaveSummary">WIS: </p>
+                    <p id="charismaSaveSummary">CHA: </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card mb-3">
+                <div class="card-header"><h5>Combat Stats</h5></div>
+                <div class="card-body">
+                    <p id="speedSummary"><strong>Speed:</strong> </p>
+                    <p id="inspirationSummary"><strong>Inspiration:</strong> </p>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-header"><h5>Equipment</h5></div>
+                <div class="card-body">
+                    <p><strong>Weapons:</strong></p>
+                    <ul id="weaponsSummary"></ul>
+                    <p><strong>Items:</strong></p>
+                    <ul id="itemsSummary"></ul>
+                    <div id="spellsSummaryContainer" style="display: none;">
+                        <p><strong>Spells:</strong></p>
+                        <ul id="spellsSummary"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-header"><h5>Character Details</h5></div>
+                <div class="card-body">
+                    <p id="ageSummary"><strong>Age:</strong> </p>
+                    <p id="heightSummary"><strong>Height:</strong> </p>
+                    <p id="weightSummary"><strong>Weight:</strong> </p>
+                    <p id="eyesSummary"><strong>Eyes:</strong> </p>
+                    <p id="hairSummary"><strong>Hair:</strong> </p>
+                    <p id="skinSummary"><strong>Skin:</strong> </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mt-3">
+        <div class="card-header"><h5>Roleplay & Story</h5></div>
+        <div class="card-body">
+            <p id="personalitySummary"><strong>Personality:</strong> </p>
+            <p id="languagesSummary"><strong>Languages:</strong> </p>
+            <p id="idealSummary"><strong>Ideal:</strong> </p>
+            <p id="bondSummary"><strong>Bond:</strong> </p>
+            <p id="flawSummary"><strong>Flaw:</strong> </p>
+            <hr />
+            <p><strong>Backstory:</strong></p>
+            <p id="backstorySummary"></p>
+            <hr />
+            <p><strong>Physical Description:</strong></p>
+            <p id="physicalSummary"></p>
+        </div>
+    </div>
+</div>
