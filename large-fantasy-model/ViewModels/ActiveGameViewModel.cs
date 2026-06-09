@@ -1,4 +1,4 @@
-﻿namespace large_fantasy_model.ViewModels
+namespace large_fantasy_model.ViewModels
 {
     public class ActiveGameViewModel
     {
@@ -7,6 +7,7 @@
         public bool IsDungeonMaster { get; set; }
 
         public UserViewModel DungeonMaster { get; set; } = null!;
+        public int? CurrentUserCharacterId { get; set; }
         public List<UserViewModel> Players { get; set; } = new();
         public List<TokenViewModel> Tokens { get; set; } = new();
         public List<ChatMessageViewModel> ChatMessages { get; set; } = new();

@@ -1,4 +1,4 @@
-﻿window.activeToken = null;
+window.activeToken = null;
 let tokenOffsetX = 0; let tokenOffsetY = 0;
 const ctxMenu = document.getElementById('token-context-menu');
 const ctxClose = document.getElementById('ctx-close');
@@ -126,8 +126,10 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && window.isPlacingMonster) { window.isPlacingMonster = false; window.pendingMonsterData = null; document.getElementById('viewport').style.cursor = "grab"; }
 });
 
-document.getElementById('btn-open-sheet')?.addEventListener('click', () => {
-    ctxMenu.style.display = 'none'; new bootstrap.Modal(document.getElementById('characterSheetModal')).show();
+document.querySelectorAll('.btn-open-sheet').forEach(btn => {
+    btn.addEventListener('click', () => {
+        ctxMenu.style.display = 'none'; new bootstrap.Modal(document.getElementById('characterSheetModal')).show();
+    });
 });
 
 document.getElementById('btn-open-notes')?.addEventListener('click', () => {

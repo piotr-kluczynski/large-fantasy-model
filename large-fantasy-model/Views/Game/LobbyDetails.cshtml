@@ -32,8 +32,10 @@
         </div>
 
         <div class="d-flex gap-2 align-items-center">
-            <form asp-controller="ActiveGame" asp-action="Index" asp-route-id="@Model.GameId" method="get">
-                <button class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm px-5">
+            <form asp-controller="ActiveGame" asp-action="Index" asp-route-id="@Model.GameId" method="get" id="enter-vtt-form">
+                <button type="button" id="enter-vtt-btn" class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm px-5" 
+                        data-is-dm="@(Model.IsDungeonMaster ? "true" : "false")"
+                        data-has-character="@(Model.CurrentUserSelectedCharacterId.HasValue ? "true" : "false")">
                     Enter VTT
                 </button>
              </form>
@@ -200,7 +202,13 @@
                                         <div class="d-flex align-items-center">
                                             <img src="@AvatarHelper.GetUserAvatar(player.Username, player.ProfilePicturePath, _env.WebRootPath, 45)" class="rounded-circle me-3 border border-success border-2" alt="Avatar" style="width: 45px; height: 45px; object-fit: cover;" />
                                             <div>
-                                                <div class="fw-bold text-dark">@player.Username</div>
+                                                <div class="fw-bold text-dark">
+                                                    @player.Username
+                                                    @if(Model.PlayerCharacters.ContainsKey(player.Id))
+                                                    {
+                                                        <span class="text-muted fw-normal ms-1">(@Model.PlayerCharacters[player.Id])</span>
+                                                    }
+                                                </div>
                                                 <small class="text-success fw-bold">Player</small>
                                             </div>
                                         </div>
@@ -217,6 +225,48 @@
                                     </li>
                                 }
                             </ul>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm border-0 rounded-4 mb-4">
+                        <div class="card-header bg-white border-0 pt-4 pb-0">
+                            <h5 class="fw-bold text-dark">Your Character</h5>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.IsDungeonMaster)
+                            {
+                                <p class="text-muted small mb-0"><i class="bi bi-info-circle me-1"></i> You are the Dungeon Master. You don't need to select a character.</p>
+                            }
+                            else
+                            {
+                                <form asp-action="SelectCharacter" asp-controller="Game" method="post" id="select-character-form">
+                                    <input type="hidden" name="gameId" value="@Model.GameId" />
+                                    <select id="character-select" name="characterId" class="form-select mb-3 rounded-pill">
+                                        <option value="">-- Select a Character --</option>
+                                        @foreach (var c in Model.AvailableCharacters)
+                                        {
+                                            if (Model.CurrentUserSelectedCharacterId == c.Id)
+                                            {
+                                                <option value="@c.Id" selected>@c.Name (Lvl @c.Level @c.Class?.ClassName)</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@c.Id">@c.Name (Lvl @c.Level @c.Class?.ClassName)</option>
+                                            }
+                                        }
+                                    </select>
+                                </form>
+                                <div id="character-status-container">
+                                    @if (Model.CurrentUserSelectedCharacterId.HasValue)
+                                    {
+                                        <p class="text-success small fw-bold mb-0"><i class="bi bi-check-circle-fill me-1"></i> Character selected and ready for adventure!</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-danger small mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> You must select a character to enter the VTT.</p>
+                                    }
+                                </div>
+                            }
                         </div>
                     </div>
 
@@ -373,6 +423,7 @@
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="~/js/Game/Lobbydetails.js" asp-append-version="true"></script>
 }

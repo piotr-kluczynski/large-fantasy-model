@@ -182,6 +182,7 @@ namespace large_fantasy_model.Controllers
             var game = await _context.Games
                 .Include(g => g.User)
                 .Include(g => g.Users)
+                .Include(g => g.Characters)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
             if (game == null || (game.UserId != myId && !game.Users.Any(u => u.Id == myId)))
@@ -200,6 +201,15 @@ namespace large_fantasy_model.Controllers
                 .Select(n => n.ReceiverId)
                 .ToListAsync();
 
+            var playerCharacters = new Dictionary<int, string>();
+            foreach (var character in game.Characters)
+            {
+                playerCharacters[character.UserId] = character.Name;
+            }
+
+            var availableCharacters = await _context.Characters.Include(c => c.Class).Where(c => c.UserId == myId).ToListAsync();
+            var currentCharacter = game.Characters.FirstOrDefault(c => c.UserId == myId);
+
             var viewModel = new GameLobbyViewModel
             {
                 GameId = game.Id,
@@ -215,7 +225,10 @@ namespace large_fantasy_model.Controllers
                 CurrentPlayers = game.Users.Count + 1,
                 MaxPlayers = game.MaxPlayers > 0 ? game.MaxPlayers : 10,
                 InvitedFriendIds = invitedIds,
-                Lore = game.Lore
+                Lore = game.Lore,
+                PlayerCharacters = playerCharacters,
+                AvailableCharacters = availableCharacters,
+                CurrentUserSelectedCharacterId = currentCharacter?.Id
             };
 
             ViewBag.ActiveTab = tab;
@@ -516,6 +529,55 @@ namespace large_fantasy_model.Controllers
             string fileName = $"{game.Name.Replace(" ", "_")}_Lore.txt";
 
             return File(fileBytes, "text/plain", fileName);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SelectCharacter(int gameId, int? characterId)
+        {
+            int myId = GetCurrentUserId();
+            var game = await _context.Games
+                .Include(g => g.Users)
+                .Include(g => g.Characters)
+                .FirstOrDefaultAsync(g => g.Id == gameId);
+
+            if (game == null) return NotFound();
+
+            if (game.UserId != myId && !game.Users.Any(u => u.Id == myId))
+            {
+                return Unauthorized();
+            }
+
+            var existingCharacter = game.Characters.FirstOrDefault(c => c.UserId == myId);
+            if (existingCharacter != null)
+            {
+                game.Characters.Remove(existingCharacter);
+            }
+
+            if (characterId.HasValue)
+            {
+                var character = await _context.Characters.FirstOrDefaultAsync(c => c.Id == characterId.Value && c.UserId == myId);
+                if (character != null)
+                {
+                    game.Characters.Add(character);
+                    TempData["SuccessMessage"] = $"Selected character: {character.Name}!";
+                    await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerSelectedCharacter", myId, character.Name);
+                }
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Character selection cleared.";
+                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerClearedCharacter", myId);
+            }
+
+            await _context.SaveChangesAsync();
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = true, hasCharacter = characterId.HasValue });
+            }
+
+            return RedirectToAction(nameof(LobbyDetails), new { id = gameId });
         }
     }
 }

@@ -107,9 +107,72 @@ lobbyConnection.on("GameInviteDeclined", function (declinerId) {
     }
 });
 
+lobbyConnection.on("PlayerSelectedCharacter", function (playerId, characterName) {
+    const playerRow = document.getElementById(`player-row-${playerId}`);
+    if (playerRow) {
+        const nameDiv = playerRow.querySelector('.fw-bold.text-dark');
+        if (nameDiv) {
+            let span = nameDiv.querySelector('span.text-muted');
+            if (!span) {
+                span = document.createElement('span');
+                span.className = 'text-muted fw-normal ms-1';
+                nameDiv.appendChild(span);
+            }
+            span.innerText = `(${characterName})`;
+        }
+    }
+});
+
+lobbyConnection.on("PlayerClearedCharacter", function (playerId) {
+    const playerRow = document.getElementById(`player-row-${playerId}`);
+    if (playerRow) {
+        const span = playerRow.querySelector('.fw-bold.text-dark span.text-muted');
+        if (span) {
+            span.remove();
+        }
+    }
+});
+
 lobbyConnection.start().then(() => {
     lobbyConnection.invoke("JoinLobbyGroup", gameId);
 });
+
+// AJAX character selection
+const characterSelect = document.getElementById('character-select');
+if (characterSelect) {
+    characterSelect.addEventListener('change', async function () {
+        const form = document.getElementById('select-character-form');
+        const formData = new FormData(form);
+
+        try {
+            const res = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const enterVttBtn = document.getElementById('enter-vtt-btn');
+                const statusContainer = document.getElementById('character-status-container');
+
+                if (data.hasCharacter) {
+                    if (enterVttBtn) enterVttBtn.setAttribute('data-has-character', 'true');
+                    if (statusContainer) {
+                        statusContainer.innerHTML = '<p class="text-success small fw-bold mb-0"><i class="bi bi-check-circle-fill me-1"></i> Character selected and ready for adventure!</p>';
+                    }
+                } else {
+                    if (enterVttBtn) enterVttBtn.setAttribute('data-has-character', 'false');
+                    if (statusContainer) {
+                        statusContainer.innerHTML = '<p class="text-danger small mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> You must select a character to enter the VTT.</p>';
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Error selecting character:', e);
+        }
+    });
+}
 
 document.addEventListener('submit', function (e) {
     if (e.target.classList.contains('invite-form')) {
@@ -280,6 +343,31 @@ document.addEventListener('DOMContentLoaded', function () {
             const url = new URL(window.location);
             url.searchParams.set('tab', 'lore'); // Add ?tab=lore
             window.history.replaceState({}, '', url);
+        });
+    }
+
+    const enterVttBtn = document.getElementById('enter-vtt-btn');
+    if (enterVttBtn) {
+        enterVttBtn.addEventListener('click', function(e) {
+            const isDM = this.getAttribute('data-is-dm') === 'true';
+            const hasCharacter = this.getAttribute('data-has-character') === 'true';
+
+            if (!isDM && !hasCharacter) {
+                e.preventDefault();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Hold on, adventurer!',
+                        text: 'You must select a character from the panel on the right before entering the virtual tabletop.',
+                        icon: 'warning',
+                        confirmButtonText: 'I will do that',
+                        confirmButtonColor: '#198754'
+                    });
+                } else {
+                    alert('Hold on, adventurer! You must select a character before entering the virtual tabletop.');
+                }
+            } else {
+                document.getElementById('enter-vtt-form').submit();
+            }
         });
     }
 });

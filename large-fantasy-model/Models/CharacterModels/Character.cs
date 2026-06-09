@@ -25,6 +25,8 @@ namespace large_fantasy_model.Models.CharacterModels
         public CharacterBackground Background { get; set; }
         public CharacterDetails Details { get; set; }
 
+        public ICollection<Game> Games { get; set; } = new List<Game>();
+
 
         public List<CharacterFeature> Features { get; set; }
 

@@ -1,4 +1,4 @@
-﻿    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations;
 
 namespace large_fantasy_model.Models
 {
@@ -24,6 +24,9 @@ namespace large_fantasy_model.Models
 
         // Kolekcja przechowująca graczy biorących udział w tej grze - relacja wiele-do-wielu (wielu użytkowników może brać udział w wielu grach)
         public ICollection<User> Users { get; set; } = new List<User>();
+
+        // Kolekcja przechowująca postacie biorące udział w tej grze - relacja wiele-do-wielu
+        public ICollection<large_fantasy_model.Models.CharacterModels.Character> Characters { get; set; } = new List<large_fantasy_model.Models.CharacterModels.Character>();
 
         // Odwołanie do konwersacji powiązanej z tą grą - relacja jeden-do-jednego, dziecko (jedna gra ma tylko jedną powiązaną konwersację)
         public int ConversationId { get; set; }

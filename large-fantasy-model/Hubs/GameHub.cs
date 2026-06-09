@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Data;
+using large_fantasy_model.Data;
 using large_fantasy_model.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +47,18 @@ namespace large_fantasy_model.Hubs
             var now = DateTime.Now;
             string timeString = now.ToString("HH:mm");
 
+
+            var userIdString = Context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdString))
+            {
+                int userId = int.Parse(userIdString);
+                var character = await _context.Characters
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.Games.Any(g => g.Id == gameId));
+                if (character != null)
+                {
+                    username = $"{username} ({character.Name})";
+                }
+            }
 
             var chatMessage = new Models.GameChatMessage
             {

@@ -57,6 +57,11 @@ namespace large_fantasy_model.Data
                 .HasMany(u => u.Games)
                 .WithMany(g => g.Users);
 
+            // Relacja wiele-do-wielu pomiędzy Game-Character (wiele postaci w wielu grach)
+            modelBuilder.Entity<Character>()
+                .HasMany(c => c.Games)
+                .WithMany(g => g.Characters);
+
             // Relacja wiele-do-wielu pomiędzy Conversation-User (wielu użytkowników może uczestniczyć w wielu konwersacjach)
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Conversations)

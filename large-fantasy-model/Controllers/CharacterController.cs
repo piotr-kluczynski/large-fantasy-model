@@ -5,11 +5,14 @@ using large_fantasy_model.Models.CharacterModels.Additional;
 using large_fantasy_model.Models.CharacterModels.Json;
 using large_fantasy_model.Models.CharacterModels.References;
 using large_fantasy_model.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace large_fantasy_model.Controllers
 {
+    [Authorize]
     public class CharacterController : Controller
     {
         private readonly LargeFantasyModelContext _context;
@@ -42,6 +45,11 @@ namespace large_fantasy_model.Controllers
             _backgroundRepository = backgroundRepository;
         }
 
+        private int GetCurrentUserId()
+        {
+            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        }
+
         [HttpGet]
         public IActionResult Index()
         {
@@ -51,19 +59,13 @@ namespace large_fantasy_model.Controllers
         [HttpGet]
         public IActionResult Collection()
         {
-            var user = _context.Users.FirstOrDefault();
-            if (user == null)
-            {
-                user = new User { Username = "Player1", FirstName = "Player", Email = "player1@test.com", Password = "MockPassword123!" };
-                _context.Users.Add(user);
-                _context.SaveChanges();
-            }
+            int myId = GetCurrentUserId();
 
             var characters = _context.Characters
                 .Include(c => c.Class)
                 .Include(c => c.Race)
                 .Include(c => c.Background)
-                .Where(c => c.UserId == user.Id) // Mock current user id
+                .Where(c => c.UserId == myId)
                 .ToList();
             return View("Collection", characters);
         }
@@ -320,7 +322,8 @@ namespace large_fantasy_model.Controllers
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            var character = _context.Characters.FirstOrDefault(c => c.Id == id);
+            int myId = GetCurrentUserId();
+            var character = _context.Characters.FirstOrDefault(c => c.Id == id && c.UserId == myId);
             if (character != null)
             {
                 _context.Characters.Remove(character);
@@ -378,17 +381,11 @@ namespace large_fantasy_model.Controllers
                 ? model.SelectedItemNames.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count()) 
                 : new Dictionary<string, int>();
 
-            var user = _context.Users.FirstOrDefault();
-            if (user == null)
-            {
-                user = new User { Username = "Player1", FirstName = "Player", Email = "player1@test.com", Password = "MockPassword123!" };
-                _context.Users.Add(user);
-                _context.SaveChanges();
-            }
+            int myId = GetCurrentUserId();
 
             var character = new Character
             {
-                UserId = user.Id,// Add current user id
+                UserId = myId,
                 Name = model.Name,
                 Xp = model.Xp,
                 Level = model.Level,

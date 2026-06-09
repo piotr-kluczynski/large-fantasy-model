@@ -71,11 +71,15 @@ namespace large_fantasy_model.Controllers
                 .Take(50)
                 .ToListAsync();
 
+            var myCharacter = await _context.Characters
+                .FirstOrDefaultAsync(c => c.UserId == myId && c.Games.Any(g => g.Id == id));
+
             var viewModel = new ActiveGameViewModel
             {
                 GameId = game.Id,
                 Name = game.Name,
                 IsDungeonMaster = game.UserId == myId,
+                CurrentUserCharacterId = myCharacter?.Id,
                 DungeonMaster = new UserViewModel { Id = game.User.Id, Username = game.User.Username, ProfilePicturePath = game.User.ProfilePicturePath },
                 Players = game.Users.Select(u => new UserViewModel { Id = u.Id, Username = u.Username, ProfilePicturePath = u.ProfilePicturePath }).ToList(),
                 MapImageUrl = game.MapImageUrl, 

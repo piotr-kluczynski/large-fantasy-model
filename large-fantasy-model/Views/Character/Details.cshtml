@@ -4,7 +4,7 @@
     ViewData["Title"] = Model?.Name ?? "Character";
 }
 
-<div class="container py-4">
+<div class="container py-4" id="character-sheet-content">
     <style>
         @@media print {
             .d-print-none { display: none !important; }
@@ -50,8 +50,8 @@
                     </span>
 
                     <br />
-                    <button onclick="window.print()" class="btn btn-outline-secondary d-print-none mt-3">
-                        Print to PDF
+                    <button onclick="generatePDF()" class="btn btn-outline-secondary d-print-none mt-3">
+                        <i class="bi bi-file-earmark-pdf-fill"></i> Download as PDF
                     </button>
                     <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary d-print-none mt-3">
                         Edit Character
@@ -378,4 +378,30 @@
             </div>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function generatePDF() {
+            var buttons = document.querySelectorAll('.d-print-none');
+            buttons.forEach(btn => btn.style.display = 'none');
+
+            var element = document.getElementById('character-sheet-content');
+            
+            var opt = {
+              margin:       10,
+              filename:     '@(Model.Name)_Sheet.pdf',
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#212529' }, // Force dark background if in dark mode
+              jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Workaround for background colors: ensure body is dark
+            var originalBodyBg = document.body.style.backgroundColor;
+            document.body.style.backgroundColor = '#212529'; 
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                buttons.forEach(btn => btn.style.display = '');
+                document.body.style.backgroundColor = originalBodyBg;
+            });
+        }
+    </script>
 </div>

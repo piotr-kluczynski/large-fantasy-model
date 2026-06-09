@@ -1,4 +1,4 @@
-﻿namespace large_fantasy_model.ViewModels
+namespace large_fantasy_model.ViewModels
 {
     public class GameLobbyViewModel
     {
@@ -19,5 +19,9 @@
         public List<UserViewModel> AvailableFriends { get; set; } = new();
         public List<int> InvitedFriendIds { get; set; } = new();
         public string? Lore { get; set; }
+
+        public Dictionary<int, string> PlayerCharacters { get; set; } = new();
+        public List<large_fantasy_model.Models.CharacterModels.Character> AvailableCharacters { get; set; } = new();
+        public int? CurrentUserSelectedCharacterId { get; set; }
     }
 }
