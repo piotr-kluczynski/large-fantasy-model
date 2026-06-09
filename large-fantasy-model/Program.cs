@@ -30,6 +30,9 @@ namespace large_fantasy_model
 
             builder.Services.AddHttpClient();
             builder.Services.AddControllersWithViews();
+            
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
 
             builder.Services.AddHostedService<large_fantasy_model.Services.AvatarWatcherService>();
 
@@ -56,6 +59,9 @@ namespace large_fantasy_model
                 });
 
             var app = builder.Build();
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             if (!app.Environment.IsDevelopment())
             {
