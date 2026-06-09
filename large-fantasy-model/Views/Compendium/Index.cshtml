@@ -1,17 +1,5 @@
-﻿@using large_fantasy_model.Models.Compendium
-@*
-    Widok: Index
+@using large_fantasy_model.Models.Compendium
 
-    Przeznaczenie:
-    - Strona główna kompendium, zawierająca listę wszystkich systemów RPG dostępny w aplikacji
-
-    Model:
-    - GameModeRuleBook
-
-    Zachowanie:
-    - Wyświetla pobieżne dane dotyczące każdego z systemów RPG
-    - Pozwala na wejście do szczegółowego opisu systemu RPG (widok Details.cshtml)
-*@
 
 @model IEnumerable<GameModeRulebook>
 @{
@@ -49,7 +37,7 @@
 </div>
 
 <style>
-    /* Drobny efekt, żeby kafelki lekko podnosiły się przy najechaniu */
+
     .transition-hover {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     }

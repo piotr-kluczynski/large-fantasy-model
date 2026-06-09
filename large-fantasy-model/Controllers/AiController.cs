@@ -69,7 +69,7 @@ namespace large_fantasy_model.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 var errorDetails = await response.Content.ReadAsStringAsync();
-                return BadRequest($"Request rejected. Status: {response.StatusCode}. Szczegóły: {errorDetails}");
+                return BadRequest($"Request rejected. Status: {response.StatusCode}. Details: {errorDetails}");
             }
 
             var json = await response.Content.ReadAsStringAsync();

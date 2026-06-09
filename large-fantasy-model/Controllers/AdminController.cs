@@ -119,15 +119,15 @@ namespace large_fantasy_model.Controllers
                 return RedirectToAction(nameof(Users));
             }
 
-            // Usuwamy ręcznie powiązane wiadomości (ponieważ EF Core ma ustawione DeleteBehavior.Restrict)
+
             var userMessages = await _context.Messages.Where(m => m.UserId == id).ToListAsync();
             _context.Messages.RemoveRange(userMessages);
 
-            // Usuwamy gry założone przez użytkownika (DeleteBehavior.Restrict)
+
             var ownedGames = await _context.Games.Where(g => g.UserId == id).ToListAsync();
             _context.Games.RemoveRange(ownedGames);
 
-            // Teraz możemy bezpiecznie usunąć samego użytkownika
+
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 

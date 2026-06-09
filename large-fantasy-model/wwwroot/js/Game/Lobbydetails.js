@@ -137,7 +137,7 @@ lobbyConnection.start().then(() => {
     lobbyConnection.invoke("JoinLobbyGroup", gameId);
 });
 
-// AJAX character selection
+
 const characterSelect = document.getElementById('character-select');
 if (characterSelect) {
     characterSelect.addEventListener('change', async function () {
@@ -326,14 +326,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Update URL when switching tabs
+
     const mainTab = document.getElementById('main-tab');
     const loreTab = document.getElementById('lore-tab');
     
     if (mainTab) {
         mainTab.addEventListener('shown.bs.tab', function () {
             const url = new URL(window.location);
-            url.searchParams.delete('tab'); // Remove ?tab=lore
+            url.searchParams.delete('tab');
             window.history.replaceState({}, '', url);
         });
     }
@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (loreTab) {
         loreTab.addEventListener('shown.bs.tab', function () {
             const url = new URL(window.location);
-            url.searchParams.set('tab', 'lore'); // Add ?tab=lore
+            url.searchParams.set('tab', 'lore');
             window.history.replaceState({}, '', url);
         });
     }

@@ -37,7 +37,7 @@ namespace large_fantasy_model.Controllers
 
             if (game == null || (game.UserId != myId && !game.Users.Any(u => u.Id == myId)))
             {
-                TempData["DangerMessage"] = "Nie masz dostępu do tej sesji gry.";
+                TempData["DangerMessage"] = "You do not have access to this game session.";
                 return RedirectToAction("Campaigns", "Game");
             }
 

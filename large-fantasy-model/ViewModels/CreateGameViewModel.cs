@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace large_fantasy_model.ViewModels
 {
@@ -17,8 +17,8 @@ namespace large_fantasy_model.ViewModels
         [StringLength(100, MinimumLength = 3, ErrorMessage = "Password must be at least 3 characters long.")]
         public string? Password { get; set; }
 
-        [Required(ErrorMessage = "Proszę podać maksymalną liczbę graczy.")]
-        [Range(2, 50, ErrorMessage = "Kampania musi mieć od 2 do 16 graczy.")]
+        [Required(ErrorMessage = "Please specify the maximum number of players.")]
+        [Range(2, 50, ErrorMessage = "The campaign must have between 2 and 50 players.")]
         public int MaxPlayers { get; set; } = 10; 
     }
 }

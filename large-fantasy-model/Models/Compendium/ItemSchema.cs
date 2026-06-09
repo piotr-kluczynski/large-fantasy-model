@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.ViewModels.Compendium;
+using large_fantasy_model.ViewModels.Compendium;
 
 namespace large_fantasy_model.Models.Compendium
 {

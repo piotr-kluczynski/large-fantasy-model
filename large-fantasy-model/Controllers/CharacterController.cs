@@ -170,7 +170,7 @@ namespace large_fantasy_model.Controllers
                 SelectedWeaponNames = character.Weapons?.Select(w => w.WeaponName).ToList() ?? new List<string>(),
                 SelectedItemNames = character.Equipment?.SelectMany(e => Enumerable.Repeat(e.ItemName, e.Quantity)).ToList() ?? new List<string>(),
 
-                // Abilities
+
                 Strength = character.AbilityScores?.Strength ?? 10,
                 Dexterity = character.AbilityScores?.Dexterity ?? 10,
                 Constitution = character.AbilityScores?.Constitution ?? 10,
@@ -178,7 +178,7 @@ namespace large_fantasy_model.Controllers
                 Wisdom = character.AbilityScores?.Wisdom ?? 10,
                 Charisma = character.AbilityScores?.Charisma ?? 10,
 
-                // Saves
+
                 StrengthSave = character.SavingThrows?.Strength ?? false,
                 DexteritySave = character.SavingThrows?.Dexterity ?? false,
                 ConstitutionSave = character.SavingThrows?.Constitution ?? false,
@@ -186,7 +186,7 @@ namespace large_fantasy_model.Controllers
                 WisdomSave = character.SavingThrows?.Wisdom ?? false,
                 CharismaSave = character.SavingThrows?.Charisma ?? false,
 
-                // Skills
+
                 Athletics = character.Skills?.Athletics ?? 0,
                 Acrobatics = character.Skills?.Acrobatics ?? 0,
                 SleightOfHand = character.Skills?.SleightOfHand ?? 0,
@@ -206,7 +206,7 @@ namespace large_fantasy_model.Controllers
                 Performance = character.Skills?.Performance ?? 0,
                 Persuasion = character.Skills?.Persuasion ?? 0,
 
-                // Details
+
                 Age = character.Details?.Age ?? 0,
                 Eyes = character.Details?.Eyes,
                 Hair = character.Details?.Hair,
@@ -228,7 +228,7 @@ namespace large_fantasy_model.Controllers
                 AvailableSpells = _spellRepository.GetAll(rulebook, "Spells")
             };
 
-            // Calculate IsSpellcaster based on class
+
             var cClass = model.AvailableClasses.FirstOrDefault(c => c.Name.ToLower().Replace(" ", "_") == model.SelectedClassName?.ToLower());
             model.IsSpellcaster = cClass != null && !string.IsNullOrWhiteSpace(cClass.Spellcasting);
 
@@ -273,7 +273,7 @@ namespace large_fantasy_model.Controllers
             existingCharacter.Alignment = newCharacterData.Alignment;
             existingCharacter.Speed = newCharacterData.Speed;
             existingCharacter.MaxHitPoints = newCharacterData.MaxHitPoints;
-            existingCharacter.CurrentHitPoints = newCharacterData.MaxHitPoints; // Reset HP on edit
+            existingCharacter.CurrentHitPoints = newCharacterData.MaxHitPoints;
             existingCharacter.Inspiration = newCharacterData.Inspiration;
             existingCharacter.ArmorClass = newCharacterData.ArmorClass;
             existingCharacter.Languages = newCharacterData.Languages;
@@ -334,10 +334,10 @@ namespace large_fantasy_model.Controllers
 
         private Character BuildCharacter(CreateCharacterViewModel model)
         {
-            // Creating feature list
+
             List<string> feature_names = new List<string>();
         
-            // Collecting features from class
+
             List<CClass> classes = _classRepository.GetAll(rulebook, "Classes");
             CClass selectedClass = classes.FirstOrDefault(c =>
                     c.Name.ToLower() == model.SelectedClassName.ToLower());
@@ -350,7 +350,7 @@ namespace large_fantasy_model.Controllers
                 }
             }
 
-            // Collecting features from Race
+
             List<Race> races = _raceRepository.GetAll(rulebook, "Races");
             Race selectedRace = races.FirstOrDefault(c =>
                     c.Name.ToLower() == model.SelectedRaceName.ToLower());
@@ -363,7 +363,7 @@ namespace large_fantasy_model.Controllers
                 }
             }
 
-            // Collecting features from Background
+
             List<Background> backgrounds = _backgroundRepository.GetAll(rulebook, "Backgrounds");
             Background selectedBackground = backgrounds.FirstOrDefault(c =>
                     c.Name.ToLower() == model.SelectedBackgroundName?.ToLower());
@@ -376,7 +376,7 @@ namespace large_fantasy_model.Controllers
                 }
             }
 
-            // Creating equipment dictionary - CORRECT
+
             var equipment_dict = model.SelectedItemNames != null 
                 ? model.SelectedItemNames.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count()) 
                 : new Dictionary<string, int>();

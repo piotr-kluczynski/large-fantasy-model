@@ -35,7 +35,7 @@ namespace large_fantasy_model.Controllers
 
                 if (existingUser != null)
                 {
-                    ViewBag.ErrorMessage = "Użytkownik z takim adresem e-mail lub nazwą już istnieje.";
+                    ViewBag.ErrorMessage = "A user with this email or username already exists.";
                     return View(model);
                 }
 
@@ -97,7 +97,7 @@ namespace large_fantasy_model.Controllers
                 {
                 if (user.IsLockedOut)
                 {
-                    ViewBag.ErrorMessage = $"Twój dostęp został zablokowany do {user.LockoutEnd:dd.MM.yyyy}. Powód: {user.LockoutReason}";
+                    ViewBag.ErrorMessage = $"Your access has been blocked until {user.LockoutEnd:dd.MM.yyyy}. Reason: {user.LockoutReason}";
                     return View();
                 }
                 var claims = new List<Claim>
@@ -126,7 +126,7 @@ namespace large_fantasy_model.Controllers
                 return RedirectToAction("Index", "Home");
                 }
             }
-            ViewBag.ErrorMessage = "Nieprawidłowy adres e-mail lub hasło.";
+            ViewBag.ErrorMessage = "Invalid email address or password.";
             return View();
         }
 

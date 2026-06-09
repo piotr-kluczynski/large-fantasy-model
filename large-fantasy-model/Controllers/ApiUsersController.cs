@@ -19,7 +19,7 @@ namespace large_fantasy_model.Controllers
             _context = context;
         }
 
-        // GET: api/ApiUsers
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetUsers()
         {
@@ -36,7 +36,7 @@ namespace large_fantasy_model.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/ApiUsers/5
+
         [HttpGet("{id}")]
         public async Task<ActionResult<object>> GetUser(int id)
         {

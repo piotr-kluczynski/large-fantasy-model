@@ -1,4 +1,4 @@
-﻿@using System.Security.Claims
+@using System.Security.Claims
 @{
     ViewData["Title"] = "Home Page";
     var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
@@ -68,14 +68,14 @@
             </div>
 
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm border-0 border-top border-secondary border-4 rounded-4 opacity-75 overflow-hidden">
+                <div class="card h-100 shadow-sm border-0 border-top border-info border-4 rounded-4 transition-hover overflow-hidden">
                     <div class="card-body text-center p-4">
-                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-secondary bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-info bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
                             <i class="bi bi-person-vcard fs-4"></i>
                         </div>
-                        <h5 class="fw-bold text-muted">Characters</h5>
-                        <p class="small text-muted">Coming soon!</p>
-                        <button class="btn btn-sm btn-light border rounded-pill disabled w-100">Locked</button>
+                        <h5 class="fw-bold">Characters</h5>
+                        <p class="small text-muted">Manage your heroes.</p>
+                        <a asp-controller="Character" asp-action="Collection" class="btn btn-sm btn-outline-info rounded-pill stretched-link">Collection</a>
                     </div>
                 </div>
             </div>

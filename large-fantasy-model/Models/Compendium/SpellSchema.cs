@@ -1,16 +1,9 @@
-﻿using large_fantasy_model.ViewModels.Compendium;
+using large_fantasy_model.ViewModels.Compendium;
 
 namespace large_fantasy_model.Models.Compendium
 {
-    /// <summary>
-    /// "Schemat" opisujący pola oraz ich właściwości elementów należących do kategorii "Spells" systemu RPG "DnD Basic Rules 2018".
-    /// Służy on do łatwiejszego poprawnego reprezentowania pól w widokach.
-    /// </summary>
     public static class SpellSchema
     {
-        /// <summary>
-        /// Lista obiektów EntityFieldDefinition, które opisują pola elementu kategorii "Spell".
-        /// </summary>
         public static List<EntityFieldDefinition> Fields => new()
         {
             new() { Key = "Name", Label = "Name", Type = "text" },

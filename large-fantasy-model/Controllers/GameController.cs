@@ -397,7 +397,7 @@ namespace large_fantasy_model.Controllers
                     await _lobbyHub.Clients.Group($"Lobby_{gameId.Value}").SendAsync("GameInviteDeclined", myId);
                 }
 
-                TempData["SuccessMessage"] = "Zaproszenie zostało odrzucone.";
+                TempData["SuccessMessage"] = "The invitation has been rejected.";
             }
 
             string referer = Request.Headers["Referer"].ToString();

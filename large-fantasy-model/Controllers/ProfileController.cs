@@ -257,7 +257,7 @@ namespace large_fantasy_model.Controllers
                     await model.ProfilePicture.CopyToAsync(fileStream);
                 }
 
-                // Usuń stary avatar jeśli istnieje
+
                 if (!string.IsNullOrEmpty(userInDb.ProfilePicturePath))
                 {
                     string oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath, userInDb.ProfilePicturePath.TrimStart('/'));
@@ -273,7 +273,7 @@ namespace large_fantasy_model.Controllers
             _context.Update(userInDb);
             await _context.SaveChangesAsync();
 
-            // Aktualizacja cookies
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userInDb.Id.ToString()),
@@ -286,7 +286,7 @@ namespace large_fantasy_model.Controllers
             {
                 claims.Add(new Claim("ProfilePicturePath", userInDb.ProfilePicturePath));
 
-                // Broadcast the change to all hubs
+
                 await _hubContext.Clients.All.SendAsync("UserAvatarChanged", userInDb.Username, userInDb.ProfilePicturePath);
                 await _gameHubContext.Clients.All.SendAsync("UserAvatarChanged", userInDb.Username, userInDb.ProfilePicturePath);
                 await _lobbyHubContext.Clients.All.SendAsync("UserAvatarChanged", userInDb.Username, userInDb.ProfilePicturePath);
