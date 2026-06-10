@@ -12,7 +12,6 @@ namespace large_fantasy_model
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Rejestrowanie repozytoriów dla plików JSON
             builder.Services.AddScoped(sp =>
                 new JsonRepository<Spell>("Data/JsonFiles"));
             builder.Services.AddScoped(f =>
@@ -56,6 +55,16 @@ namespace large_fantasy_model
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/Auth/Login";
+                    options.Events.OnRedirectToLogin = context =>
+                    {
+                        if (context.Request.Path.StartsWithSegments("/api"))
+                        {
+                            context.Response.StatusCode = 401;
+                            return Task.CompletedTask;
+                        }
+                        context.Response.Redirect(context.RedirectUri);
+                        return Task.CompletedTask;
+                    };
                 });
 
             var app = builder.Build();
@@ -71,6 +80,8 @@ namespace large_fantasy_model
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UseRequestLocalization("en-US");
 
             app.UseRouting();
 

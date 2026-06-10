@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using large_fantasy_model.Data;
 using large_fantasy_model.Models;
+using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace large_fantasy_model.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "HeadAdmin")]
     public class ApiUsersController : ControllerBase
     {
         private readonly LargeFantasyModelContext _context;

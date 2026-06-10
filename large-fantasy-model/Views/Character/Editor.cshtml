@@ -9,7 +9,7 @@
             <h2>Edit Character: @Model.Name</h2>
         </div>
         <div class="card-body">
-            @* Progress *@
+            
             <div class="progress mb-4">
                 <div id="wizardProgress" class="progress-bar" style="width:14%"></div>
             </div>
@@ -43,9 +43,9 @@
 @await Html.PartialAsync("Partials/_CreatorScripts", Model)
 
 <script>
-    // Pre-fill logic for Editor
+
     document.addEventListener("DOMContentLoaded", function () {
-        // Pre-select arrays for JS arrays used in _CreatorScripts
+
         @if(Model.SelectedWeaponNames != null)
         {
             foreach(var weapon in Model.SelectedWeaponNames)
@@ -72,7 +72,7 @@
         renderItems();
         renderSelectedSpells();
 
-        // Highlight selected class/race/background buttons
+
         const selClass = document.getElementById('selectedClassInput').value;
         if(selClass) {
             const normalizedSelClass = selClass.toLowerCase().replace(/ /g, '_');
@@ -104,7 +104,7 @@
             });
         }
 
-        // Trigger updates
+
         updateSkills();
         updateWizard();
     });

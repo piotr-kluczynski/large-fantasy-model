@@ -56,7 +56,6 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Sidebar Layout */
 .app-container {
   display: flex;
   min-height: 100vh;
@@ -190,7 +189,6 @@ body {
   color: #777;
 }
 
-/* Custom Overrides for Blame Theme */
 .btn-primary {
   background: var(--blame-gradient);
   border: none;
@@ -217,7 +215,9 @@ body {
   color: var(--blame-main);
   border-color: var(--blame-main);
 }
-.btn-outline-blame:hover {
+.btn-outline-blame:hover,
+.btn-outline-blame:active,
+.btn-outline-blame.active {
   color: #fff !important;
   background-color: var(--blame-main) !important;
   border-color: var(--blame-main) !important;
@@ -282,6 +282,11 @@ body {
 .spell-list {
     max-height: 700px;
     overflow-y: auto;
+}
+.equipment-list {
+    max-height: 350px;
+    overflow-y: auto;
+    padding-right: 5px;
 }
 .spell-card {
     cursor: pointer;

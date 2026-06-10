@@ -7,7 +7,7 @@ const lobbyConnection = new signalR.HubConnectionBuilder()
     .withUrl("/lobbyHub")
     .build();
 
-lobbyConnection.on("PlayerJoinedLobby", function (playerId, username) {
+lobbyConnection.on("PlayerJoinedLobby", function (playerId, username, profilePicturePath, characterName) {
     const friendRow = document.getElementById(`friend-row-${playerId}`);
     if (friendRow) {
         friendRow.remove();
@@ -40,9 +40,9 @@ lobbyConnection.on("PlayerJoinedLobby", function (playerId, username) {
         const html = `
             <li id="player-row-${playerId}" class="list-group-item p-3 border-top d-flex align-items-center justify-content-between border-0">
                 <div class="d-flex align-items-center">
-                    <img src="${avatarSrc}" class="rounded-circle me-3 border border-success border-2" style="width: 45px; height: 45px; object-fit: cover;" />
+                    <img src="${avatarSrc}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${username}&size=45&background=${getUserColor(username)}&color=fff&length=2';" class="rounded-circle me-3 border border-success border-2" style="width: 45px; height: 45px; object-fit: cover;" />
                     <div>
-                        <div class="fw-bold text-dark">${username}</div>
+                        <div class="fw-bold text-dark">${username}${characterName ? `<span class="text-muted fw-normal ms-1">(${characterName})</span>` : ''}</div>
                         <small class="text-success fw-bold">Player</small>
                     </div>
                 </div>
@@ -181,12 +181,12 @@ document.addEventListener('submit', function (e) {
         btn.disabled = true;
         btn.className = 'btn btn-secondary btn-sm rounded-pill fw-bold btn-invited';
         btn.innerText = 'Invited';
-        fetch(e.target.action, { method: 'POST', body: new FormData(e.target), headers: { 'RequestVerificationToken': getAfToken() } });
+        fetch(e.target.action, { method: 'POST', body: new FormData(e.target), headers: { 'RequestVerificationToken': window.getAntiForgeryToken() } });
     }
     if (e.target.classList.contains('kick-form')) {
         e.preventDefault();
         if (confirm('Kick this player?')) {
-            fetch(e.target.action, { method: 'POST', body: new FormData(e.target), headers: { 'RequestVerificationToken': getAfToken() } });
+            fetch(e.target.action, { method: 'POST', body: new FormData(e.target), headers: { 'RequestVerificationToken': window.getAntiForgeryToken() } });
         }
     }
 });
@@ -214,12 +214,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (aiPanel.style.display === 'none' || aiPanel.style.display === '') {
                 aiPanel.style.display = 'block';
-                btnToggleAi.classList.replace('btn-outline-success', 'btn-success');
-                btnToggleAi.classList.add('text-white');
+                btnToggleAi.classList.add('active');
             } else {
                 aiPanel.style.display = 'none';
-                btnToggleAi.classList.replace('btn-success', 'btn-outline-success');
-                btnToggleAi.classList.remove('text-white');
+                btnToggleAi.classList.remove('active');
             }
         });
     }

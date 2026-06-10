@@ -1,0 +1,13 @@
+{
+  "name": "Bankier",
+  "description": "Z wyksztalcenia bankier, pochodzenia synagogicznego",
+  "hit_die": 1,
+  "spellcasting": "D\u0142ugo\u015B\u0107 pejs\u00F3w",
+  "features": [
+    "Evasion",
+    "Expertise",
+    "Lucky",
+    "Spellcasting",
+    "Spell Mastery"
+  ]
+}

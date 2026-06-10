@@ -25,7 +25,7 @@
         }
     </style>
 
-    <!-- HEADER -->
+
 
     <div class="card shadow-lg border-0 mb-4">
         <div class="card-body">
@@ -79,7 +79,7 @@
         </div>
     </div>
 
-    <!-- COMBAT -->
+
 
     <div class="row mb-4">
 
@@ -124,7 +124,7 @@
 
     </div>
 
-    <!-- ABILITY SCORES -->
+
 
     <div class="card shadow-sm mb-4">
 
@@ -172,7 +172,7 @@
 
     </div>
 
-    <!-- SAVING THROWS + SKILLS -->
+
 
     <div class="row">
 
@@ -265,7 +265,7 @@
         </div>
     </div>
 
-    <!-- CHARACTER DETAILS -->
+
     <div class="card shadow-sm mb-4">
         <div class="card-header">
             <h4 class="mb-0">Character Description</h4>
@@ -318,7 +318,7 @@
         </div>
     </div>
 
-    <!-- EQUIPMENT -->
+
 
     <div class="row">
         <div class="col-lg-4 mb-4">
@@ -406,11 +406,11 @@
               margin:       10,
               filename:     '@(Model.Name)_Sheet.pdf',
               image:        { type: 'jpeg', quality: 0.98 },
-              html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#212529' }, // Force dark background if in dark mode
+              html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#212529' }, 
               jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // Workaround for background colors: ensure body is dark
+            
             var originalBodyBg = document.body.style.backgroundColor;
             document.body.style.backgroundColor = '#212529'; 
 
