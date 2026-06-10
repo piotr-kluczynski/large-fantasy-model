@@ -1,0 +1,19 @@
+{
+  "damage": "Jakby Tw\u00F3j stary waln\u0105 trzy harnasie w ci\u0105gu 2 min",
+  "range": "Od po\u0142owy tego pokoju do drzwi",
+  "throw_range": "Od Bia\u0142egostoku do Radomia",
+  "ammunition": "Polski patriotyzm",
+  "finesse": true,
+  "heavy": false,
+  "light": false,
+  "loading": false,
+  "monk": false,
+  "reach": true,
+  "thrown": true,
+  "two_handed": false,
+  "versatile": true,
+  "name": "Polska Szabla",
+  "description": "You win the game.",
+  "weight": -5,
+  "magic": true
+}

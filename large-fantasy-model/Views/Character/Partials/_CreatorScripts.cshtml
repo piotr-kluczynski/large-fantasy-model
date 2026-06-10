@@ -13,6 +13,30 @@
     const selectedItems = [];
     let selectedSpells = [];
 
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === '-' || e.key === 'e' || e.key === 'E') {
+                e.preventDefault();
+            }
+            if (this.hasAttribute('min') && this.getAttribute('min') === '1') {
+                if (e.key === '0' && this.value === '') {
+                    e.preventDefault();
+                }
+            }
+        });
+
+        input.addEventListener('input', function() {
+            if (this.value.includes('-')) {
+                this.value = this.value.replace(/-/g, '');
+            }
+            if (this.hasAttribute('min') && this.getAttribute('min') === '1') {
+                if (this.value === '0') {
+                    this.value = '';
+                }
+            }
+        });
+    });
+
     let currentHitDie = 10;
     const classSavesMap = {
         "Barbarian": ["StrengthSave", "ConstitutionSave"],
@@ -29,7 +53,6 @@
         "Wizard": ["IntelligenceSave", "WisdomSave"]
     };
 
-    // Select Class
     document.querySelectorAll('.select-class-btn').forEach(button => {
         button.addEventListener('click', function () {
             const selectedClass = this.dataset.className;
@@ -43,7 +66,6 @@
 
             this.closest('.class-card').classList.add('selected');
 
-            // Auto-check saving throws
             document.querySelectorAll('input[id$="Save"]').forEach(cb => cb.checked = false);
             if (classSavesMap[selectedClass]) {
                 classSavesMap[selectedClass].forEach(saveId => {
@@ -54,7 +76,6 @@
         });
     });
 
-    // Select Race
     document.querySelectorAll('.select-race-btn').forEach(button => {
         button.addEventListener('click', function () {
             const selectedRace = this.dataset.raceName;
@@ -67,7 +88,6 @@
         });
     });
 
-    // Select Background
     document.querySelectorAll('.select-background-btn').forEach(button => {
         button.addEventListener('click', function () {
             const selectedBackground = this.dataset.backgroundName;
@@ -80,7 +100,6 @@
         });
     });
 
-    // Select Abilities
     const abilityIds = ['Strength', 'Dexterity', 'Constitution', 'Intelligence', 'Wisdom', 'Charisma'];
     abilityIds.forEach(id => {
         const input = document.getElementById(id);
@@ -96,7 +115,6 @@
         }
     });
 
-    // Select Skills
     function getProficiencyBonus() {
         let level = parseInt(document.getElementById("Level")?.value);
         if (isNaN(level) || level < 1) level = 1;
@@ -151,6 +169,11 @@
             if (el) {
                 el.innerText = (total >= 0 ? "+" : "") + total;
             }
+
+            const hiddenInput = document.getElementById("input_" + skill);
+            if (hiddenInput) {
+                hiddenInput.value = total;
+            }
         });
     }
 
@@ -162,7 +185,6 @@
 
     updateSkills();
 
-    // Select Weapons
     document.querySelectorAll('.add-weapon-btn').forEach(button => {
         button.addEventListener('click', function () {
             const weaponName = this.dataset.weaponName;
@@ -202,7 +224,6 @@
         renderWeapons();
     }
 
-    // Select Items
     document.querySelectorAll('.add-item-btn').forEach(button => {
         button.addEventListener('click', function () {
             const itemName = this.dataset.itemName;
@@ -242,7 +263,6 @@
         renderItems();
     }
 
-    // Select Spells
     document.querySelectorAll('.spell-card').forEach(card => {
         card.addEventListener('click', function(e) {
             if(e.target.classList.contains('add-spell-btn')) return;
@@ -304,7 +324,6 @@
         const percent = ((currentStep + 1) / steps.length) * 100;
         progressBar.style.width = percent + '%';
 
-        // Check if we reached the Summary tab
         if (currentStep === steps.length - 1) {
             updateSummary();
         }
@@ -318,7 +337,6 @@
         document.getElementById('backgroundSummary').innerHTML = `<strong>Background:</strong> ${document.getElementById('selectedBackgroundInput').value}`;
         document.getElementById('alignmentSummary').innerHTML = `<strong>Alignment:</strong> ${document.getElementById('Alignment').value}`;
 
-        // Ability Scores
         document.getElementById('strengthSummary').innerHTML = `STR: <strong>${document.getElementById('Strength').value}</strong>`;
         document.getElementById('dexteritySummary').innerHTML = `DEX: <strong>${document.getElementById('Dexterity').value}</strong>`;
         document.getElementById('constitutionSummary').innerHTML = `CON: <strong>${document.getElementById('Constitution').value}</strong>`;
@@ -326,7 +344,6 @@
         document.getElementById('wisdomSummary').innerHTML = `WIS: <strong>${document.getElementById('Wisdom').value}</strong>`;
         document.getElementById('charismaSummary').innerHTML = `CHA: <strong>${document.getElementById('Charisma').value}</strong>`;
 
-        // Saving Throws
         document.getElementById('strengthSaveSummary').textContent = `STR: ${document.getElementById('StrengthSave').checked ? 'Yes' : 'No'}`;
         document.getElementById('dexteritySaveSummary').textContent = `DEX: ${document.getElementById('DexteritySave').checked ? 'Yes' : 'No'}`;
         document.getElementById('constitutionSaveSummary').textContent = `CON: ${document.getElementById('ConstitutionSave').checked ? 'Yes' : 'No'}`;
@@ -334,17 +351,13 @@
         document.getElementById('wisdomSaveSummary').textContent = `WIS: ${document.getElementById('WisdomSave').checked ? 'Yes' : 'No'}`;
         document.getElementById('charismaSaveSummary').textContent = `CHA: ${document.getElementById('CharismaSave').checked ? 'Yes' : 'No'}`;
 
-        // Combat
         document.getElementById('speedSummary').innerHTML = `<strong>Speed:</strong> ${document.getElementById('Speed').value}`;
         document.getElementById('inspirationSummary').innerHTML = `<strong>Inspiration:</strong> ${document.getElementById('Inspiration').value}`;
 
-        // Weapons
         document.getElementById('weaponsSummary').innerHTML = selectedWeapons.map(w => `<li>${w}</li>`).join('');
 
-        // Equipment
         document.getElementById('itemsSummary').innerHTML = selectedItems.map(i => `<li>${i}</li>`).join('');
 
-        // Spells (conditional based on class selection)
         const spellsContainer = document.getElementById('spellsSummaryContainer');
         if (hasSpellcasting) {
             spellsContainer.style.display = 'block';
@@ -353,7 +366,6 @@
             spellsContainer.style.display = 'none';
         }
 
-        // Character Details
         document.getElementById('ageSummary').innerHTML = `<strong>Age:</strong> ${document.getElementById('Age').value}`;
         document.getElementById('heightSummary').innerHTML = `<strong>Height:</strong> ${document.getElementById('Height').value}`;
         document.getElementById('weightSummary').innerHTML = `<strong>Weight:</strong> ${document.getElementById('Weight').value}`;
@@ -361,7 +373,6 @@
         document.getElementById('hairSummary').innerHTML = `<strong>Hair:</strong> ${document.getElementById('Hair').value}`;
         document.getElementById('skinSummary').innerHTML = `<strong>Skin:</strong> ${document.getElementById('Skin').value}`;
 
-        // Roleplay
         document.getElementById('personalitySummary').innerHTML = `<strong>Personality:</strong> ${document.getElementById('Personality').value}`;
         document.getElementById('idealSummary').innerHTML = `<strong>Ideal:</strong> ${document.getElementById('Ideal').value}`;
         document.getElementById('bondSummary').innerHTML = `<strong>Bond:</strong> ${document.getElementById('Bond').value}`;
@@ -406,7 +417,6 @@
             
             for (let field of reqFields) {
                 const el = document.getElementById(field.id);
-                // Check if element is invalid based on HTML5 rules (min, max, required, etc.) or if it's empty (except '0')
                 let isInvalid = false;
                 let errorMessage = "";
 
@@ -415,13 +425,21 @@
                     errorMessage = `${field.name} is missing.`;
                 } else if (!el.checkValidity()) {
                     isInvalid = true;
-                    errorMessage = el.validationMessage || `Invalid value for ${field.name}.`;
+                    if (el.validity.valueMissing) {
+                        errorMessage = `${field.name} is required.`;
+                    } else if (el.validity.rangeUnderflow) {
+                        errorMessage = `${field.name} must be at least ${el.min || 0}.`;
+                    } else if (el.validity.rangeOverflow) {
+                        errorMessage = `${field.name} must be at most ${el.max}.`;
+                    } else if (el.validity.typeMismatch || el.validity.badInput) {
+                        errorMessage = `Invalid number format for ${field.name}.`;
+                    } else {
+                        errorMessage = `Invalid value for ${field.name}.`;
+                    }
                 } else if (el.value === '' && el.type !== 'number') {
                     isInvalid = true;
                     errorMessage = `${field.name} is required.`;
                 } else if (el.type === 'number' && field.id !== 'Inspiration' && field.id !== 'Speed' && Number(el.value) <= 0) {
-                     // Keep strict > 0 logic for HP, Level, Age, Height, Weight etc. if needed,
-                     // but checkValidity() already covers min="1" if present in HTML!
                      if(Number(el.value) <= 0) {
                         isInvalid = true;
                         errorMessage = `${field.name} must be greater than 0.`;
@@ -458,7 +476,6 @@
         window.location.href = '/Character';
     });
 
-    // Auto Calculate HP
     const autoCalcHpBtn = document.getElementById('autoCalcHpBtn');
     if (autoCalcHpBtn) {
         autoCalcHpBtn.addEventListener('click', () => {
@@ -468,7 +485,7 @@
             let mods = getAbilityMods();
             let conMod = mods.con || 0;
 
-            let maxHp = currentHitDie + conMod; // Level 1
+            let maxHp = currentHitDie + conMod; 
             if (level > 1) {
                 maxHp += ((Math.floor(currentHitDie / 2) + 1) + conMod) * (level - 1);
             }
@@ -477,7 +494,7 @@
         });
     }
 
-    // Auto Calculate AC
+
     const autoCalcAcBtn = document.getElementById('autoCalcAcBtn');
     if (autoCalcAcBtn) {
         autoCalcAcBtn.addEventListener('click', () => {
@@ -487,7 +504,7 @@
         });
     }
 
-    // Add Level listener
+
     const levelInput = document.getElementById('Level');
     if (levelInput) {
         levelInput.addEventListener('input', updateSkills);

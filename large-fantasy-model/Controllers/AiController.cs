@@ -1,7 +1,9 @@
 using large_fantasy_model.Data;
 using large_fantasy_model.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace large_fantasy_model.Controllers
@@ -15,6 +17,7 @@ namespace large_fantasy_model.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class AiController : Controller
     {
         private readonly IConfiguration _config;
@@ -28,15 +31,28 @@ namespace large_fantasy_model.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
+        private int GetCurrentUserId()
+        {
+            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        }
+
         [HttpPost("generate")]
         public async Task<IActionResult> GenerateContent([FromBody] AiRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Prompt)) return BadRequest("Prompt is empty");
 
+            bool isHeadAdmin = User.IsInRole("HeadAdmin");
+            int myId = GetCurrentUserId();
+
             Game game = null;
             if (request.GameId.HasValue)
             {
                 game = await _context.Games.Include(g => g.Users).FirstOrDefaultAsync(g => g.Id == request.GameId.Value);
+                
+                if (game != null && !isHeadAdmin && game.UserId != myId)
+                {
+                    return Forbid();
+                }
             }
 
             string systemPrompt = "";

@@ -357,13 +357,20 @@ namespace large_fantasy_model.Controllers
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var user = await _context.Users.FindAsync(userId);
 
-            if (user == null || user.Password != model.CurrentPassword)
+            bool isPasswordValid = false;
+            if (user != null)
+            {
+                try { isPasswordValid = BCrypt.Net.BCrypt.Verify(model.CurrentPassword, user.Password); }
+                catch (BCrypt.Net.SaltParseException) { }
+            }
+
+            if (user == null || !isPasswordValid)
             {
                 ModelState.AddModelError("CurrentPassword", "Incorrect current password.");
                 return View(model);
             }
 
-            user.Password = model.NewPassword;
+            user.Password = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
             _context.Update(user);
             await _context.SaveChangesAsync();
 
@@ -385,7 +392,14 @@ namespace large_fantasy_model.Controllers
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var user = await _context.Users.FindAsync(userId);
 
-            if (user == null || user.Password != model.CurrentPassword)
+            bool isPasswordValid = false;
+            if (user != null)
+            {
+                try { isPasswordValid = BCrypt.Net.BCrypt.Verify(model.CurrentPassword, user.Password); }
+                catch (BCrypt.Net.SaltParseException) { }
+            }
+
+            if (user == null || !isPasswordValid)
             {
                 ModelState.AddModelError("CurrentPassword", "Incorrect current password.");
                 return View(model);

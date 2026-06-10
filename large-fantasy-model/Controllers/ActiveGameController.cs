@@ -1,6 +1,8 @@
 using large_fantasy_model.Data;
 using large_fantasy_model.ViewModels;
 using large_fantasy_model.Models; 
+using large_fantasy_model.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +16,12 @@ namespace large_fantasy_model.Controllers
     public class ActiveGameController : Controller
     {
         private readonly LargeFantasyModelContext _context;
+        private readonly IHubContext<GameHub> _gameHub;
 
-        public ActiveGameController(LargeFantasyModelContext context)
+        public ActiveGameController(LargeFantasyModelContext context, IHubContext<GameHub> gameHub)
         {
             _context = context;
+            _gameHub = gameHub;
         }
 
         private int GetCurrentUserId()
@@ -43,12 +47,14 @@ namespace large_fantasy_model.Controllers
 
 
             var existingTokens = await _context.Tokens.Where(t => t.GameId == id).ToListAsync();
+            var newlyCreatedTokens = new List<Token>();
 
             if (!existingTokens.Any(t => t.UserId == game.User.Id))
             {
                 var dmToken = new Token { GameId = id, UserId = game.User.Id, Name = game.User.Username, Color = "#ffc107", X = 500, Y = 500, CurrentHp = 100, MaxHp = 100 };
                 _context.Tokens.Add(dmToken);
                 existingTokens.Add(dmToken);
+                newlyCreatedTokens.Add(dmToken);
             }
 
             foreach (var player in game.Users)
@@ -62,9 +68,18 @@ namespace large_fantasy_model.Controllers
                     var playerToken = new Token { GameId = id, UserId = player.Id, Name = player.Username, Color = "#0d6efd", X = 500 + offsetX, Y = 500 + offsetY, CurrentHp = 100, MaxHp = 100 };
                     _context.Tokens.Add(playerToken);
                     existingTokens.Add(playerToken);
+                    newlyCreatedTokens.Add(playerToken);
                 }
             }
             await _context.SaveChangesAsync();
+
+            string groupName = $"Game_{id}";
+            foreach (var t in newlyCreatedTokens)
+            {
+                await _gameHub.Clients.Group(groupName).SendAsync("TokenSpawned", t.Id, t.Name, t.MaxHp, t.Color, t.X, t.Y, t.UserId);
+                await _gameHub.Clients.Group(groupName).SendAsync("ReceiveGameMessage", "System", $"[SYSTEM] {t.Name}'s token was automatically restored.", DateTime.Now.ToString("HH:mm"));
+            }
+
             var chatHistory = await _context.GameChatMessages
                 .Where(m => m.GameId == id)
                 .OrderBy(m => m.Timestamp)

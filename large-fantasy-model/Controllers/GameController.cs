@@ -362,7 +362,9 @@ namespace large_fantasy_model.Controllers
                 {
                     game.Users.Add(me);
                     await _context.SaveChangesAsync();
-                    await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerJoinedLobby", me.Id, me.Username);
+                    
+                    var characterName = await _context.Characters.Where(c => c.UserId == myId && c.Games.Any(g => g.Id == gameId)).Select(c => c.Name).FirstOrDefaultAsync();
+                    await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerJoinedLobby", me.Id, me.Username, me.ProfilePicturePath, characterName);
 
                     TempData["SuccessMessage"] = $"Successfully joined {game.Name}!";
                     return RedirectToAction("LobbyDetails", new { id = gameId });
@@ -425,7 +427,7 @@ namespace large_fantasy_model.Controllers
                 game.Users.Remove(playerToRemove);
                 await _context.SaveChangesAsync();
 
-                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerLeftLobby", playerId, username);
+                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerLeftLobby", playerId, username, playerToRemove.ProfilePicturePath);
 
                 TempData["SuccessMessage"] = $"Player {username} has been removed from the party.";
             }
@@ -482,7 +484,7 @@ namespace large_fantasy_model.Controllers
                 game.Users.Remove(me);
                 await _context.SaveChangesAsync();
 
-                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerLeftLobby", myId, username);
+                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerLeftLobby", myId, username, me.ProfilePicturePath);
 
                 TempData["SuccessMessage"] = $"You have left the campaign {game.Name}.";
             }

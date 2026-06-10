@@ -28,50 +28,51 @@ connection.on("ReceiveFriendRequest", function (senderId, senderName, senderAvat
     let avatarSrc = senderAvatar ? senderAvatar : `https://ui-avatars.com/api/?name=${senderName}&size=40&background=${color}&color=fff&length=2`;
 
     if (list) {
-        let li = document.createElement("li");
-        li.className = "list-group-item d-flex justify-content-between align-items-center py-3 bg-light";
-        li.innerHTML = `
-            <div class="d-flex align-items-center">
-                <img src="${avatarSrc}" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;" />
-                <span class="fw-semibold">${senderName}</span>
-            </div>
+        if (card) card.style.display = "block";
+
+        let newRequestHtml = `
+            <li class="list-group-item d-flex justify-content-between align-items-center py-3 bg-light">
+                <div class="d-flex align-items-center">
+                    <img src="${avatarSrc}" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;" />
+                    <span class="fw-semibold">${senderName}</span>
+                </div>
                 <div class="d-flex gap-2">
-                    <form action="/Profile/AddFriend" method="post">
+                    <form action="/Profile/AcceptFriendInvite" method="post">
+
+                    </form>
+                    <form action="/Profile/AddFriend" method="post" style="display:inline;">
                         <input type="hidden" name="friendId" value="${senderId}" />
                         <input type="hidden" name="__RequestVerificationToken" value="${window.getAntiForgeryToken()}" />
                         <button type="submit" class="btn btn-success btn-sm rounded-pill fw-bold">Accept</button>
                     </form>
-                    <form action="/Profile/RemoveFriend" method="post">
+                    <form action="/Profile/RemoveFriend" method="post" style="display:inline;">
                         <input type="hidden" name="friendId" value="${senderId}" />
                         <input type="hidden" name="__RequestVerificationToken" value="${window.getAntiForgeryToken()}" />
                         <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill fw-bold">Decline</button>
                     </form>
                 </div>
             </li>`;
-        requestsList.insertAdjacentHTML('afterbegin', newRequestHtml);
+        list.insertAdjacentHTML('afterbegin', newRequestHtml);
     }
 });
 
-connection.on("ReceiveFriendAccept", function (senderId, senderName) {
-    
-
+connection.on("ReceiveFriendAccept", function (senderId, senderName, senderAvatar) {
     const friendsList = document.getElementById("mutual-friends-list");
     const noFriendsMsg = document.getElementById("no-friends-msg");
 
-
     if (noFriendsMsg) noFriendsMsg.style.display = "none";
-
 
     if (friendsList) {
         friendsList.style.display = "block";
 
-
         if (!document.querySelector(`#mutual-friends-list input[name="friendId"][value="${senderId}"]`)) {
             const color = window.getUserColor(senderName);
+            let avatarSrc = senderAvatar ? senderAvatar : `https://ui-avatars.com/api/?name=${senderName}&size=40&background=${color}&color=fff&length=2`;
+
             const newFriendHtml = `
                 <li class="list-group-item d-flex justify-content-between align-items-center py-3 unread-pop" style="background-color: #f8fff9;">
                     <div class="d-flex align-items-center">
-                        <img src="https://ui-avatars.com/api/?name=${senderName}&size=40&background=${color}&color=fff&length=2" class="rounded-circle me-3 border border-success" />
+                        <img src="${avatarSrc}" class="rounded-circle me-3 border border-success" style="width: 40px; height: 40px; object-fit: cover;" />
                         <span class="fw-bold fs-5">${senderName}</span>
                     </div>
                     <div class="d-flex gap-2">
@@ -102,7 +103,7 @@ connection.on("ReceiveFriendAccept", function (senderId, senderName) {
 
             liToRemove.remove(); 
 
-            console.log("✅ Usunięto znajomego z oczekujących.");
+            console.log("Usunięto znajomego z oczekujących.");
 
 
             if (ulContainer && ulContainer.querySelectorAll('li').length === 0 && cardContainer) {

@@ -1,4 +1,4 @@
-﻿@model large_fantasy_model.ViewModels.FindGameViewModel
+@model large_fantasy_model.ViewModels.FindGameViewModel
 
 @{
     ViewData["Title"] = "Find Game";
@@ -6,9 +6,10 @@
 
 <div class="container mt-5">
    
-    <div class="row justify-content-center text-center mb-4">
+    <div class="row justify-content-center text-center mb-4 mt-3">
         <div class="col-lg-8">
-            <h1 class="display-5 fw-bold fantasy-font text-primary mb-3">Find Adventure</h1>
+            <i class="bi bi-compass mb-3" style="font-size: 3.5rem; background: var(--blame-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;"></i>
+            <h1 class="display-5 fw-bold mb-3" style="color: var(--blame-side-dark); letter-spacing: -1px;">Find Adventure</h1>
             <p class="lead text-secondary">Discover new worlds, join epic campaigns, or enter a secret invite code.</p>
         </div>
     </div>
@@ -33,33 +34,45 @@
     </div>
 
     <div class="row justify-content-center mb-5">
-        <div class="col-lg-8">
-            <div class="card border-primary border-3 rounded-pill shadow-lg overflow-hidden mb-5"> 
-                <form asp-controller="FindGame" asp-action="Find" method="get" class="d-flex m-0">
-                    <span class="bg-white border-0 text-primary ps-4 pe-2 d-flex align-items-center fs-4"><i class="bi bi-search"></i></span>
-                    <input type="text" asp-for="SearchQuery" class="form-control form-control-lg border-0 bg-white py-2 fs-5 shadow-none w-100" style="box-shadow: none;" placeholder="Search campaigns by name...">
+        <div class="col-lg-10">
+            
+            <div class="card rounded-pill overflow-hidden mb-5" style="border: 1px solid rgba(174, 26, 103, 0.2) !important; box-shadow: 0 15px 35px rgba(174, 26, 103, 0.1) !important;"> 
+                <form asp-controller="FindGame" asp-action="Find" method="get" class="d-flex m-0 p-2 align-items-center bg-white">
+                    <span class="bg-white border-0 ps-4 pe-3 d-flex align-items-center fs-3" style="color: var(--blame-main);"><i class="bi bi-search"></i></span>
+                    <input type="text" asp-for="SearchQuery" class="form-control form-control-lg border-0 bg-white py-3 fs-5 shadow-none w-100" placeholder="Search for public campaigns, keywords, or DM names...">
                     
                     @if (!string.IsNullOrWhiteSpace(Model.SearchQuery))
                     {
-                        <a asp-action="Find" class="btn btn-light d-flex align-items-center border-start rounded-0 px-4 text-muted fs-5">
+                        <a asp-action="Find" class="btn btn-light d-flex align-items-center rounded-circle me-3 text-muted" style="width: 45px; height: 45px; justify-content: center;">
                             <i class="bi bi-x-lg"></i>
                         </a>
                     }
-                    <button class="btn btn-primary fw-bold px-5 fs-5 rounded-0" type="submit">Search</button>
+                    <button class="btn btn-gradient fw-bold px-5 py-3 fs-5 rounded-pill shadow-sm me-1" type="submit">Search</button>
                 </form>
             </div>
 
-            <div class="row justify-content-center">
-                <div class="col-md-9 col-lg-7"> 
-                    <div class="card border-0 bg-light rounded-4 shadow-sm p-3 text-center">
-                        <h6 class="fw-bold text-dark mb-3"> Have an Invite Code?</h6>
-                        <form asp-controller="Game" asp-action="JoinByCode" method="post" class="d-flex justify-content-center px-2">
-                            <input type="text" name="code" class="form-control text-center text-uppercase fw-bold border-secondary bg-white w-100" placeholder="A7B9F2" maxlength="6" style="letter-spacing: 2px;" required />
-                            <button type="submit" class="btn btn-dark fw-bold ms-2 px-4 rounded-3 shadow-sm">Join</button>
+            <div class="card border-0 rounded-4 p-3 px-md-4 shadow-sm" style="background: #ffffff; border: 1px solid #eaeaea !important;">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-md-start text-center mb-3 mb-md-0">
+                        <div class="d-flex align-items-center justify-content-center justify-content-md-start">
+                            <div class="feature-icon-small d-inline-flex align-items-center justify-content-center rounded-3 me-3" style="width: 40px; height: 40px; background: rgba(174, 26, 103, 0.1); color: var(--blame-main);">
+                                <i class="bi bi-key-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">Have a Secret Invite Code?</h6>
+                                <small class="text-muted">Enter the 6-character code to join.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <form asp-controller="Game" asp-action="JoinByCode" method="post" class="d-flex justify-content-center justify-content-md-end m-0 w-100">
+                            <input type="text" name="code" class="form-control form-control-lg text-center text-uppercase fw-bold bg-light me-2 border-0 shadow-none w-100" placeholder="A7B9F2" maxlength="6" style="letter-spacing: 5px;" required />
+                            <button type="submit" class="btn btn-gradient fw-bold px-4 rounded-3 shadow-sm">Join</button>
                         </form>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -87,26 +100,34 @@
                                 <h4 class="fw-bold mb-0">@game.Name</h4>
                                 @if (game.IsPublic)
                                 {
-                                    <span class="badge bg-success rounded-pill px-2 py-1"><i class="bi bi-globe"></i> Public</span>
+                                    <span class="badge rounded-pill px-3 py-2 border shadow-sm" style="color: var(--blame-main); background: rgba(174, 26, 103, 0.05); border-color: var(--blame-main) !important; letter-spacing: 0.5px;">
+                                        <i class="bi bi-globe me-1"></i> Public
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-danger rounded-pill px-2 py-1"><i class="bi bi-lock-fill"></i> Private</span>
+                                    <span class="badge rounded-pill px-3 py-2 bg-light text-secondary border shadow-sm" style="letter-spacing: 0.5px;">
+                                        <i class="bi bi-lock-fill me-1"></i> Private
+                                    </span>
                                 }
                                 @if (isFull)
                                 {
-                                    <span class="badge bg-dark rounded-pill px-2 py-1">FULL</span>
+                                    <span class="badge bg-danger rounded-pill px-3 py-2 shadow-sm text-white" style="letter-spacing: 0.5px;">FULL</span>
                                 }
                             </div>
-                            <p class="text-muted mb-2">
+                            <p class="text-secondary mb-2" style="font-size: 0.95rem; line-height: 1.6;">
                                 @(game.Description.Length > 150 ? game.Description.Substring(0, 150) + "..." : game.Description)
                             </p>
-                            <div class="d-flex gap-4 text-secondary small fw-semibold">
-                                <span class="text-primary"><i class="bi bi-person-fill"></i> Host: @game.DungeonMasterName</span>
-                                <span class="@(isFull ? "text-danger" : "text-success")">
-                                   <i class="bi bi-people-fill"></i> Players: @game.PlayerCount / @game.MaxPlayers
-                               </span>
-                                <span><i class="bi bi-calendar-event"></i> Created: @game.CreationDate.ToString("MM/dd/yyyy")</span>
+                            <div class="d-flex flex-wrap gap-3 text-secondary small fw-semibold mt-3">
+                                <div class="d-flex align-items-center bg-light px-3 py-2 rounded-pill">
+                                    <i class="bi bi-person-fill me-2" style="color: var(--blame-main);"></i> Host: @game.DungeonMasterName
+                                </div>
+                                <div class="d-flex align-items-center px-3 py-2 rounded-pill @(isFull ? "bg-danger text-white shadow-sm" : "bg-light")">
+                                    <i class="bi bi-people-fill me-2 @(isFull ? "text-white" : "")" style="@(!isFull ? "color: var(--blame-main);" : "")"></i> Players: @game.PlayerCount / @game.MaxPlayers
+                                </div>
+                                <div class="d-flex align-items-center bg-light px-3 py-2 rounded-pill">
+                                    <i class="bi bi-calendar3 me-2" style="color: var(--blame-main);"></i> @game.CreationDate.ToString("MMM dd, yyyy")
+                                </div>
                             </div>
                         </div>
 
@@ -118,18 +139,18 @@
                                     <i class="bi bi-check-circle-fill me-1"></i> Already a Member
                                 </span>
                             </div>
-                            <a asp-controller="Game" asp-action="LobbyDetails" asp-route-id="@game.Id" class="btn btn-primary btn-lg rounded-pill fw-bold w-100">Enter Lobby</a>
+                            <a asp-controller="Game" asp-action="LobbyDetails" asp-route-id="@game.Id" class="btn btn-gradient btn-lg rounded-pill fw-bold w-100 py-2 shadow-sm">Enter Lobby</a>
                          }
                          else if (isFull)
                          {
-                            <button class="btn btn-secondary btn-lg rounded-pill fw-bold w-100 disabled" disabled>
+                            <button class="btn btn-outline-secondary btn-lg rounded-pill fw-bold w-100 disabled" disabled>
                                 Lobby Full
                             </button>
                          }
                          else if (game.HasPassword)
                          {
                             <button type="button" 
-                                class="btn btn-outline-primary btn-lg rounded-pill fw-bold w-100" data-bs-toggle="modal" data-bs-target="#joinPasswordModal-@game.Id">
+                                class="btn btn-outline-blame btn-lg rounded-pill fw-bold w-100 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#joinPasswordModal-@game.Id">
                                 Join (Password)
                             </button>
                          }
@@ -138,7 +159,7 @@
                             <form asp-controller="FindGame" asp-action="JoinCampaign" method="post">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="gameId" value="@game.Id" />
-                                <button type="submit" class="btn btn-outline-primary btn-lg rounded-pill fw-bold w-100">Join Campaign</button>
+                                <button type="submit" class="btn btn-outline-blame btn-lg rounded-pill fw-bold w-100 py-2 shadow-sm">Join Campaign</button>
                             </form>
                          }
                         </div>

@@ -1,4 +1,4 @@
-﻿using large_fantasy_model.Data;
+using large_fantasy_model.Data;
 using large_fantasy_model.Models;
 using large_fantasy_model.ViewModels;
 using large_fantasy_model.Hubs; 
@@ -90,8 +90,8 @@ namespace large_fantasy_model.Controllers
                 game.Users.Add(me);
                 await _context.SaveChangesAsync();
 
-
-                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerJoinedLobby", me.Id, me.Username);
+                var characterName = await _context.Characters.Where(c => c.UserId == myId && c.Games.Any(g => g.Id == gameId)).Select(c => c.Name).FirstOrDefaultAsync();
+                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerJoinedLobby", me.Id, me.Username, me.ProfilePicturePath, characterName);
 
                 TempData["SuccessMessage"] = $"Successfully joined {game.Name}!";
             }
@@ -120,8 +120,8 @@ namespace large_fantasy_model.Controllers
                 game.Users.Add(me);
                 await _context.SaveChangesAsync();
 
-
-                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerJoinedLobby", me.Id, me.Username);
+                var characterName = await _context.Characters.Where(c => c.UserId == myId && c.Games.Any(g => g.Id == gameId)).Select(c => c.Name).FirstOrDefaultAsync();
+                await _lobbyHub.Clients.Group($"Lobby_{gameId}").SendAsync("PlayerJoinedLobby", me.Id, me.Username, me.ProfilePicturePath, characterName);
 
                 TempData["SuccessMessage"] = $"Successfully joined {game.Name}!";
             }

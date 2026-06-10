@@ -1,4 +1,4 @@
-﻿.btn-kick {
+.btn-kick {
     color: #000;
     transition: color 0.2s ease-in-out;
     display: flex;
@@ -33,13 +33,13 @@
 
 
     .custom-tab-btn:hover {
-        color: #198754;
+        color: var(--blame-main);
         background-color: #e9ecef;
     }
 
 
     .custom-tab-btn.active {
-        background-color: #198754 !important;
+        background-color: var(--blame-main) !important;
         color: #fff !important;
         cursor: default;
     }

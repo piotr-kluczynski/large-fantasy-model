@@ -5,106 +5,122 @@
     var username = User.Identity?.Name ?? "Traveler";
 }
 
-<div class="container mt-5">
-    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm border text-center">
-        <div class="container-fluid py-5">
+<div class="container-fluid mt-2">
+    <div class="p-5 mb-4 rounded-4 shadow-sm border-0 text-white text-center position-relative overflow-hidden" style="background: var(--blame-gradient);">
+        <div class="container-fluid py-5 position-relative" style="z-index: 2;">
             @if (isAuthenticated)
             {
-                <h1 class="display-5 fw-bold text-dark">Welcome back, @username!</h1>
-                <p class="fs-4 text-muted">Your adventure continues. Where shall we go today?</p>
+                <h1 class="display-4 fw-bold">Welcome back, @username</h1>
+                <p class="fs-4 mt-3 opacity-75">The universe awaits. Manage your campaigns, find new lobbies, and continue your adventure.</p>
             }
             else
             {
-                <h1 class="display-5 fw-bold">Welcome to the Large Fantasy Model</h1>
-                <p class="fs-4">Step into the tavern, traveler. Your journey starts here.</p>
+                <h1 class="display-4 fw-bold">Welcome to Large Fanstasy Model</h1>
+                <p class="fs-4 mt-3 opacity-75">Step into the universe, traveler. Your journey starts here.</p>
                 <div class="mt-4">
-                    <a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-lg px-4 me-md-2">Login</a>
-                    <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-secondary btn-lg px-4">Register</a>
+                    <a asp-controller="Auth" asp-action="Login" class="btn btn-light btn-lg px-5 me-md-3 text-dark fw-bold rounded-pill shadow-sm">Login</a>
+                    <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-light btn-lg px-5 fw-bold rounded-pill">Join</a>
                 </div>
             }
         </div>
+        <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at top right, rgba(255,255,255,0.1), transparent 50%); z-index: 1;"></div>
     </div>
 
     @if (isAuthenticated)
     {
         <div class="row g-4 mt-2 justify-content-center">
-          
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm border-0 border-top border-primary border-4 rounded-4 transition-hover overflow-hidden">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-primary bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
-                            <i class="bi bi-search fs-4"></i>
+                <div class="card h-100 shadow-sm border-0 rounded-4 transition-hover overflow-hidden" style="background-color: #ffffff;">
+                    <div class="card-body p-4 position-relative">
+                        <i class="bi bi-search position-absolute" style="font-size: 6rem; right: -10px; bottom: -20px; opacity: 0.03; color: var(--blame-main);"></i>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white rounded-4 shadow-sm me-3" style="width: 48px; height: 48px; background: var(--blame-gradient);">
+                                <i class="bi bi-search fs-5"></i>
+                            </div>
+                            <h5 class="fw-bold mb-0">Find Lobby</h5>
                         </div>
-                        <h5 class="fw-bold">Find Lobby</h5>
-                        <p class="small text-muted">Join new adventures.</p>
-                        <a asp-controller="FindGame" asp-action="Find" class="btn btn-sm btn-outline-primary rounded-pill stretched-link">Search</a>
+                        <p class="small text-muted mb-4">Discover public games in the galaxy.</p>
+                        <a asp-controller="FindGame" asp-action="Find" class="btn btn-sm btn-outline-blame rounded-pill px-4 stretched-link fw-bold">Search <i class="bi bi-arrow-right ms-1"></i></a>
                     </div>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm border-0 border-top border-success border-4 rounded-4 transition-hover overflow-hidden">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-success bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
-                            <i class="bi bi-journal-bookmark-fill fs-4"></i>
+                <div class="card h-100 shadow-sm border-0 rounded-4 transition-hover overflow-hidden" style="background-color: #ffffff;">
+                    <div class="card-body p-4 position-relative">
+                        <i class="bi bi-journal-bookmark-fill position-absolute" style="font-size: 6rem; right: -10px; bottom: -20px; opacity: 0.03; color: var(--blame-main);"></i>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white rounded-4 shadow-sm me-3" style="width: 48px; height: 48px; background: var(--blame-gradient);">
+                                <i class="bi bi-journal-bookmark-fill fs-5"></i>
+                            </div>
+                            <h5 class="fw-bold mb-0">My Campaigns</h5>
                         </div>
-                        <h5 class="fw-bold">My Campaigns</h5>
-                        <p class="small text-muted">Manage your active games.</p>
-                        <a asp-controller="Game" asp-action="Campaigns" class="btn btn-sm btn-outline-success rounded-pill stretched-link">Open</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm border-0 border-top border-danger border-4 rounded-4 transition-hover overflow-hidden">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-danger bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
-                            <i class="bi bi-book-half fs-4"></i>
-                        </div>
-                        <h5 class="fw-bold">Compendium</h5>
-                        <p class="small text-muted">Rules and world lore.</p>
-                        <a asp-controller="Compendium" asp-action="Index" class="btn btn-sm btn-outline-danger rounded-pill stretched-link">Explore</a>
+                        <p class="small text-muted mb-4">View active sessions and dive back into the game.</p>
+                        <a asp-controller="Game" asp-action="Campaigns" class="btn btn-sm btn-outline-blame rounded-pill px-4 stretched-link fw-bold">Open <i class="bi bi-arrow-right ms-1"></i></a>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm border-0 border-top border-info border-4 rounded-4 transition-hover overflow-hidden">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-info bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
-                            <i class="bi bi-person-vcard fs-4"></i>
+                <div class="card h-100 shadow-sm border-0 rounded-4 transition-hover overflow-hidden" style="background-color: #ffffff;">
+                    <div class="card-body p-4 position-relative">
+                        <i class="bi bi-book-half position-absolute" style="font-size: 6rem; right: -10px; bottom: -20px; opacity: 0.03; color: var(--blame-main);"></i>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white rounded-4 shadow-sm me-3" style="width: 48px; height: 48px; background: var(--blame-gradient);">
+                                <i class="bi bi-book-half fs-5"></i>
+                            </div>
+                            <h5 class="fw-bold mb-0">Compendium</h5>
                         </div>
-                        <h5 class="fw-bold">Characters</h5>
-                        <p class="small text-muted">Manage your heroes.</p>
-                        <a asp-controller="Character" asp-action="Collection" class="btn btn-sm btn-outline-info rounded-pill stretched-link">Collection</a>
+                        <p class="small text-muted mb-4">Rules & Lore.</p>
+                        <a asp-controller="Compendium" asp-action="Index" class="btn btn-sm btn-outline-blame rounded-pill px-4 stretched-link fw-bold">Explore <i class="bi bi-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 rounded-4 transition-hover overflow-hidden" style="background-color: #ffffff;">
+                    <div class="card-body p-4 position-relative">
+                        <i class="bi bi-person-vcard position-absolute" style="font-size: 6rem; right: -10px; bottom: -20px; opacity: 0.03; color: var(--blame-main);"></i>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white rounded-4 shadow-sm me-3" style="width: 48px; height: 48px; background: var(--blame-gradient);">
+                                <i class="bi bi-person-vcard fs-5"></i>
+                            </div>
+                            <h5 class="fw-bold mb-0">Characters</h5>
+                        </div>
+                        <p class="small text-muted mb-4">Your identity.</p>
+                        <a asp-controller="Character" asp-action="Collection" class="btn btn-sm btn-outline-blame rounded-pill px-4 stretched-link fw-bold">Collection <i class="bi bi-arrow-right ms-1"></i></a>
                     </div>
                 </div>
             </div>
             @if (User.IsInRole("Admin"))
             {
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm border-0 border-top border-dark border-4 rounded-4 transition-hover overflow-hidden">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-dark bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
-                                <i class="bi bi-incognito fs-4"></i>
+                    <div class="card h-100 shadow-sm border-0 rounded-4 transition-hover overflow-hidden" style="background-color: #ffffff;">
+                        <div class="card-body p-4 position-relative">
+                            <i class="bi bi-shield-lock position-absolute" style="font-size: 6rem; right: -10px; bottom: -20px; opacity: 0.03; color: #E31317;"></i>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white rounded-4 shadow-sm me-3" style="width: 48px; height: 48px; background-color: #E31317;">
+                                    <i class="bi bi-shield-lock fs-5"></i>
+                                </div>
+                                <h5 class="fw-bold mb-0">Admin Center</h5>
                             </div>
-                            <h5 class="fw-bold">Admin Panel</h5>
-                            <p class="small text-muted">Manage users in game.</p>
-                            <a asp-controller="Admin" asp-action="Users" class="btn btn-sm btn-outline-dark rounded-pill stretched-link">Management</a>
+                            <p class="small text-muted mb-4">Manage system parameters.</p>
+                            <a asp-controller="Admin" asp-action="Users" class="btn btn-sm btn-outline-danger rounded-pill px-4 stretched-link fw-bold">Management <i class="bi bi-arrow-right ms-1"></i></a>
                         </div>
                     </div>
                 </div>
             }
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm border-0 border-top border-dark border-4 rounded-4 transition-hover overflow-hidden">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white bg-dark bg-gradient rounded-circle mb-3" style="width: 50px; height: 50px;">
-                            <i class="bi bi-gear-fill fs-4"></i>
+                <div class="card h-100 shadow-sm border-0 rounded-4 transition-hover overflow-hidden" style="background-color: #ffffff;">
+                    <div class="card-body p-4 position-relative">
+                        <i class="bi bi-gear-fill position-absolute" style="font-size: 6rem; right: -10px; bottom: -20px; opacity: 0.03; color: var(--blame-main);"></i>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white rounded-4 shadow-sm me-3" style="width: 48px; height: 48px; background: var(--blame-gradient);">
+                                <i class="bi bi-gear-fill fs-5"></i>
+                            </div>
+                            <h5 class="fw-bold mb-0">Settings</h5>
                         </div>
-                        <h5 class="fw-bold">Settings</h5>
-                        <p class="small text-muted">Account & Security.</p>
-                        <div class="d-grid mt-2">
-                            <a asp-controller="Profile" asp-action="Edit" class="btn btn-sm btn-outline-dark rounded-pill stretched-link">Manage Account</a>
-                        </div>
+                        <p class="small text-muted mb-4">Account & Security.</p>
+                        <a asp-controller="Profile" asp-action="Edit" class="btn btn-sm btn-outline-blame rounded-pill px-4 stretched-link fw-bold">Manage Account <i class="bi bi-arrow-right ms-1"></i></a>
                     </div>
                 </div>
             </div>
@@ -113,20 +129,18 @@
 </div>
 @section Styles {
     <style>
- 
         .rounded-4 {
             border-radius: 1rem !important;
         }
-
-    
         .transition-hover {
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
             cursor: pointer;
+            background-color: #ffffff;
         }
-
-            .transition-hover:hover {
-                transform: translateY(-10px) scale(1.02);
-                box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
-            }
+        .transition-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+            z-index: 10;
+        }
     </style>
 }
