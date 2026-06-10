@@ -235,7 +235,7 @@
                 <div class="modal-body p-0" style="height: 80vh;">
                     @if (Model.CurrentUserCharacterId.HasValue)
                     {
-                        <iframe src="/Character/Details/@Model.CurrentUserCharacterId" style="width: 100%; height: 100%; border: none;"></iframe>
+                        <iframe src="/Character/Details/@Model.CurrentUserCharacterId?iframe=true" style="width: 100%; height: 100%; border: none;"></iframe>
                     }
                     else
                     {
@@ -265,7 +265,7 @@
                     <span id="notes-save-status" class="text-success fw-bold ms-2" style="opacity: 0; transition: opacity 0.3s;"><i class="bi bi-check-circle-fill me-1"></i> Saved!</span>
                     <div>
                         <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Close</button>
-                        <button type="button" id="btn-save-notes" class="btn btn-rpg-blue fw-bold px-4">Save Notes</button>
+                        <button type="button" id="btn-save-notes" class="btn btn-primary fw-bold px-4">Save Notes</button>
                     </div>
                 </div>
             </div>

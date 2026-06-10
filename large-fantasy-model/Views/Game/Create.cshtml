@@ -1,4 +1,4 @@
-﻿@model large_fantasy_model.ViewModels.CreateGameViewModel
+@model large_fantasy_model.ViewModels.CreateGameViewModel
 
 @{
     ViewData["Title"] = "Create Campaign";
@@ -7,49 +7,62 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-success text-white border-0 pt-4 pb-3 rounded-top-4 text-center">
-                    <h3 class="fw-bold mb-0">Start a New Campaign</h3>
-                </div>
-                <div class="card-body p-4 p-md-5">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                <div class="card-body p-4 p-md-5 position-relative">
+                    <!-- Watermark -->
+                    <i class="bi bi-fire position-absolute" style="font-size: 15rem; right: -30px; top: -30px; opacity: 0.02; color: var(--blame-main);"></i>
                     
-                    <form asp-action="Create" method="post">
+                    <div class="text-center mb-5 position-relative" style="z-index: 2;">
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-white rounded-circle shadow-sm mb-3" style="width: 70px; height: 70px; background: var(--blame-gradient);">
+                            <i class="bi bi-fire fs-2"></i>
+                        </div>
+                        <h2 class="fw-bold mb-1" style="color: var(--blame-side-dark);">Start a New Campaign</h2>
+                        <p class="text-muted">Forge your world and gather your party.</p>
+                    </div>
+
+                    <form asp-action="Create" method="post" class="position-relative" style="z-index: 2;">
                         @Html.AntiForgeryToken()
 
-                        <div class="mb-4">
-                            <label asp-for="Name" class="form-label fw-bold text-secondary">Campaign Name</label>
-                            <input asp-for="Name" class="form-control form-control-lg rounded-3 bg-light border-0" placeholder="e.g. The Lost Mines of Phandelver" />
+                        <div class="form-floating mb-4">
+                            <input asp-for="Name" class="form-control rounded-4 shadow-sm border-light" placeholder="Campaign Name" style="background-color: #fcfcfc;" />
+                            <label asp-for="Name" class="fw-bold text-muted"><i class="bi bi-pencil-fill me-2" style="color: var(--blame-main);"></i>Campaign Name</label>
                             <span asp-validation-for="Name" class="text-danger small fw-semibold"></span>
                         </div>
 
-                        <div class="mb-4">
-                            <label asp-for="Description" class="form-label fw-bold text-secondary">Description</label>
-                            <textarea asp-for="Description" class="form-control rounded-3 bg-light border-0" rows="5" placeholder="Describe the world, the goal, or the overall vibe of this campaign..."></textarea>
+                        <div class="form-floating mb-4">
+                            <textarea asp-for="Description" class="form-control rounded-4 shadow-sm border-light custom-scrollbar" style="height: 150px; background-color: #fcfcfc;" placeholder="Description"></textarea>
+                            <label asp-for="Description" class="fw-bold text-muted"><i class="bi bi-text-paragraph me-2" style="color: var(--blame-main);"></i>Description</label>
                             <span asp-validation-for="Description" class="text-danger small fw-semibold"></span>
                         </div>
-                        <div class="mb-4">
-                            <label asp-for="MaxPlayers" class="form-label fw-bold">Max Players</label>
-                            <input asp-for="MaxPlayers" type="number" class="form-control" min="2" max="50" />
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="MaxPlayers" type="number" class="form-control rounded-4 shadow-sm border-light" min="2" max="50" placeholder="Max Players" style="background-color: #fcfcfc;" />
+                            <label asp-for="MaxPlayers" class="fw-bold text-muted"><i class="bi bi-people-fill me-2" style="color: var(--blame-main);"></i>Max Players</label>
                             <span asp-validation-for="MaxPlayers" class="text-danger small"></span>
                         </div>
-                        <div class="form-check form-switch mb-4 mt-3">
-                            <input asp-for="IsPublic" class="form-check-input fs-4" type="checkbox" role="switch" id="isPublicSwitch">
-                                <label asp-for="IsPublic" class="form-check-label fw-bold text-dark ms-2 mt-1" for="isPublicSwitch">
-                                    Make this campaign Public <br>
-                                    <small class="text-muted fw-normal">Public games will be visible in the 'Find Game' board.</small>
-                                </label>
-                            </div>
 
-                            
-                            
-                            <div class="mb-4 d-none" id="passwordField">
-                                <label asp-for="Password" class="form-label fw-bold text-secondary">Lobby Password</label>
-                                <input asp-for="Password" class="form-control form-control-lg rounded-3 bg-light border-0" placeholder="Set a password for your private game..." />
-                                <span asp-validation-for="Password" class="text-danger small fw-semibold"></span>
+                        <!-- Modern Switch Card -->
+                        <div class="card border-light shadow-sm rounded-4 mb-4" style="background-color: #fcfcfc;">
+                            <div class="card-body d-flex align-items-center justify-content-between p-3 px-4">
+                                <div>
+                                    <h6 class="fw-bold mb-1" style="color: var(--blame-side-dark);"><i class="bi bi-globe me-2" style="color: var(--blame-main);"></i>Public Lobby</h6>
+                                    <small class="text-muted">Visible in the 'Find Game' board.</small>
+                                </div>
+                                <div class="form-check form-switch fs-3 mb-0">
+                                    <input asp-for="IsPublic" class="form-check-input" type="checkbox" role="switch" id="isPublicSwitch" style="cursor: pointer;">
+                                </div>
                             </div>
+                        </div>
+
+                        <div class="form-floating mb-4 d-none" id="passwordField">
+                            <input asp-for="Password" class="form-control rounded-4 shadow-sm border-light" placeholder="Lobby Password" style="background-color: #fcfcfc;" />
+                            <label asp-for="Password" class="fw-bold text-muted"><i class="bi bi-lock-fill me-2" style="color: var(--blame-main);"></i>Lobby Password</label>
+                            <span asp-validation-for="Password" class="text-danger small fw-semibold"></span>
+                        </div>
+
                         <div class="d-grid gap-2 mt-5">
-                            <button type="submit" class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm">Create Campaign</button>
-                            <a asp-action="Campaigns" class="btn btn-danger btn-lg rounded-pill fw-bold shadow-sm">Cancel and return to list</a>
+                            <button type="submit" class="btn btn-gradient btn-lg rounded-pill fw-bold shadow-sm py-3">Create Campaign</button>
+                            <a asp-action="Campaigns" class="btn btn-outline-secondary btn-lg rounded-pill fw-bold shadow-sm py-3">Cancel and return to list</a>
                         </div>
                     </form>
                     

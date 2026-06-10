@@ -3,7 +3,9 @@
 @using large_fantasy_model.Models.CharacterModels.Json
 @using large_fantasy_model.Models.Compendium
 @model GameModeRulebook
-
+@{
+    ViewData["Title"] = "Details    ";
+}
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-3">
@@ -14,7 +16,7 @@
 
                 <a href="~/pdfs/@Model.PdfFileName"
                    target="_blank"
-                   class="btn btn-outline-primary w-100 mt-3">
+                   class="btn btn-outline-blame w-100 mt-3 rounded-pill fw-bold">
                     Open Rulebook PDF
                 </a>
             </div>
@@ -67,11 +69,11 @@
                                                asp-action="Create"
                                                asp-route-rulebook="@Model.FilesPathName"
                                                asp-route-category="@category.FilesPathName"
-                                               class="text-decoration-none">
+                                               class="text-decoration-none text-muted">
 
-                                            <div class="card p-3 shadow-sm d-flex align-items-center justify-content-center h-100 border-dashed">
+                                            <div class="card p-3 shadow-sm d-flex align-items-center justify-content-center h-100 border-dashed transition-hover" style="background-color: #f8f9fa;">
                                                 <div class="text-center">
-                                                    <h5 class="mb-0">+ Add @category.Title</h5>
+                                                    <h5 class="mb-0 fw-bold">+ Add @category.Title</h5>
                                                 </div>
                                             </div>
                                         </a>
@@ -88,12 +90,12 @@
                                                asp-route-rulebook="@item.Rulebook"
                                                asp-route-category="@item.Category"
                                                asp-route-name="@item.Slug"
-                                               class="text-decoration-none">
+                                               class="text-decoration-none text-primary">
 
-                                                <h5>@item.Name</h5>
+                                                <h5 class="fw-bold mb-1">@item.Name</h5>
                                             </a>
 
-                                            <small>@item.Subtitle</small>
+                                            <small class="text-muted fw-semibold">@item.Subtitle</small>
                                         </div>
                                     </div>
                                 }

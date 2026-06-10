@@ -5,3 +5,4 @@ namespace large_fantasy_model.Models.Compendium
         string Name { get; set; }
     }
 }
+        

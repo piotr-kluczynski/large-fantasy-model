@@ -2,7 +2,18 @@
 
 @{
     ViewData["Title"] = Model?.Name ?? "Character";
+    bool isIframe = Context.Request.Query["iframe"] == "true";
+    if (isIframe)
+    {
+        Layout = null;
+    }
 }
+
+@if (isIframe)
+{
+    @Html.Raw("<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\" />\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n<title>" + ViewData["Title"] + " - Character Sheet</title>\n<link rel=\"stylesheet\" href=\"/lib/bootstrap/dist/css/bootstrap.min.css\" />\n<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css\">\n<link rel=\"stylesheet\" href=\"/css/site.css\" />\n</head>\n<body style=\"background: var(--blame-gradient); padding: 10px;\">")
+}
+
 
 <div class="container py-4" id="character-sheet-content">
     <style>
@@ -43,19 +54,24 @@
                         XP: @Model.Xp
                     </span>
 
-                    <br />
+                    @if (!string.IsNullOrWhiteSpace(Model.Alignment))
+                    {
+                        <br />
+                        <span class="badge bg-secondary fs-6 mt-2 p-2">
+                            @Model.Alignment
+                        </span>
+                    }
 
-                    <span class="badge bg-secondary fs-6 mt-2 p-2">
-                        @Model.Alignment
-                    </span>
-
-                    <br />
-                    <button onclick="generatePDF()" class="btn btn-outline-secondary d-print-none mt-3">
-                        <i class="bi bi-file-earmark-pdf-fill"></i> Download as PDF
-                    </button>
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary d-print-none mt-3">
-                        Edit Character
-                    </a>
+                    @if (!isIframe)
+                    {
+                        <br />
+                        <button onclick="generatePDF()" class="btn btn-outline-secondary d-print-none mt-3">
+                            <i class="bi bi-file-earmark-pdf-fill"></i> Download as PDF
+                        </button>
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary d-print-none mt-3">
+                            Edit Character
+                        </a>
+                    }
                 </div>
 
             </div>
@@ -405,3 +421,8 @@
         }
     </script>
 </div>
+
+@if (isIframe)
+{
+    @Html.Raw("</body>\n</html>")
+}
